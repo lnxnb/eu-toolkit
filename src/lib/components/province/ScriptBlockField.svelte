@@ -1,0 +1,206 @@
+<script lang="ts">
+  // One trigger/effect block edited via the 14.2 tree editor, addressed by a
+  // full `path` into the file (generalizes estates/EstateScriptBlock, which is
+  // fixed to [objKey, name] — monuments need nested paths like
+  // [key, "tier_1", "on_upgraded"]). Lazy-parses through
+  // parse_script_block_with_edits so the tree reflects pending edits; add/remove
+  // the block via insert/removeStatement on the parent block.
+  import { invoke } from "@tauri-apps/api/core";
+  import { ScriptTreeEditor } from "$lib/components/script";
+  import type { KnownKey, ScriptBlock } from "$lib/components/script";
+  import type { DropdownItem } from "$lib/components/ui";
+  import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
+
+  let {
+    installPath,
+    modPath,
+    queue,
+    file,
+    path,
+    registry,
+    present,
+    known,
+    countries = [],
+    label,
+  }: {
+    installPath: string;
+    modPath: string | null;
+    queue: EditQueue;
+    file: string;
+    /** Full path to the block within the file (last segment = block key). */
+    path: string[];
+    registry: "triggers" | "effects";
+    present: boolean;
+    known: KnownKey[];
+    countries?: DropdownItem[];
+    /** Optional display label (defaults to the block key). */
+    label?: string;
+  } = $props();
+
+  const name = $derived(path[path.length - 1]);
+  const parent = $derived(path.slice(0, -1));
+  let open = $state(false);
+  let block = $state<ScriptBlock | null>(null);
+  let error = $state<string | null>(null);
+  let token = 0;
+
+  $effect(() => {
+    void installPath;
+    void modPath;
+    void file;
+    void path;
+    queue.version;
+    const t = ++token;
+    if (!open || !present) {
+      block = null;
+      return;
+    }
+    void reload(t);
+  });
+
+  async function reload(t: number) {
+    error = null;
+    try {
+      const b = await invoke<ScriptBlock>("parse_script_block_with_edits", {
+        installPath,
+        modPath,
+        file,
+        path,
+        edits: queue.serialize(),
+      });
+      if (t !== token) return;
+      block = b;
+    } catch (e) {
+      if (t !== token) return;
+      block = null;
+      error = String(e);
+    }
+  }
+
+  function onTreeEdit(edits: TypedEdit[], lbl: string) {
+    if (edits.length) queue.push({ label: lbl, edits });
+  }
+  function addBlock() {
+    queue.push({
+      label: `Add ${name}`,
+      edits: [{ kind: "insertStatement", file, blockPath: parent, statement: `${name} = {\n}` }],
+    });
+    open = true;
+  }
+  function removeBlock() {
+    if (!confirm(`Remove ${name} block?`)) return;
+    queue.push({
+      label: `Remove ${name}`,
+      edits: [{ kind: "removeStatement", file, blockPath: parent, key: name }],
+    });
+  }
+</script>
+
+<div class="sb">
+  <div class="sb-head">
+    <button class="sb-title" onclick={() => (open = !open)} disabled={!present}>
+      <span class="caret">{present ? (open ? "▾" : "▸") : "·"}</span>
+      <code>{label ?? name}</code>
+      <span class="reg">{registry === "triggers" ? "trigger" : "effect"}</span>
+    </button>
+    {#if present}
+      <button class="mini danger" onclick={removeBlock}>remove</button>
+    {:else}
+      <button class="mini" onclick={addBlock}>＋ add</button>
+    {/if}
+  </div>
+  {#if present && open}
+    {#if error}
+      <p class="err">{error}</p>
+    {:else if block}
+      <ScriptTreeEditor
+        {file}
+        rootPath={path}
+        {block}
+        {registry}
+        {known}
+        {countries}
+        onedit={onTreeEdit}
+      />
+    {:else}
+      <p class="dim">Loading…</p>
+    {/if}
+  {/if}
+</div>
+
+<style>
+  .sb {
+    border: 1px solid #232a33;
+    margin-top: 0.25rem;
+  }
+  .sb-head {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0.3rem;
+    background: #21262e;
+  }
+  .sb-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 1;
+    text-align: left;
+    border: none;
+    background: transparent;
+    color: #cfd4db;
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .sb-title:disabled {
+    cursor: default;
+    color: #8a919c;
+  }
+  .caret {
+    color: #8a919c;
+    width: 0.8rem;
+    flex: none;
+  }
+  code {
+    color: #9aecc0;
+    background: #16191f;
+    padding: 0 0.3rem;
+    font-size: 0.76rem;
+  }
+  .reg {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #8a919c;
+  }
+  .mini {
+    border: 1px solid #4b5563;
+    background: #2b323d;
+    color: #cfd4db;
+    font-family: inherit;
+    font-size: 0.7rem;
+    padding: 0.05rem 0.35rem;
+    cursor: pointer;
+    flex: none;
+  }
+  .mini:hover {
+    border-color: #4a6da7;
+    background: #4a6da7;
+    color: #fff;
+  }
+  .mini.danger {
+    color: #fca5a5;
+    border-color: #6b3630;
+  }
+  .err {
+    color: #fca5a5;
+    font-size: 0.76rem;
+    padding: 0.2rem 0.4rem;
+  }
+  .dim {
+    color: #9ca3af;
+    font-size: 0.74rem;
+    padding: 0.2rem 0.4rem;
+  }
+</style>
