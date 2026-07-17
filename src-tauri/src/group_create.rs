@@ -276,7 +276,7 @@ pub fn scaffold_culture_group(
 
 // --- Tauri commands ------------------------------------------------------
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn prepare_religion_group_scaffold(
     install_path: String,
     mod_path: Option<String>,
@@ -288,7 +288,7 @@ pub fn prepare_religion_group_scaffold(
     scaffold_religion_group(&vfs, &sibling_group_key, &name, &existing_keys.unwrap_or_default())
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn prepare_culture_group_scaffold(
     install_path: String,
     mod_path: Option<String>,

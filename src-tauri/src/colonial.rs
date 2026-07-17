@@ -372,7 +372,7 @@ pub fn scaffold(kind: &str, key: &str, provinces: &[u32], name_key: &str) -> Str
 // Commands (registered in lib.rs).
 // ---------------------------------------------------------------------------
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_colonial_data(
     kind: String,
     install_path: String,
@@ -383,7 +383,7 @@ pub fn get_colonial_data(
     load(&vfs, &loc, &kind)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_colonial_block(
     kind: String,
     key: String,

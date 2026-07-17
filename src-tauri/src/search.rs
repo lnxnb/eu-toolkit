@@ -161,7 +161,7 @@ pub fn search(
 }
 
 /// Tauri command: paginated project-wide search.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn search_project(
     install_path: String,
     mod_path: Option<String>,
@@ -189,7 +189,7 @@ pub struct FileText {
 }
 
 /// Tauri command: read one game-relative file through the Vfs for preview.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn read_project_file(
     install_path: String,
     mod_path: Option<String>,

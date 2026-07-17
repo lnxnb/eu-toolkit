@@ -342,7 +342,7 @@ pub fn scaffold_company(key: &str, province_id: u32) -> Scaffold {
 // Commands.
 // ---------------------------------------------------------------------------
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_province_mercenaries(
     install_path: String,
     mod_path: Option<String>,
@@ -362,7 +362,7 @@ pub fn get_province_mercenaries(
     })
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_mercenary_company(key: String, province_id: u32) -> Result<Scaffold, String> {
     Ok(scaffold_company(&key, province_id))
 }

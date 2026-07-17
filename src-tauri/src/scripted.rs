@@ -125,7 +125,7 @@ pub fn load_scripted(vfs: &Vfs) -> Vec<ScriptedDef> {
 /// Tauri command: every scripted trigger + scripted effect (base + mod). The
 /// frontend uses this both for the browser list AND to build the name→definition
 /// map that resolves references in every 14.2 tree into jump links.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_scripted_definitions(
     install_path: String,
     mod_path: Option<String>,
@@ -145,7 +145,7 @@ pub struct ScriptedScaffold {
 /// Tauri command: scaffold a new scripted trigger/effect. Returns the toolkit
 /// project file + the `<name> = { }` statement the frontend queues (InsertStatement
 /// into an existing toolkit file, else CreateFile). `kind` = `trigger`|`effect`.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_scripted(kind: String, name: String) -> Result<ScriptedScaffold, String> {
     let name = name.trim();
     if name.is_empty() || !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {

@@ -408,18 +408,12 @@ fn revolt_empty(b: &Block) -> bool {
 /// `revolt = {}` clears it. Vanilla has zero active revolts at 1444.11.11.
 pub fn rebel_provinces(vfs: &Vfs, loc: &LocStore, faction: &str, at: Date) -> Vec<RebelProvince> {
     let mut out = Vec::new();
-    for (name, path) in vfs.list_dir("history/provinces") {
-        if !name.to_lowercase().ends_with(".txt") {
-            continue;
-        }
-        let digits: String = name.chars().take_while(|c| c.is_ascii_digit()).collect();
-        let Ok(id) = digits.parse::<u32>() else {
+    for ast in crate::game_data::province_asts(vfs).iter() {
+        let id = ast.id;
+        let name = &ast.file_name;
+        let Some(block) = &ast.block else {
             continue;
         };
-        let Ok(bytes) = std::fs::read(&path) else {
-            continue;
-        };
-        let block = paradox::parse(&String::from_utf8_lossy(&bytes));
 
         // Fold: (is_active, type_matches, date). Track the last revolt statement
         // that applies at `at`, in file order (top level first, then dated ≤ at).
@@ -474,19 +468,19 @@ fn province_name_from_file(file: &str) -> String {
 // Commands.
 // ---------------------------------------------------------------------------
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_rebels(install_path: String, mod_path: Option<String>) -> Result<RebelsData, String> {
     let vfs = Vfs::new(&install_path, mod_path.as_deref())?;
     let loc = loc::store(&vfs, &install_path, mod_path.as_deref());
     Ok(load(&vfs, &loc))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_rebel_faction(key: String) -> Result<Scaffold, String> {
     Ok(scaffold_faction(&key))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_rebel_provinces(
     install_path: String,
     mod_path: Option<String>,

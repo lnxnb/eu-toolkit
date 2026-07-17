@@ -132,7 +132,7 @@ pub fn defines_dates(vfs: &Vfs) -> DefinesDates {
 
 /// Tauri command: the effective `START_DATE`/`END_DATE` for the calendar editor
 /// and out-of-range bookmark checks.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_defines_dates(
     install_path: String,
     mod_path: Option<String>,
@@ -326,7 +326,7 @@ pub fn extract_all(vfs: &Vfs) -> Vec<DefineEntry> {
 
 /// Tauri command: the full searchable NDefines tree with typed values + diff
 /// (project overrides vs base).
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_defines(
     install_path: String,
     mod_path: Option<String>,

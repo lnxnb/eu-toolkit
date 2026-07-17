@@ -623,7 +623,7 @@ pub fn scaffold_great_project(
 // Commands.
 // ---------------------------------------------------------------------------
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_province_monuments(
     install_path: String,
     mod_path: Option<String>,
@@ -643,7 +643,7 @@ pub fn get_province_monuments(
     })
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn list_monuments(
     install_path: String,
     mod_path: Option<String>,
@@ -665,7 +665,7 @@ pub fn list_monuments(
     Ok(out)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_great_project_cmd(
     install_path: String,
     mod_path: Option<String>,

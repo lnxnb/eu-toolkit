@@ -3,7 +3,9 @@
 
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
+use std::sync::Arc;
 
+use crate::cache;
 use crate::date::{self, Date};
 #[cfg(test)]
 use crate::date::DEFAULT_START;
@@ -40,8 +42,71 @@ fn parse_dir_merged(vfs: &Vfs, rel_dir: &str) -> Block {
     merged
 }
 
+// --- Session caches (see cache.rs) ----------------------------------------
+//
+// Parsing all ~4k history/provinces files (and the ~1k country files behind
+// country_colors) per command call was the app-wide lag root cause: every map
+// render, mode-data payload, and trigger snapshot re-did it from scratch.
+// The parsed ASTs are memoized per session; the date-folding stays per-call
+// (it's a cheap in-memory pass over the cached blocks).
+
+/// One `history/provinces` file, parsed once per session.
+pub(crate) struct ProvinceAst {
+    pub id: u32,
+    /// File name including extension (`1 - Uppland.txt`); the political payload
+    /// synthesizes history paths from it.
+    pub file_name: String,
+    /// `None` when the file failed to read (the name is still recorded,
+    /// matching the uncached behavior).
+    pub block: Option<Block>,
+}
+
+static PROVINCE_ASTS: cache::Store<cache::SessionKey, Vec<ProvinceAst>> = cache::Store::new();
+static COUNTRY_COLORS: cache::Store<cache::SessionKey, HashMap<String, [u8; 3]>> =
+    cache::Store::new();
+
+/// Every parsed province history file for this session, in `list_dir` order
+/// (sorted names — the same order the uncached loops iterated).
+pub(crate) fn province_asts(vfs: &Vfs) -> Arc<Vec<ProvinceAst>> {
+    PROVINCE_ASTS.get_or_build(cache::session_key(vfs), || {
+        let mut out = Vec::new();
+        for (name, path) in vfs.list_dir("history/provinces") {
+            if !name.to_lowercase().ends_with(".txt") {
+                continue;
+            }
+            let digits: String = name.chars().take_while(|c| c.is_ascii_digit()).collect();
+            let Ok(id) = digits.parse::<u32>() else {
+                continue;
+            };
+            out.push(ProvinceAst {
+                id,
+                file_name: name,
+                block: parse_path(&path),
+            });
+        }
+        out
+    })
+}
+
+/// Drops this module's session caches. Called from `cache::invalidate_all`.
+pub(crate) fn invalidate_caches() {
+    PROVINCE_ASTS.clear();
+    COUNTRY_COLORS.clear();
+    COUNTRY_HISTORY_INDEX.clear();
+}
+
 /// Country tag -> map color, resolved via common/country_tags -> common/countries.
+/// Memoized per session (resolving it walks every country file); the clone out
+/// of the cache is ~1k small entries and keeps the by-value signature callers
+/// consume with `into_keys`/`into_values`.
 pub fn country_colors(vfs: &Vfs) -> HashMap<String, [u8; 3]> {
+    COUNTRY_COLORS
+        .get_or_build(cache::session_key(vfs), || country_colors_uncached(vfs))
+        .as_ref()
+        .clone()
+}
+
+fn country_colors_uncached(vfs: &Vfs) -> HashMap<String, [u8; 3]> {
     let tags = parse_dir_merged(vfs, "common/country_tags");
     let mut colors = HashMap::new();
     for (key, value) in &tags.items {
@@ -433,15 +498,40 @@ pub fn mode_data_with_overrides_at(
         }
         "trade_goods" => {
             let goods = trade_good_colors(vfs);
+            // Undiscovered provinces (`trade_goods = unknown`) are split into
+            // spawn-distribution clusters (goods_spawn) instead of one global
+            // group, so hover/click selects a contiguous same-distribution
+            // patch. Every cluster keeps the unknown good's color — the render
+            // (map_renderer colors by good) is unchanged; only the selection
+            // granularity and label differ. Group keys are `unknown#<n>`; the
+            // frontend maps them back to the base good key ("unknown") for
+            // list/paint purposes (goodKeyOfGroup).
+            let clusters = crate::goods_spawn::undiscovered_clusters(vfs, loc, date);
+            let unknown_color = goods
+                .get("unknown")
+                .copied()
+                .unwrap_or_else(|| hash_color("unknown"));
             for (id, state) in province_history_at(vfs, date) {
                 let (Some(g), true) = (state.trade_goods, id <= max_id) else {
                     continue;
                 };
-                let idx = it.intern(
-                    &g,
-                    || loc.resolve(&g),
-                    || goods.get(&g).copied().unwrap_or_else(|| hash_color(&g)),
-                );
+                let idx = if g == "unknown" {
+                    if let Some(&ci) = clusters.index.get(&id) {
+                        it.intern(
+                            &format!("unknown#{ci}"),
+                            || format!("{} — {}", loc.resolve("unknown"), clusters.summaries[ci]),
+                            || unknown_color,
+                        )
+                    } else {
+                        it.intern(&g, || loc.resolve(&g), || unknown_color)
+                    }
+                } else {
+                    it.intern(
+                        &g,
+                        || loc.resolve(&g),
+                        || goods.get(&g).copied().unwrap_or_else(|| hash_color(&g)),
+                    )
+                };
                 values[id as usize] = idx;
             }
         }
@@ -772,20 +862,42 @@ fn country_file_rel(vfs: &Vfs, tag: &str) -> Option<String> {
     Some(format!("common/{rel}"))
 }
 
-/// The country's history file ("SWE - Sweden.txt"): (file name, bytes).
-pub fn country_history_file(vfs: &Vfs, tag: &str) -> Option<(String, Vec<u8>)> {
-    for (name, path) in vfs.list_dir("history/countries") {
-        if name.len() > 3
-            && name[..3].eq_ignore_ascii_case(tag)
-            && !name.as_bytes()[3].is_ascii_alphanumeric()
-            && name.to_lowercase().ends_with(".txt")
-        {
-            if let Ok(bytes) = std::fs::read(&path) {
-                return Some((name, bytes));
+/// Tag -> (file name, resolved path) for every `history/countries` file, from
+/// ONE directory pass, memoized per session. Enumerating the directory per
+/// lookup was the mission-board lag root cause: the trigger snapshot calls
+/// [`country_history_file`] for ~1k tags, which was ~1k full enumerations
+/// (35s on vanilla). First matching file per tag wins, preserving the old
+/// first-in-sorted-order semantics.
+static COUNTRY_HISTORY_INDEX: cache::Store<
+    cache::SessionKey,
+    HashMap<String, (String, std::path::PathBuf)>,
+> = cache::Store::new();
+
+fn country_history_index(vfs: &Vfs) -> Arc<HashMap<String, (String, std::path::PathBuf)>> {
+    COUNTRY_HISTORY_INDEX.get_or_build(cache::session_key(vfs), || {
+        let mut out: HashMap<String, (String, std::path::PathBuf)> = HashMap::new();
+        for (name, path) in vfs.list_dir("history/countries") {
+            let Some(stem) = name.get(..3) else { continue };
+            if name.len() > 3
+                && !name.as_bytes()[3].is_ascii_alphanumeric()
+                && name.to_lowercase().ends_with(".txt")
+            {
+                out.entry(stem.to_ascii_uppercase())
+                    .or_insert_with(|| (name.clone(), path.clone()));
             }
         }
-    }
-    None
+        out
+    })
+}
+
+/// The country's history file ("SWE - Sweden.txt"): (file name, bytes). The
+/// tag→file mapping is served from the session index; the BYTES are read fresh
+/// per call (the edit writer resolves through this, so content must never be
+/// stale).
+pub fn country_history_file(vfs: &Vfs, tag: &str) -> Option<(String, Vec<u8>)> {
+    let idx = country_history_index(vfs);
+    let (name, path) = idx.get(&tag.to_ascii_uppercase())?;
+    std::fs::read(path).ok().map(|bytes| (name.clone(), bytes))
 }
 
 use date::parse_date;
@@ -2281,16 +2393,9 @@ pub struct ProvinceState {
 /// callers that want the file's as-written base state (map render, usage counts).
 pub fn province_history(vfs: &Vfs) -> HashMap<u32, ProvinceState> {
     let mut states = HashMap::new();
-    for (name, path) in vfs.list_dir("history/provinces") {
-        if !name.to_lowercase().ends_with(".txt") {
-            continue;
-        }
-        // Filenames look like "1 - Uppland.txt"; the leading digits are the id.
-        let digits: String = name.chars().take_while(|c| c.is_ascii_digit()).collect();
-        let Ok(id) = digits.parse::<u32>() else {
-            continue;
-        };
-        let Some(block) = parse_path(&path) else {
+    for ast in province_asts(vfs).iter() {
+        let id = ast.id;
+        let Some(block) = &ast.block else {
             continue;
         };
         let get = |key: &str| block.get_scalar(key).map(str::to_string);
@@ -2385,15 +2490,9 @@ impl DerivedState {
 /// At the effective start this matches `province_details::effective_1444`.
 pub fn province_history_at(vfs: &Vfs, date: Date) -> HashMap<u32, ProvinceState> {
     let mut states = HashMap::new();
-    for (name, path) in vfs.list_dir("history/provinces") {
-        if !name.to_lowercase().ends_with(".txt") {
-            continue;
-        }
-        let digits: String = name.chars().take_while(|c| c.is_ascii_digit()).collect();
-        let Ok(id) = digits.parse::<u32>() else {
-            continue;
-        };
-        let Some(block) = parse_path(&path) else {
+    for ast in province_asts(vfs).iter() {
+        let id = ast.id;
+        let Some(block) = &ast.block else {
             continue;
         };
         let mut acc = DerivedState::default();
@@ -2500,16 +2599,10 @@ fn province_political_impl(vfs: &Vfs, at: Option<Date>) -> Vec<ProvincePolitical
     let mut fields: HashMap<u32, (Option<String>, Option<String>, Vec<String>)> = HashMap::new();
     // id -> [base_tax, base_production, base_manpower] scalars (dev painting).
     let mut devs: HashMap<u32, [Option<f64>; 3]> = HashMap::new();
-    for (name, path) in vfs.list_dir("history/provinces") {
-        if !name.to_lowercase().ends_with(".txt") {
-            continue;
-        }
-        let digits: String = name.chars().take_while(|c| c.is_ascii_digit()).collect();
-        let Ok(id) = digits.parse::<u32>() else {
-            continue;
-        };
-        files.insert(id, name.clone());
-        if let Some(block) = parse_path(&path) {
+    for ast in province_asts(vfs).iter() {
+        let id = ast.id;
+        files.insert(id, ast.file_name.clone());
+        if let Some(block) = &ast.block {
             // Statements to apply: top level, plus (when viewing at a date) the
             // dated blocks ≤ date in file order.
             let mut owner = None;

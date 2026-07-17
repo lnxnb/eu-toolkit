@@ -78,6 +78,18 @@ export interface TradeGoodScaffold {
 /** The sentinel good key that means "no trade good" (uncolonized land). */
 export const UNKNOWN_KEY = "unknown";
 
+/**
+ * The base good key of a trade_goods mode-data group. Undiscovered provinces
+ * are grouped per spawn-distribution CLUSTER with keys like `unknown#3`
+ * (backend goods_spawn); everything list- or paint-shaped works on the base
+ * good key, while the cluster group drives hover/selection granularity.
+ * Real good keys never contain `#` (Clausewitz identifiers).
+ */
+export function goodKeyOfGroup(groupKey: string): string {
+  const i = groupKey.indexOf("#");
+  return i < 0 ? groupKey : groupKey.slice(0, i);
+}
+
 // --- pure helpers ----------------------------------------------------------
 
 /** Parses a color token list ("0.96" floats or "245" ints) into 0-255 RGB. */

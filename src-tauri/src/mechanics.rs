@@ -2953,21 +2953,21 @@ pub fn scaffold(family: &str, key: &str, group: Option<&str>) -> Result<Scaffold
 // Commands.
 // ---------------------------------------------------------------------------
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_mechanic_families() -> Vec<FamilyMeta> {
     FAMILIES.iter().filter(|f| !family_hidden(f)).map(family_meta).collect()
 }
 
 /// The meta for a single family by id (Sprint 29 — the Empires overlay renders
 /// the hidden empire families, which `get_mechanic_families` omits).
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_mechanic_family(family: String) -> Result<FamilyMeta, String> {
     family_for(&family)
         .map(family_meta)
         .ok_or_else(|| format!("Unknown mechanics family: {family}"))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_mechanics(
     install_path: String,
     mod_path: Option<String>,
@@ -2978,7 +2978,7 @@ pub fn get_mechanics(
     load(&vfs, &loc, &family)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_mechanic(
     family: String,
     key: String,
@@ -2987,7 +2987,7 @@ pub fn scaffold_mechanic(
     scaffold(&family, &key, group.as_deref())
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn find_mechanic_event_refs(
     install_path: String,
     mod_path: Option<String>,

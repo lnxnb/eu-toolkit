@@ -701,7 +701,7 @@ pub struct ImportedIcon {
 /// scaffold) so multiple pre-save imports chain (see the module note). Returns
 /// the spliced strip (queue as a `BinaryAsset`) + a preview tile PNG. The base
 /// install is never written.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn import_icon(
     install_path: String,
     mod_path: Option<String>,
@@ -736,7 +736,7 @@ pub fn import_icon(
 
 /// Serves a sprite strip as `[u32 header_len][header JSON][PNG]` (see module
 /// docs). `kind` is `trade_goods` | `religions` | `development`.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_icon_atlas(
     install_path: String,
     mod_path: Option<String>,

@@ -55,6 +55,7 @@
   import TradeGoodsList from "./tradegoods/TradeGoodsList.svelte";
   import {
     UNKNOWN_KEY,
+    goodKeyOfGroup,
     type TradeGood,
     type TradeGoodsPayload,
     type TradeGoodScaffold,
@@ -1326,11 +1327,13 @@
     for (const e of queue.serialize()) foldTradeGoodEditInto(overlay, e);
     const vals = modeData.values;
     for (let id = 0; id < vals.length; id++) {
-      const key = overlay.has(id)
+      const raw = overlay.has(id)
         ? overlay.get(id)
         : vals[id] !== NONE
           ? (modeData.groups[vals[id]]?.key ?? null)
           : null;
+      // Cluster groups count toward their base good ("unknown").
+      const key = raw != null ? goodKeyOfGroup(raw) : null;
       if (key) m.set(key, (m.get(key) ?? 0) + 1);
     }
     return m;
@@ -1982,7 +1985,14 @@
     }
     if (m === "trade_goods") {
       tradeGoodKeyToGroup = new Map();
-      md.groups.forEach((g, i) => tradeGoodKeyToGroup.set(g.key, i));
+      // Cluster groups (`unknown#N`) also register their BASE key first-wins,
+      // so paint/recolor lookups by good key resolve to a representative group
+      // (all clusters share the unknown good's color, so any works).
+      md.groups.forEach((g, i) => {
+        tradeGoodKeyToGroup.set(g.key, i);
+        const bk = goodKeyOfGroup(g.key);
+        if (!tradeGoodKeyToGroup.has(bk)) tradeGoodKeyToGroup.set(bk, i);
+      });
       // Province files back paint eligibility (land only) + file resolution.
       await ensureProvincePolitical();
       if (seq !== renderSeq) return;
@@ -2146,17 +2156,27 @@
           continue;
         }
         const g = effectiveGroup(id);
+        // List-selected "unknown" = ALL undiscovered: every cluster group plus
+        // absent-good land. Distinguished from a map click on one cluster by
+        // selectedGroup being NONE (selectGood leaves it NONE for UNKNOWN_KEY).
+        const allUndiscovered =
+          mode === "trade_goods" && selectedGoodKey === UNKNOWN_KEY && selectedGroup === NONE;
         if (g === NONE) {
           // Show-unassigned tint: provinces belonging to no node (Sprint 8.1).
           if (mode === "trade_nodes" && showUnassigned) provinceFill[id] = UNASSIGNED_FILL;
           // "No trade good" also covers land provinces lacking a good key (absent).
-          else if (mode === "trade_goods" && selectedGoodKey === UNKNOWN_KEY) {
+          else if (allUndiscovered) {
             const b = baseProv?.get(id);
             if (b && !b.water && !b.wasteland) provinceFill[id] = SELECTED_FILL;
           }
           continue;
         }
         if (g === selectedGroup) provinceFill[id] = SELECTED_FILL;
+        else if (
+          allUndiscovered &&
+          goodKeyOfGroup(modeData.groups[g]?.key ?? "") === UNKNOWN_KEY
+        )
+          provinceFill[id] = SELECTED_FILL;
         else if (g === hoverGroup) provinceFill[id] = HOVER_FILL;
       }
       // Emphasize the hovered/selected route's path provinces (over the above).
@@ -2507,7 +2527,8 @@
     const vals = modeData.values;
     for (let id = 0; id < vals.length; id++) {
       const e = tradeGoodEdited.get(id);
-      const key = e ? e.good : vals[id] !== NONE ? (modeData.groups[vals[id]]?.key ?? null) : null;
+      const raw = e ? e.good : vals[id] !== NONE ? (modeData.groups[vals[id]]?.key ?? null) : null;
+      const key = raw != null ? goodKeyOfGroup(raw) : null;
       if (!key || cfg.skip.has(key)) continue;
       const frame = overlayAtlasIndex.get(key);
       if (frame === undefined) continue;
@@ -2831,16 +2852,22 @@
       return;
     }
     selectedGoodKey = key;
-    const gi = tradeGoodKeyToGroup.get(key);
+    // Undiscovered from the LIST = "everything undiscovered": selectedGroup
+    // stays NONE and updateHighlight tints every cluster + absent-good land.
+    // (A MAP click on an unknown province instead selects its single cluster
+    // via selectGoodByGroup.)
+    const gi = key === UNKNOWN_KEY ? undefined : tradeGoodKeyToGroup.get(key);
     select(gi ?? NONE);
   }
 
   /// Map eyedropper: select the good under the cursor (its list row highlights).
+  /// For an undiscovered province the GROUP is its spawn cluster (granular
+  /// highlight) while the list row is the base "unknown" entry.
   function selectGoodByGroup(g: number) {
     if (g === NONE || !modeData) return;
     const key = modeData.groups[g]?.key;
     if (key) {
-      selectedGoodKey = key;
+      selectedGoodKey = goodKeyOfGroup(key);
       select(g);
     }
   }
@@ -6587,9 +6614,14 @@
     invoke<MapMode[]>("list_map_modes")
       .then((m) => (modes = m))
       .catch(() => {});
+    // A (re)opened session must re-read disk: the backend memoizes parsed game
+    // data per session (cache.rs), and the mod may have changed externally
+    // since the caches were built (e.g. git). Await it before the first
+    // cache-consuming loads below.
+    const cachesCleared = invoke("invalidate_caches").catch(() => {});
     // Sprint 28: load the scripted-name registry (link resolution in every 14.2
     // tree) and register the jump handler that opens the scripted browser.
-    void loadScriptedDefs(installPath, modPath);
+    void cachesCleared.then(() => loadScriptedDefs(installPath, modPath));
     setScriptedJump((def: ScriptedDef) => {
       scriptedFocus = def.name;
       scriptedOpen = true;
@@ -6611,7 +6643,9 @@
       .catch(() => (tradeDetailsLoaded = true));
     // Resolve the selected date before the first render so the whole view derives
     // at the right date; fall back to an immediate render if context load fails.
-    initDateContext().then(() => loadMap(true), () => loadMap(true));
+    cachesCleared
+      .then(() => initDateContext())
+      .then(() => loadMap(true), () => loadMap(true));
     // Attached manually: Svelte's onwheel can be passive, and zoom needs preventDefault.
     canvas.addEventListener("wheel", onWheel, { passive: false });
     const ro = new ResizeObserver(() => resize());
@@ -6839,10 +6873,6 @@
             <span class="shortcut">Ctrl+Y</span>
           </button>
           <hr />
-          <button onclick={() => { openMenu = null; dynastiesOpen = true; }}>
-            Dynasties…
-          </button>
-          <hr />
           <button onclick={saveProject} disabled={!dirty || saving}>
             Save Project <span class="shortcut">Ctrl+S</span>
           </button>
@@ -6929,6 +6959,12 @@
           <button onclick={() => { openMenu = null; technologyOpen = true; }}>
             Technology…
           </button>
+          <button
+            title="Generic idea groups (common/ideas with a category) — national TAG ideas are edited in the country panel"
+            onclick={() => { openMenu = null; mechanicsFamily = "idea_groups"; mechanicsFocusKey = null; mechanicsOpen = true; }}
+          >
+            Ideas…
+          </button>
           <button onclick={() => { openMenu = null; mechanicsFamily = null; mechanicsOpen = true; }}>
             Mechanics…
           </button>
@@ -6937,6 +6973,9 @@
           </button>
           <button onclick={() => { openMenu = null; colorPoolsOpen = true; }}>
             Color Pools…
+          </button>
+          <button onclick={() => { openMenu = null; dynastiesOpen = true; }}>
+            Dynasties…
           </button>
           <hr />
           <button onclick={() => { openMenu = null; scriptedFocus = null; scriptedOpen = true; }}>

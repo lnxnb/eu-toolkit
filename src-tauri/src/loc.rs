@@ -265,7 +265,7 @@ pub struct CalendarLoc {
 
 /// Tauri command: the 12 resolved month names + the raw `WORLD_YEAR` template,
 /// so custom calendars (e.g. Imperium Universalis's "AUC" era) render everywhere.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_calendar_loc(
     install_path: String,
     mod_path: Option<String>,
@@ -394,7 +394,7 @@ pub fn search(vfs: &Vfs, query: &str, offset: usize, limit: usize) -> LocSearchR
 }
 
 /// Tauri command: paginated loc search across the whole VFS.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn search_loc(
     install_path: String,
     mod_path: Option<String>,
@@ -482,7 +482,7 @@ pub fn missing_report(vfs: &Vfs, store: &LocStore) -> Vec<MissingLoc> {
 }
 
 /// Tauri command: the missing-loc report for project-created content.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn missing_loc_report(
     install_path: String,
     mod_path: Option<String>,

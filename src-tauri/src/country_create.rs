@@ -579,7 +579,7 @@ fn history_file_text(
 /// `exclude_tags` names tags that are unavailable beyond those on disk — the
 /// frontend passes tags already claimed by pending (unsaved) country creates so
 /// that scaffolding several countries before a single Save never collides.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn prepare_country_scaffold(
     install_path: String,
     mod_path: Option<String>,

@@ -366,7 +366,7 @@ pub fn preview(vfs: &Vfs, loc: &LocStore, tag: &str, date: Date) -> GovNamePrevi
 // Commands (registered in lib.rs).
 // ---------------------------------------------------------------------------
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_government_names(
     install_path: String,
     mod_path: Option<String>,
@@ -376,12 +376,12 @@ pub fn get_government_names(
     Ok(load(&vfs, &loc))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_government_name(key: String) -> GovNameScaffold {
     scaffold(&key)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn preview_government_name(
     install_path: String,
     mod_path: Option<String>,

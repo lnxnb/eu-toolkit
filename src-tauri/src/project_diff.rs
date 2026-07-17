@@ -224,7 +224,7 @@ pub fn diff_file(vfs: &Vfs, rel: &str) -> Result<FileDiff, String> {
 }
 
 /// Tauri command: classify the whole project against the base install.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_project_changes(
     install_path: String,
     mod_path: Option<String>,
@@ -234,7 +234,7 @@ pub fn get_project_changes(
 }
 
 /// Tauri command: line diff of one project file vs base.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_file_diff(
     install_path: String,
     mod_path: Option<String>,

@@ -272,7 +272,7 @@ pub fn all_wars_at(vfs: &Vfs, at: Date) -> Vec<War> {
 /// each carrying its `active_at_date` flag as of `date`.
 // Registered by the orchestrator in lib.rs; unused until then.
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_wars(
     install_path: String,
     mod_path: Option<String>,

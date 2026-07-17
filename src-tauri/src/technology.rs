@@ -571,7 +571,7 @@ pub fn validate_units(vfs: &Vfs, loc: &LocStore) -> Vec<ValidationIssue> {
 // Commands.
 // ---------------------------------------------------------------------------
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_technologies(install_path: String, mod_path: Option<String>) -> Result<TechData, String> {
     let vfs = Vfs::new(&install_path, mod_path.as_deref())?;
     let loc = loc::store(&vfs, &install_path, mod_path.as_deref());
@@ -580,7 +580,7 @@ pub fn get_technologies(install_path: String, mod_path: Option<String>) -> Resul
     Ok(TechData { tables, groups })
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_units(install_path: String, mod_path: Option<String>) -> Result<Vec<Unit>, String> {
     let vfs = Vfs::new(&install_path, mod_path.as_deref())?;
     let loc = loc::store(&vfs, &install_path, mod_path.as_deref());
@@ -588,7 +588,7 @@ pub fn get_units(install_path: String, mod_path: Option<String>) -> Result<Vec<U
     Ok(load_units(&vfs, &loc, &tables))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_unit_file(key: String, category: String, unit_type: String) -> Result<UnitScaffold, String> {
     Ok(scaffold_unit(&key, &category, &unit_type))
 }

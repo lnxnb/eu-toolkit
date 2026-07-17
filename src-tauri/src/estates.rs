@@ -739,14 +739,14 @@ pub fn country_estates(vfs: &Vfs, loc: &LocStore, tag: &str, date: Date) -> Resu
 // Commands.
 // ---------------------------------------------------------------------------
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_estates(install_path: String, mod_path: Option<String>) -> Result<EstatesData, String> {
     let vfs = Vfs::new(&install_path, mod_path.as_deref())?;
     let loc = loc::store(&vfs, &install_path, mod_path.as_deref());
     Ok(load(&vfs, &loc))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_estate_object(kind: String, key: String, estate: Option<String>) -> Result<Scaffold, String> {
     match kind.as_str() {
         "estate" => Ok(scaffold_estate(&key)),
@@ -756,7 +756,7 @@ pub fn scaffold_estate_object(kind: String, key: String, estate: Option<String>)
     }
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_privilege_holders(
     install_path: String,
     mod_path: Option<String>,
@@ -767,7 +767,7 @@ pub fn get_privilege_holders(
     Ok(privilege_holders(&vfs, &loc, &privilege))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_country_estates(
     install_path: String,
     mod_path: Option<String>,

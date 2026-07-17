@@ -417,6 +417,10 @@ pub fn apply_queue(
         written.push(crate::defines::write_overrides(project_dir, &define_entries)?);
     }
 
+    // Disk changed: drop every session read cache (see cache.rs) so the next
+    // read re-derives from the files just written.
+    crate::cache::invalidate_all();
+
     Ok(written)
 }
 

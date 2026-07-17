@@ -408,7 +408,7 @@ pub fn load_network(vfs: &Vfs, loc: &LocStore, map_width: u32, map_height: u32) 
 
 /// The whole trade graph in one payload. Registered by the orchestrator.
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_trade_network(
     install_path: String,
     mod_path: Option<String>,
@@ -500,14 +500,14 @@ pub fn scaffold_route(target: &str, path: &[u32], control: &[[f64; 2]]) -> Strin
 /// Command wrapper around [`scaffold_node`] so the frontend obtains correctly
 /// formatted text for an `AppendText`/`CreateFile` edit.
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_trade_node(key: String, location: u32, color: [u8; 3]) -> String {
     scaffold_node(&key, location, color)
 }
 
 /// Command wrapper around [`scaffold_route`] (`control` is file-space).
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_trade_route(target: String, path: Vec<u32>, control: Vec<[f64; 2]>) -> String {
     scaffold_route(&target, &path, &control)
 }
@@ -666,7 +666,7 @@ pub fn derive_geometry(
 
 /// Auto-derived first-draft geometry for a new route. Registered by the orchestrator.
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn derive_route_geometry(
     install_path: String,
     mod_path: Option<String>,
@@ -834,7 +834,7 @@ pub fn path_under_control(
 /// internally. `from_node`/`to_node`, when given, exclude the endpoints' own
 /// location provinces from the path. Registered by the orchestrator.
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn derive_route_path(
     install_path: String,
     mod_path: Option<String>,

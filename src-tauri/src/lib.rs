@@ -1,6 +1,7 @@
 mod adjacencies;
 mod blank;
 mod bookmarks;
+mod cache;
 mod color_pools;
 mod colonial;
 mod country_create;
@@ -19,6 +20,7 @@ mod export;
 mod game_data;
 mod geography;
 mod gfx;
+mod goods_spawn;
 mod government_names;
 mod great_projects;
 mod group_create;
@@ -66,25 +68,25 @@ fn open_vfs(install_path: &str, mod_path: &Option<String>) -> Result<Vfs, String
 }
 
 /// Opens an EU4 mod folder: validates it, parses its descriptor, and lists its contents.
-#[tauri::command]
+#[tauri::command(async)]
 fn open_mod(path: String) -> Result<ModInfo, String> {
     mod_loader::open_mod(&path)
 }
 
 /// Scans Steam libraries (and common locations) for EU4 installations.
-#[tauri::command]
+#[tauri::command(async)]
 fn detect_installations() -> Vec<Installation> {
     installations::detect()
 }
 
 /// Returns the remembered installation path, or None if unset or no longer valid.
-#[tauri::command]
+#[tauri::command(async)]
 fn get_saved_installation(app: tauri::AppHandle) -> Result<Option<String>, String> {
     Ok(db::get_setting(&app, INSTALLATION_KEY)?
         .filter(|p| installations::is_valid_installation(Path::new(p))))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn save_installation(app: tauri::AppHandle, path: String) -> Result<(), String> {
     if !installations::is_valid_installation(Path::new(&path)) {
         return Err(format!(
@@ -95,13 +97,13 @@ fn save_installation(app: tauri::AppHandle, path: String) -> Result<(), String> 
     db::set_setting(&app, INSTALLATION_KEY, &path)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn clear_saved_installation(app: tauri::AppHandle) -> Result<(), String> {
     db::delete_setting(&app, INSTALLATION_KEY)
 }
 
 /// Checks that a folder is usable as a mod project; returns its display name.
-#[tauri::command]
+#[tauri::command(async)]
 fn validate_project(path: String) -> Result<String, String> {
     let dir = PathBuf::from(&path);
     if !vfs::is_mod_project(&dir) {
@@ -136,7 +138,7 @@ fn save_recents(app: &tauri::AppHandle, list: &[recents::RecentProject]) -> Resu
 /// Records a just-opened session (dedupes by path, bumps its timestamp). The
 /// display name is derived server-side (descriptor `name` / folder name, or
 /// "Base game @ <install>") so every open path records consistently.
-#[tauri::command]
+#[tauri::command(async)]
 fn record_recent_project(
     app: tauri::AppHandle,
     install_path: String,
@@ -156,14 +158,14 @@ fn record_recent_project(
 
 /// The recent-projects list, most-recent-first (pinned first), each row's
 /// `missing` flag freshly computed from the filesystem.
-#[tauri::command]
+#[tauri::command(async)]
 fn list_recent_projects(app: tauri::AppHandle) -> Result<Vec<recents::RecentProject>, String> {
     let mut list = load_recents(&app)?;
     recents::annotate_missing(&mut list);
     Ok(list)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn remove_recent_project(
     app: tauri::AppHandle,
     install_path: String,
@@ -173,7 +175,7 @@ fn remove_recent_project(
     save_recents(&app, &list)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn set_recent_project_pinned(
     app: tauri::AppHandle,
     install_path: String,
@@ -188,20 +190,20 @@ fn set_recent_project_pinned(
 
 /// True if `path` sits under a Steam workshop item folder for EU4. Used on open
 /// to warn (not block) that Steam overwrites the folder on updates.
-#[tauri::command]
+#[tauri::command(async)]
 fn is_workshop_path(path: String) -> bool {
     workshop::is_workshop_path(Path::new(&path))
 }
 
 /// True if this session's install is a Steam install with a provisioned EU4
 /// workshop folder (gates File ▸ Fork from Steam…).
-#[tauri::command]
+#[tauri::command(async)]
 fn is_steam_backed_install(install_path: String) -> bool {
     workshop::is_steam_backed(Path::new(&install_path))
 }
 
 /// Subscribed EU4 workshop mods for this install's Steam library.
-#[tauri::command]
+#[tauri::command(async)]
 fn list_workshop_mods(install_path: String) -> Vec<workshop::WorkshopMod> {
     workshop::list_workshop_mods(Path::new(&install_path))
 }
@@ -236,7 +238,7 @@ struct ForkPlan {
 
 /// Pre-copy fork defaults for `source_path`: suggested name, a collision-free
 /// slug, payload sizes (skip vs full), and destination free space.
-#[tauri::command]
+#[tauri::command(async)]
 fn prepare_fork(app: tauri::AppHandle, source_path: String) -> Result<ForkPlan, String> {
     let src = PathBuf::from(&source_path);
     if !src.is_dir() {
@@ -263,7 +265,7 @@ fn prepare_fork(app: tauri::AppHandle, source_path: String) -> Result<ForkPlan, 
 
 /// Requests cancellation of the in-flight fork (the copy loop stops at the next
 /// file and the partial destination is removed).
-#[tauri::command]
+#[tauri::command(async)]
 fn cancel_fork() {
     workshop::request_cancel();
 }
@@ -271,7 +273,7 @@ fn cancel_fork() {
 /// Kicks off a fork of `source_path` into `<user mod folder>\<slug>` on a worker
 /// thread. Returns after synchronous preflight (collision + free-space); copy
 /// progress and completion arrive as `fork-progress` / `fork-finished` events.
-#[tauri::command]
+#[tauri::command(async)]
 fn start_fork(
     app: tauri::AppHandle,
     install_path: String,
@@ -451,7 +453,7 @@ struct MapMode {
     view_only: bool,
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn list_map_modes() -> Vec<MapMode> {
     map_renderer::MAP_MODES
         .iter()
@@ -465,7 +467,7 @@ fn list_map_modes() -> Vec<MapMode> {
 
 /// Per-province effective terrain (override vs. auto) plus the terrain-category
 /// catalog (colors + gameplay modifiers) for the Simple Terrain mode (11.2).
-#[tauri::command]
+#[tauri::command(async)]
 fn get_effective_terrain(
     install_path: String,
     mod_path: Option<String>,
@@ -478,7 +480,7 @@ fn get_effective_terrain(
 /// The two independent slots of map/climate.txt (climate zone + winter severity)
 /// plus which list blocks exist, for the Climate mode's two-slot paint selector
 /// (Sprint 11.1). Both slots share one file; painting one never touches the other.
-#[tauri::command]
+#[tauri::command(async)]
 fn get_climate(
     install_path: String,
     mod_path: Option<String>,
@@ -499,7 +501,7 @@ struct AdjacenciesPayload {
 
 /// Reads `map/adjacencies.csv` through the Vfs (mod shadows/replaces base) and
 /// returns the parsed rows + water ids. Static (no date threading).
-#[tauri::command]
+#[tauri::command(async)]
 fn get_adjacencies(
     install_path: String,
     mod_path: Option<String>,
@@ -515,7 +517,7 @@ fn get_adjacencies(
 /// Validates a folded adjacency row list (Sprint 25): sea straits whose
 /// `through` isn't water (error); sea-strait endpoints that aren't coastal, and
 /// duplicate From/To pairs either direction (warnings).
-#[tauri::command]
+#[tauri::command(async)]
 fn validate_adjacencies(
     install_path: String,
     mod_path: Option<String>,
@@ -527,8 +529,18 @@ fn validate_adjacencies(
     Ok(adjacencies::validate(&rows, &water, &coastal))
 }
 
+/// Drops every session-scoped read cache (parsed history, base map, rendered
+/// PNGs, trigger snapshots, loc). The frontend calls this when a session
+/// (re)opens so a reopened project always re-reads disk — e.g. after the user
+/// edited the mod externally (git) between sessions. Writes through the toolkit
+/// itself invalidate automatically (`edits::apply_queue`).
+#[tauri::command(async)]
+fn invalidate_caches() {
+    cache::invalidate_all();
+}
+
 /// Renders a map mode to a PNG; returned as raw bytes (ArrayBuffer in JS).
-#[tauri::command]
+#[tauri::command(async)]
 fn render_map_mode(
     install_path: String,
     mod_path: Option<String>,
@@ -542,7 +554,7 @@ fn render_map_mode(
 }
 
 /// Province id per pixel: [u32 width][u32 height][u16 id]* little-endian.
-#[tauri::command]
+#[tauri::command(async)]
 fn get_province_ids(
     install_path: String,
     mod_path: Option<String>,
@@ -557,7 +569,7 @@ fn get_province_ids(
 /// The JSON header carries `kind` ("categorical" | "gradient" | "raster"),
 /// `groups` (categorical), `maxId`, and `valueScale` (gradient). See
 /// `game_data::ModeData`.
-#[tauri::command]
+#[tauri::command(async)]
 fn get_mode_data(
     app: tauri::AppHandle,
     install_path: String,
@@ -590,7 +602,7 @@ fn selected_date_key(mod_path: &Option<String>) -> String {
 
 /// The persisted selected date for this session's scope, or None if never set
 /// (the frontend then falls back to the effective start bookmark date).
-#[tauri::command]
+#[tauri::command(async)]
 fn get_selected_date(
     app: tauri::AppHandle,
     mod_path: Option<String>,
@@ -599,7 +611,7 @@ fn get_selected_date(
 }
 
 /// Persists (or clears, when `date` is None) the selected date for this scope.
-#[tauri::command]
+#[tauri::command(async)]
 fn set_selected_date(
     app: tauri::AppHandle,
     mod_path: Option<String>,
@@ -615,13 +627,13 @@ fn set_selected_date(
 /// A boolean View-menu toggle persisted in the settings DB, keyed globally
 /// (display preference, not per-project). Used by the S3.3 trade-details overlay
 /// toggle; reusable for future view toggles. `None` = never set (caller defaults).
-#[tauri::command]
+#[tauri::command(async)]
 fn get_view_toggle(app: tauri::AppHandle, key: String) -> Result<Option<bool>, String> {
     Ok(db::get_setting(&app, &format!("view_toggle:{key}"))?.map(|v| v == "1"))
 }
 
 /// Persists a boolean View-menu toggle (see [`get_view_toggle`]).
-#[tauri::command]
+#[tauri::command(async)]
 fn set_view_toggle(app: tauri::AppHandle, key: String, value: bool) -> Result<(), String> {
     db::set_setting(&app, &format!("view_toggle:{key}"), if value { "1" } else { "0" })
 }
@@ -671,7 +683,7 @@ fn parse_rgb(s: &str) -> Option<[u8; 3]> {
 
 /// Per-province political + eligibility payload for the political-mode brush
 /// tools (Sprint 1.4). Loaded once per session; ~5k small records.
-#[tauri::command]
+#[tauri::command(async)]
 fn get_province_political(
     install_path: String,
     mod_path: Option<String>,
@@ -682,7 +694,7 @@ fn get_province_political(
     Ok(game_data::province_political_at(&vfs, at))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn get_country_details(
     install_path: String,
     mod_path: Option<String>,
@@ -696,7 +708,7 @@ fn get_country_details(
 }
 
 /// Religions grouped by religion group (localized), for the panel dropdown.
-#[tauri::command]
+#[tauri::command(async)]
 fn list_religions(
     install_path: String,
     mod_path: Option<String>,
@@ -707,7 +719,7 @@ fn list_religions(
 }
 
 /// Full details of one religion (its block inside a group in common/religions).
-#[tauri::command]
+#[tauri::command(async)]
 fn get_religion_details(
     install_path: String,
     mod_path: Option<String>,
@@ -719,7 +731,7 @@ fn get_religion_details(
 }
 
 /// All religion groups (localized), for the create flow and move-to-group.
-#[tauri::command]
+#[tauri::command(async)]
 fn list_religion_groups(
     install_path: String,
     mod_path: Option<String>,
@@ -730,7 +742,7 @@ fn list_religion_groups(
 }
 
 /// Cultures grouped by culture group (localized), for the panel dropdown.
-#[tauri::command]
+#[tauri::command(async)]
 fn list_cultures(
     install_path: String,
     mod_path: Option<String>,
@@ -741,7 +753,7 @@ fn list_cultures(
 }
 
 /// Full details of one culture (its block inside a group in common/cultures).
-#[tauri::command]
+#[tauri::command(async)]
 fn get_culture_details(
     install_path: String,
     mod_path: Option<String>,
@@ -753,7 +765,7 @@ fn get_culture_details(
 }
 
 /// All culture groups (localized), for the create flow and move-to-group.
-#[tauri::command]
+#[tauri::command(async)]
 fn list_culture_groups(
     install_path: String,
     mod_path: Option<String>,
@@ -765,7 +777,7 @@ fn list_culture_groups(
 
 /// The dynamic province-rename list for one key (culture / culture group / TAG),
 /// from `common/province_names/<key>.txt` through the Vfs (Sprint 24).
-#[tauri::command]
+#[tauri::command(async)]
 fn get_province_names(
     install_path: String,
     mod_path: Option<String>,
@@ -777,7 +789,7 @@ fn get_province_names(
 
 /// Reverse view for the province panel: every culture/group/tag that renames the
 /// given province, with the name it assigns (Sprint 24).
-#[tauri::command]
+#[tauri::command(async)]
 fn get_province_name_assignments(
     install_path: String,
     mod_path: Option<String>,
@@ -790,7 +802,7 @@ fn get_province_name_assignments(
 
 /// This session's per-culture display-color overrides: culture key -> [r,g,b].
 /// Toolkit-only state (settings DB), applied to the culture map mode.
-#[tauri::command]
+#[tauri::command(async)]
 fn list_culture_color_overrides(
     app: tauri::AppHandle,
     mod_path: Option<String>,
@@ -799,7 +811,7 @@ fn list_culture_color_overrides(
 }
 
 /// One culture's display-color override, or None if unset.
-#[tauri::command]
+#[tauri::command(async)]
 fn get_culture_color_override(
     app: tauri::AppHandle,
     mod_path: Option<String>,
@@ -811,7 +823,7 @@ fn get_culture_color_override(
 
 /// Pins a display color for `key` (Sprint 6.1). Applied immediately to the
 /// culture map mode; never written into the mod files.
-#[tauri::command]
+#[tauri::command(async)]
 fn set_culture_color_override(
     app: tauri::AppHandle,
     mod_path: Option<String>,
@@ -825,7 +837,7 @@ fn set_culture_color_override(
 }
 
 /// Clears `key`'s display-color override, reverting to the toolkit hash color.
-#[tauri::command]
+#[tauri::command(async)]
 fn clear_culture_color_override(
     app: tauri::AppHandle,
     mod_path: Option<String>,
@@ -837,7 +849,7 @@ fn clear_culture_color_override(
 
 /// Pickable idea groups (the 8-idea groups with a category), for the country
 /// panel's historical-idea-groups picker.
-#[tauri::command]
+#[tauri::command(async)]
 fn list_idea_groups(
     install_path: String,
     mod_path: Option<String>,
@@ -848,14 +860,14 @@ fn list_idea_groups(
 }
 
 /// All unit keys (common/units file stems), for the historical-units picker.
-#[tauri::command]
+#[tauri::command(async)]
 fn list_units(install_path: String, mod_path: Option<String>) -> Result<Vec<String>, String> {
     let vfs = open_vfs(&install_path, &mod_path)?;
     Ok(game_data::unit_list(&vfs))
 }
 
 /// Every country tag with localized name + map color, for tag pickers.
-#[tauri::command]
+#[tauri::command(async)]
 fn list_countries(
     install_path: String,
     mod_path: Option<String>,
@@ -874,14 +886,14 @@ struct FlagConversion {
     preview: Vec<u8>,
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn convert_flag(path: String) -> Result<FlagConversion, String> {
     let (tga, preview) = game_data::convert_flag(&path)?;
     Ok(FlagConversion { tga, preview })
 }
 
 /// The country's flag as PNG bytes.
-#[tauri::command]
+#[tauri::command(async)]
 fn get_country_flag(
     install_path: String,
     mod_path: Option<String>,
@@ -896,7 +908,7 @@ fn get_country_flag(
 /// (copy-on-write from the resolved source files) and returns the written
 /// game-relative paths. `target_dir` names a new project folder when the
 /// session has no mod yet. `edits` is the frontend queue flattened in order.
-#[tauri::command]
+#[tauri::command(async)]
 fn save_project(
     install_path: String,
     mod_path: Option<String>,
@@ -937,7 +949,7 @@ fn save_project(
 /// world-populating folders, shipping only the engine-required special tags —
 /// see `blank.rs` for the replace_path + tag rationale and the Anbennar/vanilla
 /// ground-truth equivalence.
-#[tauri::command]
+#[tauri::command(async)]
 fn scaffold_blank_project(
     install_path: String,
     target_dir: String,
@@ -948,7 +960,7 @@ fn scaffold_blank_project(
 /// Registers the project with the game launcher (pointer .mod file in the
 /// user's Documents); overwrites any previous registration. Returns the
 /// project name.
-#[tauri::command]
+#[tauri::command(async)]
 fn export_to_game(
     app: tauri::AppHandle,
     install_path: String,
@@ -968,7 +980,7 @@ fn export_to_game(
 /// rationale). Refuses if EU4 is already running. `dry_run` stops short of
 /// spawning the game (the write side still runs, so the plan is testable and the
 /// UI can preview it). The frontend guards unsaved edits before calling this.
-#[tauri::command]
+#[tauri::command(async)]
 fn export_and_launch(
     app: tauri::AppHandle,
     install_path: String,
@@ -1011,6 +1023,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
+            invalidate_caches,
             open_mod,
             detect_installations,
             get_saved_installation,

@@ -263,7 +263,7 @@ pub fn load_network(vfs: &Vfs, loc: &LocStore) -> GeoNetwork {
 
 /// The whole area/region/superregion tree in one payload. Registered in lib.rs.
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_geo_network(
     install_path: String,
     mod_path: Option<String>,
@@ -311,28 +311,28 @@ pub fn scaffold_continent(key: &str, provinces: &[u32]) -> String {
 
 /// Command wrapper around [`scaffold_area`].
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_area_block(key: String, provinces: Vec<u32>) -> String {
     scaffold_area(&key, &provinces)
 }
 
 /// Command wrapper around [`scaffold_region`].
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_region_block(key: String, first_area: String) -> String {
     scaffold_region(&key, &first_area)
 }
 
 /// Command wrapper around [`scaffold_superregion`] (S3.1).
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_superregion_block(key: String, first_region: String) -> String {
     scaffold_superregion(&key, &first_region)
 }
 
 /// Command wrapper around [`scaffold_continent`] (S3.1).
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_continent_block(key: String, provinces: Vec<u32>) -> String {
     scaffold_continent(&key, &provinces)
 }

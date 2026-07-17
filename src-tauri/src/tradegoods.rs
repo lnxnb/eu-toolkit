@@ -361,7 +361,7 @@ pub fn trade_goods(vfs: &Vfs, loc: &crate::loc::LocStore) -> TradeGoodsPayload {
     }
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_trade_goods(
     install_path: String,
     mod_path: Option<String>,
@@ -437,7 +437,7 @@ pub fn rebalance_edits(
     edits
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn rebalance_chances(
     install_path: String,
     mod_path: Option<String>,
@@ -557,7 +557,7 @@ pub fn trade_good_scaffold(
     })
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn prepare_trade_good_scaffold(
     install_path: String,
     mod_path: Option<String>,

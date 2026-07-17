@@ -687,7 +687,7 @@ pub fn province_details_at(
 
 /// Tauri command: full province-details payload (Sprint 2.4). One JSON blob per
 /// the module docs. Registered by the orchestrator in `lib.rs`.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_province_details(
     install_path: String,
     mod_path: Option<String>,
@@ -841,7 +841,7 @@ pub fn geo_options(vfs: &Vfs, loc: &LocStore) -> GeoOptions {
 
 /// Tauri command: geography membership options for the province panel's
 /// Geography section. **NEW command — needs registration in `lib.rs`.**
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_geo_options(
     install_path: String,
     mod_path: Option<String>,

@@ -194,7 +194,7 @@ pub fn scan(vfs: &Vfs) -> Vec<DynastyEntry> {
 }
 
 /// Scans all dynasties across `history/countries` in the game+mod session.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scan_dynasties(
     install_path: String,
     mod_path: Option<String>,

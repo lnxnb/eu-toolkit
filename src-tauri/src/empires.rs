@@ -354,27 +354,14 @@ fn hre_at(block: &paradox::Block, at: Date) -> bool {
     on
 }
 
-/// The leading province id of a `history/provinces` filename (`1234 - Name.txt`).
-fn province_id_of(name: &str) -> Option<u32> {
-    let digits: String = name.chars().take_while(|c| c.is_ascii_digit()).collect();
-    digits.parse().ok()
-}
-
 pub fn hre_members(vfs: &Vfs, at: Date) -> HreMembers {
     let mut ids = Vec::new();
-    for (name, path) in vfs.list_dir("history/provinces") {
-        if !name.to_lowercase().ends_with(".txt") {
-            continue;
-        }
-        let Some(id) = province_id_of(&name) else {
+    for ast in crate::game_data::province_asts(vfs).iter() {
+        let Some(block) = &ast.block else {
             continue;
         };
-        let Ok(bytes) = std::fs::read(&path) else {
-            continue;
-        };
-        let block = paradox::parse(&String::from_utf8_lossy(&bytes));
-        if hre_at(&block, at) {
-            ids.push(id);
+        if hre_at(block, at) {
+            ids.push(ast.id);
         }
     }
     ids.sort_unstable();
@@ -429,7 +416,7 @@ pub fn scaffold_imperial_reform(empire: &str, required_reform: Option<&str>, key
 // Commands.
 // ---------------------------------------------------------------------------
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_emperor_timeline(
     install_path: String,
     mod_path: Option<String>,
@@ -442,7 +429,7 @@ pub fn get_emperor_timeline(
     emperor_timeline(&vfs, &loc, &kind, at)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_hre_electors(
     install_path: String,
     mod_path: Option<String>,
@@ -457,7 +444,7 @@ pub fn get_hre_electors(
     })
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_hre_members(
     install_path: String,
     mod_path: Option<String>,
@@ -468,7 +455,7 @@ pub fn get_hre_members(
     Ok(hre_members(&vfs, at))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_imperial_reform_chain(
     empire: String,
     required_reform: Option<String>,

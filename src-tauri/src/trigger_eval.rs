@@ -26,7 +26,9 @@
 
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
+use std::sync::Arc;
 
+use crate::cache;
 use crate::date::{self, Date};
 use crate::game_data;
 use crate::paradox::{self, Value};
@@ -223,6 +225,15 @@ pub fn installed_dlc(base_dir: &Path) -> HashSet<String> {
     set
 }
 
+/// Session-memoized [`load_scripted_triggers`] — the definitions are
+/// date-independent, so snapshots at different dates share one build.
+static SCRIPTED_TRIGGERS: cache::Store<cache::SessionKey, HashMap<String, Vec<TreeNode>>> =
+    cache::Store::new();
+
+fn scripted_triggers_cached(vfs: &Vfs) -> Arc<HashMap<String, Vec<TreeNode>>> {
+    SCRIPTED_TRIGGERS.get_or_build(cache::session_key(vfs), || load_scripted_triggers(vfs))
+}
+
 /// Loads every scripted trigger (`common/scripted_triggers/*.txt`, VFS-merged)
 /// into `name → child condition nodes`. First definition wins on a name clash.
 fn load_scripted_triggers(vfs: &Vfs) -> HashMap<String, Vec<TreeNode>> {
@@ -234,13 +245,9 @@ fn load_scripted_triggers(vfs: &Vfs) -> HashMap<String, Vec<TreeNode>> {
         let Ok(bytes) = std::fs::read(&path) else {
             continue;
         };
-        let block = paradox::parse(&String::from_utf8_lossy(&bytes));
-        for (key, _) in block.key_blocks() {
-            if out.contains_key(key) {
-                continue;
-            }
-            let nodes = script_tree::build_nodes(&bytes, &[key.to_string()]);
-            out.insert(key.to_string(), nodes);
+        // One lex per file; building per-key from the root is O(defs × file).
+        for (key, nodes) in script_tree::build_top_level_trees(&bytes) {
+            out.entry(key).or_insert(nodes);
         }
     }
     out
@@ -250,7 +257,7 @@ fn load_scripted_triggers(vfs: &Vfs) -> HashMap<String, Vec<TreeNode>> {
 /// mod's continent file shadows the base). Same `key = { id id … }` shape as
 /// `climate.txt`; keys include the six real continents plus `new_world` /
 /// `island_check_provinces`, all preserved as written.
-fn load_continents(vfs: &Vfs) -> HashMap<String, HashSet<u32>> {
+pub(crate) fn load_continents(vfs: &Vfs) -> HashMap<String, HashSet<u32>> {
     let mut out: HashMap<String, HashSet<u32>> = HashMap::new();
     let Ok(bytes) = vfs.read("map/continent.txt") else {
         return out;
@@ -325,7 +332,25 @@ fn extract_country(bytes: &[u8], date: Date) -> CountryState {
 }
 
 /// Builds the world snapshot at `date`.
-pub fn build_snapshot(vfs: &Vfs, loc: &crate::loc::LocStore, date: Date) -> WorldSnapshot {
+/// The world snapshot for this session at `date`, memoized (see cache.rs).
+/// Building one walks every province + country history file — it backs mission
+/// potential, government-name previews, privilege availability, and the generic
+/// `evaluate_trigger`, all of which used to rebuild it per call.
+pub fn build_snapshot(vfs: &Vfs, loc: &crate::loc::LocStore, date: Date) -> Arc<WorldSnapshot> {
+    SNAPSHOTS.get_or_build((cache::session_key(vfs), date), || {
+        build_snapshot_uncached(vfs, loc, date)
+    })
+}
+
+static SNAPSHOTS: cache::Store<(cache::SessionKey, Date), WorldSnapshot> = cache::Store::new();
+
+/// Drops this module's session caches. Called from `cache::invalidate_all`.
+pub(crate) fn invalidate_caches() {
+    SNAPSHOTS.clear();
+    SCRIPTED_TRIGGERS.clear();
+}
+
+fn build_snapshot_uncached(vfs: &Vfs, loc: &crate::loc::LocStore, date: Date) -> WorldSnapshot {
     let states = game_data::province_history_at(vfs, date);
     let water = game_data::water_ids(vfs);
 
@@ -483,7 +508,7 @@ pub fn build_snapshot(vfs: &Vfs, loc: &crate::loc::LocStore, date: Date) -> Worl
         war_sides,
         year: date.0,
         installed_dlc: installed_dlc(vfs.base_dir()),
-        scripted_triggers: load_scripted_triggers(vfs),
+        scripted_triggers: scripted_triggers_cached(vfs).as_ref().clone(),
     }
 }
 
@@ -1012,7 +1037,7 @@ pub fn evaluate_for_state(
 
 /// Evaluates the trigger block at `path` inside `file`, at the selected date,
 /// for every existing country.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn evaluate_trigger(
     install_path: String,
     mod_path: Option<String>,
@@ -1389,6 +1414,70 @@ mod tests {
         assert!(!yes.contains("FRA"));
         // Every matched country is genuinely french culture group (hand rule).
         assert!(yes.iter().all(|t| french(t)), "a non-french tag matched: {yes:?}");
+    }
+
+    /// Perf breakdown of the cold snapshot build (`-- --ignored --nocapture`).
+    #[test]
+    #[ignore]
+    fn snapshot_timing_breakdown() {
+        if !Path::new(INSTALL).join("map/provinces.bmp").is_file() {
+            return;
+        }
+        let vfs = Vfs::new(INSTALL, None).unwrap();
+        let loc = crate::loc::store(&vfs, INSTALL, None);
+        let at = crate::date::DEFAULT_START;
+        crate::cache::invalidate_all();
+
+        let phase = |name: &str, f: &mut dyn FnMut()| {
+            let t = std::time::Instant::now();
+            f();
+            println!("{name}: {:?}", t.elapsed());
+        };
+        phase("province_history_at (cold ASTs)", &mut || {
+            let _ = game_data::province_history_at(&vfs, at);
+        });
+        phase("province_political_at", &mut || {
+            let _ = game_data::province_political_at(&vfs, at);
+        });
+        phase("culture_list", &mut || {
+            let _ = game_data::culture_list(&vfs, &loc);
+        });
+        phase("religion_list", &mut || {
+            let _ = game_data::religion_list(&vfs, &loc);
+        });
+        phase("all_relations_at", &mut || {
+            let _ = crate::diplomacy::all_relations_at(&vfs, at);
+        });
+        phase("all_wars_at", &mut || {
+            let _ = crate::wars::all_wars_at(&vfs, at);
+        });
+        phase("load_network", &mut || {
+            let _ = crate::geography::load_network(&vfs, &loc);
+        });
+        phase("load_continents", &mut || {
+            let _ = load_continents(&vfs);
+        });
+        phase("current_emperor", &mut || {
+            let _ = current_emperor(&vfs, at);
+        });
+        let mut briefs = Vec::new();
+        phase("country_list", &mut || {
+            briefs = game_data::country_list(&vfs, &loc);
+        });
+        let mut files: Vec<(String, Vec<u8>)> = Vec::new();
+        phase("country_history_file x tags", &mut || {
+            for b in &briefs {
+                if let Some(f) = game_data::country_history_file(&vfs, &b.tag) {
+                    files.push(f);
+                }
+            }
+        });
+        phase("extract_country x tags", &mut || {
+            for (_, bytes) in &files {
+                let _ = extract_country(bytes, at);
+            }
+        });
+        println!("tags: {}, with history: {}", briefs.len(), files.len());
     }
 
     /// The user-reported case: View ▸ Missions for Aachen (AAC) at 1444.11.11.

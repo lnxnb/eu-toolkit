@@ -190,22 +190,16 @@ fn scan_provinces(
     owned.sort_unstable_by_key(|o| o.id);
     core_refs.sort_unstable();
 
-    // Targeted `tribal_owner = TAG` scan (top-level only).
+    // Targeted `tribal_owner = TAG` scan (top-level only), over the session's
+    // cached province ASTs (parsing all ~4k files per panel open was a lag hot
+    // path — get_country_blast_radius runs on every CountryPanel mount).
     let mut tribal_refs = Vec::new();
-    for (name, path) in vfs.list_dir("history/provinces") {
-        if !name.to_lowercase().ends_with(".txt") {
-            continue;
-        }
-        let digits: String = name.chars().take_while(|c| c.is_ascii_digit()).collect();
-        let Ok(id) = digits.parse::<u32>() else {
+    for ast in game_data::province_asts(vfs).iter() {
+        let Some(block) = &ast.block else {
             continue;
         };
-        let Ok(bytes) = std::fs::read(&path) else {
-            continue;
-        };
-        let block = paradox::parse(&String::from_utf8_lossy(&bytes));
         if block.get_scalar("tribal_owner") == Some(tag) {
-            tribal_refs.push(id);
+            tribal_refs.push(ast.id);
         }
     }
     tribal_refs.sort_unstable();
@@ -459,7 +453,7 @@ pub fn build_deletion(
 // ---------------------------------------------------------------------------
 
 /// The blast radius of deleting `tag`, for the confirm dialog.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_country_blast_radius(
     install_path: String,
     mod_path: Option<String>,
@@ -473,7 +467,7 @@ pub fn get_country_blast_radius(
 
 /// The deletion composite (queue verbatim as one undo unit). `transfer_to` moves
 /// owned provinces to that country; omit it to uncolonize them.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn prepare_country_deletion(
     install_path: String,
     mod_path: Option<String>,

@@ -181,7 +181,7 @@ pub fn resolve_date(vfs: &Vfs, date: Option<&str>) -> Result<Date, String> {
 
 /// Tauri command: all bookmarks (base + mod through the Vfs), loc-resolved,
 /// sorted by date.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_bookmarks(
     install_path: String,
     mod_path: Option<String>,
@@ -280,7 +280,7 @@ pub fn build_scaffold(
 }
 
 /// Tauri command: prepare a new-start-date bookmark scaffold.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_bookmark(
     install_path: String,
     mod_path: Option<String>,

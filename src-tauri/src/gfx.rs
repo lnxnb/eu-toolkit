@@ -98,7 +98,7 @@ pub fn sprite_index(vfs: &Vfs) -> Vec<Sprite> {
 
 /// Serves the sprite index, optionally filtered to names starting with `prefix`
 /// (case-insensitive), e.g. `mission_` or `GFX_mission_`.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_sprite_index(
     install_path: String,
     mod_path: Option<String>,
@@ -391,7 +391,7 @@ fn encode_png_rgba(surface: &Surface) -> Result<Vec<u8>, String> {
 
 /// Serves one sprite (looked up by `name`) as PNG bytes. Resolves the sprite's
 /// `texturefile` through the Vfs (mod overrides base) and decodes it.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_sprite(
     install_path: String,
     mod_path: Option<String>,

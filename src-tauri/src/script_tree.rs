@@ -157,6 +157,30 @@ fn slice(src: &[u8], span: (usize, usize)) -> String {
     String::from_utf8_lossy(&src[span.0..span.1]).into_owned()
 }
 
+/// Builds the child nodes of a group whose braces-inclusive `value_span` is
+/// already known, by lexing ONLY that span's interior. Recursing through
+/// [`build_nodes`] instead (which re-resolves `path` from the top of `src`)
+/// made tree building O(nodes × file size) — a 15s stall on vanilla's
+/// scripted_triggers file. Node output is identical: `path` still carries the
+/// full absolute path (threaded down), and raw/value text slices are the same
+/// bytes either way.
+fn build_nodes_in_block(src: &[u8], value_span: (usize, usize), path: &[String]) -> Vec<TreeNode> {
+    let (s, e) = value_span;
+    // Defensive: expect `{ … }`. Fall back to the path-resolving walk if the
+    // span isn't brace-shaped (shouldn't happen for an `is_block` child).
+    if e <= s + 1 || src.get(s) != Some(&b'{') || src.get(e - 1) != Some(&b'}') {
+        return build_nodes(src, path);
+    }
+    let interior = &src[s + 1..e - 1];
+    let Some(children) = mod_writer::block_children(interior, &[]) else {
+        return Vec::new();
+    };
+    children
+        .iter()
+        .map(|c| build_node(interior, path, c))
+        .collect()
+}
+
 fn build_node(src: &[u8], parent_path: &[String], c: &ChildSpan) -> TreeNode {
     let raw = slice(src, c.stmt_span);
     match &c.key {
@@ -204,7 +228,7 @@ fn build_node(src: &[u8], parent_path: &[String], c: &ChildSpan) -> TreeNode {
                         raw,
                     }
                 } else {
-                    let children = build_nodes(src, &path);
+                    let children = build_nodes_in_block(src, c.value_span, &path);
                     TreeNode {
                         node_type: "group".into(),
                         key: Some(key.clone()),
@@ -233,6 +257,28 @@ fn build_node(src: &[u8], parent_path: &[String], c: &ChildSpan) -> TreeNode {
     }
 }
 
+/// The child trees of EVERY top-level `key = { … }` block in `src`, in file
+/// order, from ONE lex of the file. For loaders that want many/all definitions
+/// (scripted triggers): calling [`build_nodes`] per key re-tokenizes the whole
+/// file per definition — O(defs × file size), a multi-second stall on vanilla's
+/// scripted_triggers. Non-block and keyless top-level statements are skipped.
+pub fn build_top_level_trees(src: &[u8]) -> Vec<(String, Vec<TreeNode>)> {
+    let Some(children) = mod_writer::block_children(src, &[]) else {
+        return Vec::new();
+    };
+    children
+        .iter()
+        .filter_map(|c| {
+            let key = c.key.clone()?;
+            if !c.is_block {
+                return None;
+            }
+            let path = vec![key.clone()];
+            Some((key, build_nodes_in_block(src, c.value_span, &path)))
+        })
+        .collect()
+}
+
 // ---------------------------------------------------------------------------
 // Command: parse_script_block
 // ---------------------------------------------------------------------------
@@ -250,7 +296,7 @@ pub struct ScriptBlock {
 }
 
 /// Parses the block at `path` inside `file` into a typed tree + its raw slice.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn parse_script_block(
     install_path: String,
     mod_path: Option<String>,
@@ -269,7 +315,7 @@ pub fn parse_script_block(
 /// decision whose file isn't written yet), re-parsing must see them — this command
 /// applies the edits targeting `file`, in queue order, to an in-memory copy before
 /// building the typed tree. Mirrors how `apply_queue` folds per file.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn parse_script_block_with_edits(
     install_path: String,
     mod_path: Option<String>,
@@ -309,7 +355,7 @@ pub struct ScriptValidation {
 /// Validates a raw script fragment (balanced braces/quotes, comment-aware). A
 /// fragment need not be a single block — the frontend hands the raw contents of
 /// one edited block, which balance-checks on their own.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn validate_script_text(text: String) -> ScriptValidation {
     match validate_fragment(text.as_bytes()) {
         Ok(()) => ScriptValidation {
@@ -550,12 +596,12 @@ pub fn known_effects() -> &'static [KnownKey] {
     KNOWN_EFFECTS
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_known_triggers() -> Vec<KnownKey> {
     KNOWN_TRIGGERS.to_vec()
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_known_effects() -> Vec<KnownKey> {
     KNOWN_EFFECTS.to_vec()
 }

@@ -1,9 +1,11 @@
 use std::collections::{HashMap, HashSet};
 use std::io::Cursor;
+use std::sync::Arc;
 
 use image::codecs::png::{CompressionType, FilterType, PngEncoder};
 use image::{ExtendedColorType, ImageEncoder};
 
+use crate::cache;
 use crate::date::Date;
 #[cfg(test)]
 use crate::date::DEFAULT_START;
@@ -59,6 +61,67 @@ struct BaseMap {
     raw: Vec<u8>,
 }
 
+// --- Session caches (see cache.rs) ----------------------------------------
+//
+// Decoding the 34MB provinces.bmp + building the 11.5M-entry id buffer per
+// render was a lag root cause; the base map never changes within a session.
+// Rendered mode PNGs are also memoized (mode switching back to a visited mode
+// is then instant); the store self-clears past a small cap so date-scrubbing
+// can't grow it unboundedly.
+
+static BASE_MAPS: cache::Store<cache::SessionKey, BaseMap> = cache::Store::new();
+static RENDERED: cache::Store<(cache::SessionKey, String, Date), Vec<u8>> = cache::Store::new();
+static COASTAL: cache::Store<cache::SessionKey, HashSet<u32>> = cache::Store::new();
+static ADJACENCY: cache::Store<cache::SessionKey, HashMap<u32, Vec<u32>>> = cache::Store::new();
+
+/// Rendered-PNG entries kept before the cache clears itself (17 modes; a date
+/// change re-keys, so a scrubbing session would otherwise accumulate).
+const RENDER_CACHE_CAP: usize = 24;
+
+/// Drops this module's session caches. Called from `cache::invalidate_all`.
+pub(crate) fn invalidate_caches() {
+    BASE_MAPS.clear();
+    RENDERED.clear();
+    COASTAL.clear();
+    ADJACENCY.clear();
+}
+
+/// province id -> map-adjacent province ids (4-neighborhood over the id
+/// buffer, horizontal wrap honored — same neighbor rule as `coastal_land_ids`
+/// and the border painter). Water and land both included; unknown-color pixels
+/// (u32::MAX) excluded. Memoized per session.
+pub(crate) fn province_adjacency(vfs: &Vfs) -> Result<Arc<HashMap<u32, Vec<u32>>>, String> {
+    ADJACENCY.get_or_try_build(cache::session_key(vfs), || {
+        let base = load_base(vfs)?;
+        let w = base.width as usize;
+        let h = base.height as usize;
+        let ids = &base.ids;
+        let mut pairs: HashSet<(u32, u32)> = HashSet::new();
+        let mut add = |a: u32, b: u32| {
+            if a != b && a != u32::MAX && b != u32::MAX {
+                pairs.insert((a.min(b), a.max(b)));
+            }
+        };
+        for y in 0..h {
+            let row = y * w;
+            for x in 0..w {
+                let id = ids[row + x];
+                let right = if x + 1 < w { ids[row + x + 1] } else { ids[row] };
+                add(id, right);
+                if y + 1 < h {
+                    add(id, ids[row + w + x]);
+                }
+            }
+        }
+        let mut out: HashMap<u32, Vec<u32>> = HashMap::new();
+        for (a, b) in pairs {
+            out.entry(a).or_default().push(b);
+            out.entry(b).or_default().push(a);
+        }
+        Ok(out)
+    })
+}
+
 /// Renders a map mode at the effective start date (pre-Sprint-12 signature; used
 /// by tests). Delegates at 1444.11.11.
 #[cfg(test)]
@@ -70,6 +133,15 @@ pub fn render_map_mode(vfs: &Vfs, mode: &str) -> Result<Vec<u8>, String> {
 /// religion, culture, trade goods, development) fold dated history blocks ≤ date,
 /// so the PNG matches the date-aware `mode_data` groups and province panel.
 pub fn render_map_mode_at(vfs: &Vfs, mode: &str, date: Date) -> Result<Vec<u8>, String> {
+    if RENDERED.len() >= RENDER_CACHE_CAP {
+        RENDERED.clear();
+    }
+    let key = (cache::session_key(vfs), mode.to_string(), date);
+    let png = RENDERED.get_or_try_build(key, || render_map_mode_uncached(vfs, mode, date))?;
+    Ok(png.as_ref().clone())
+}
+
+fn render_map_mode_uncached(vfs: &Vfs, mode: &str, date: Date) -> Result<Vec<u8>, String> {
     match mode {
         "terrain" => encode_bmp_file(vfs, "map/terrain.bmp"),
         "heightmap" => encode_bmp_file(vfs, "map/heightmap.bmp"),
@@ -253,7 +325,12 @@ fn mode_colors(
     Ok((colors, LAND))
 }
 
-fn load_base(vfs: &Vfs) -> Result<BaseMap, String> {
+/// The decoded base map for this session, built once and memoized.
+fn load_base(vfs: &Vfs) -> Result<Arc<BaseMap>, String> {
+    BASE_MAPS.get_or_try_build(cache::session_key(vfs), || load_base_uncached(vfs))
+}
+
+fn load_base_uncached(vfs: &Vfs) -> Result<BaseMap, String> {
     let bmp = vfs.read("map/provinces.bmp")?;
     let img = image::load_from_memory(&bmp)
         .map_err(|e| format!("Failed to load map/provinces.bmp: {e}"))?
@@ -394,7 +471,11 @@ pub fn province_id_buffer(vfs: &Vfs) -> Result<Vec<u8>, String> {
 /// since the codebase has no prior coastal helper. The horizontal map wrap
 /// (antimeridian) is honored: column 0 and the last column are neighbors. One
 /// O(pixels) pass over the base map; callers cache the result.
-pub(crate) fn coastal_land_ids(vfs: &Vfs) -> Result<HashSet<u32>, String> {
+pub(crate) fn coastal_land_ids(vfs: &Vfs) -> Result<Arc<HashSet<u32>>, String> {
+    COASTAL.get_or_try_build(cache::session_key(vfs), || coastal_land_ids_uncached(vfs))
+}
+
+fn coastal_land_ids_uncached(vfs: &Vfs) -> Result<HashSet<u32>, String> {
     let base = load_base(vfs)?;
     let w = base.width as usize;
     let h = base.height as usize;
@@ -709,6 +790,30 @@ lakes = { 10 11 }
         let block = crate::paradox::parse(text);
         assert_eq!(block.get_block("sea_starts").unwrap().bare_ids(), vec![1, 2, 3, 4]);
         assert_eq!(block.get_block("lakes").unwrap().bare_ids(), vec![10, 11]);
+    }
+
+    /// Perf evidence for the session caches (run with `-- --ignored --nocapture`):
+    /// cold = the full pre-cache cost (bmp decode + all history parses + paint +
+    /// encode); warm same-mode = the render-PNG memo; warm other-mode = paint +
+    /// encode over the cached base map/ASTs.
+    #[test]
+    #[ignore]
+    fn render_timing_cold_vs_warm() {
+        let Some(install) = real_install() else { return };
+        crate::cache::invalidate_all();
+        let t = std::time::Instant::now();
+        render_map_mode(&install, "political").unwrap();
+        let cold = t.elapsed();
+        let t = std::time::Instant::now();
+        render_map_mode(&install, "political").unwrap();
+        let warm_same = t.elapsed();
+        let t = std::time::Instant::now();
+        render_map_mode(&install, "religion").unwrap();
+        let warm_other = t.elapsed();
+        println!(
+            "political cold: {cold:?} | political warm: {warm_same:?} | religion after: {warm_other:?}"
+        );
+        assert!(warm_same < cold);
     }
 
     #[test]

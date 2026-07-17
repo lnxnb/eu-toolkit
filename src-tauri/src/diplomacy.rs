@@ -228,7 +228,7 @@ pub fn all_relations_at(vfs: &Vfs, at: Date) -> Vec<Relation> {
 /// All relations involving `tag` (as `first` or `second`).
 // Registered by the orchestrator in lib.rs; unused until then.
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_diplomacy(
     install_path: String,
     mod_path: Option<String>,

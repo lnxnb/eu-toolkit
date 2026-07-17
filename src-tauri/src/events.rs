@@ -240,7 +240,7 @@ pub fn load_events(vfs: &Vfs, loc: &loc::LocStore) -> Vec<EventEntry> {
 }
 
 /// Tauri command: list all events (base + mod) for the Events overlay.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_events(install_path: String, mod_path: Option<String>) -> Result<Vec<EventEntry>, String> {
     let vfs = Vfs::new(&install_path, mod_path.as_deref())?;
     let loc = loc::store(&vfs, &install_path, mod_path.as_deref());
@@ -249,7 +249,7 @@ pub fn get_events(install_path: String, mod_path: Option<String>) -> Result<Vec<
 
 /// The next free `n` for a namespace: `max(n) + 1` across saved events (pending
 /// scaffolds are tracked frontend-side). Returns `1` when the namespace is new.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn next_event_id(install_path: String, mod_path: Option<String>, namespace: String) -> Result<u64, String> {
     let vfs = Vfs::new(&install_path, mod_path.as_deref())?;
     let loc = loc::store(&vfs, &install_path, mod_path.as_deref());
@@ -263,7 +263,7 @@ pub fn next_event_id(install_path: String, mod_path: Option<String>, namespace: 
 
 /// "Can happen to" for one event: the trigger evaluation (14.3) per country.
 /// (The frontend skips this for `is_triggered_only` events.)
-#[tauri::command]
+#[tauri::command(async)]
 pub fn evaluate_event(
     install_path: String,
     mod_path: Option<String>,
@@ -394,7 +394,7 @@ pub fn scan_references(vfs: &Vfs, id: &str) -> Vec<EventReference> {
 
 /// Tauri command: call sites firing the event `id` (for the is_triggered_only
 /// "referenced from N files" jump list).
-#[tauri::command]
+#[tauri::command(async)]
 pub fn find_event_references(
     install_path: String,
     mod_path: Option<String>,

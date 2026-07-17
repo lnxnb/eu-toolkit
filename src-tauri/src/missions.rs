@@ -262,7 +262,7 @@ pub fn load_series(vfs: &Vfs, loc: &loc::LocStore) -> Vec<MissionSeries> {
 }
 
 /// Tauri command: list all mission series (base + mod) for the Missions overlay.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_mission_series(
     install_path: String,
     mod_path: Option<String>,
@@ -310,7 +310,7 @@ pub struct SeriesPotential {
 ///   at 1444; `tag = ARB` → Yes), and modeled country fields (religion/culture/…)
 ///   come from the tag's country/history file where present. A series with no
 ///   `potential` is received unconditionally (`yes`).
-#[tauri::command]
+#[tauri::command(async)]
 pub fn evaluate_series_potential(
     install_path: String,
     mod_path: Option<String>,
@@ -430,7 +430,7 @@ fn series_edges(series: &MissionSeries) -> HashMap<String, Vec<String>> {
 
 /// Checks whether adding `dependent` requires `prereq` in `series` creates a
 /// cycle (Tauri wrapper over [`creates_cycle`]).
-#[tauri::command]
+#[tauri::command(async)]
 pub fn mission_link_creates_cycle(
     install_path: String,
     mod_path: Option<String>,
@@ -462,6 +462,63 @@ mod tests {
 
     fn install_present() -> bool {
         Path::new(INSTALL).join("map/provinces.bmp").is_file()
+    }
+
+    /// Perf breakdown for the per-country mission board (`-- --ignored
+    /// --nocapture`): where does `evaluate_series_potential`'s time go?
+    #[test]
+    #[ignore]
+    fn mission_potential_timing_breakdown() {
+        if !install_present() {
+            return;
+        }
+        let vfs = Vfs::new(INSTALL, None).unwrap();
+        let loc = loc::store(&vfs, INSTALL, None);
+        let at = crate::date::DEFAULT_START;
+        crate::cache::invalidate_all();
+
+        let t = std::time::Instant::now();
+        let snap = trigger_eval::build_snapshot(&vfs, &loc, at);
+        let snap_cold = t.elapsed();
+        let t = std::time::Instant::now();
+        let _ = trigger_eval::build_snapshot(&vfs, &loc, at);
+        let snap_warm = t.elapsed();
+
+        let t = std::time::Instant::now();
+        let series = load_series(&vfs, &loc);
+        let load = t.elapsed();
+
+        let t = std::time::Instant::now();
+        let mut file_cache: HashMap<String, Vec<u8>> = HashMap::new();
+        let mut all_nodes = Vec::new();
+        for s in &series {
+            let bytes = match file_cache.get(&s.file) {
+                Some(b) => b,
+                None => {
+                    let b = vfs.read(&s.file).unwrap_or_default();
+                    file_cache.entry(s.file.clone()).or_insert(b)
+                }
+            };
+            let nodes = if s.has_potential {
+                crate::script_tree::build_nodes(bytes, &s.potential_path)
+            } else {
+                Vec::new()
+            };
+            all_nodes.push(nodes);
+        }
+        let build = t.elapsed();
+
+        let cs = snap.countries.get("HAB").cloned().unwrap();
+        let t = std::time::Instant::now();
+        for nodes in &all_nodes {
+            let _ = trigger_eval::evaluate_for_state(nodes, &cs, &snap);
+        }
+        let eval_one = t.elapsed();
+
+        println!(
+            "series: {} | snapshot cold: {snap_cold:?} warm: {snap_warm:?} | load_series: {load:?} | build_nodes: {build:?} | eval(HAB): {eval_one:?}",
+            series.len()
+        );
     }
 
     const SAMPLE: &[u8] = br#"russia_missions = {

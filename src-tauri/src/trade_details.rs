@@ -26,7 +26,7 @@ use crate::date::{parse_date, Date};
 use crate::date::DEFAULT_START;
 use crate::loc::{self, LocStore};
 use crate::map_renderer;
-use crate::paradox::{self, Block, Value};
+use crate::paradox::{Block, Value};
 use crate::registry::{self, RawItem, RawValue};
 use crate::vfs::Vfs;
 
@@ -141,21 +141,14 @@ pub fn trade_details_at(
     let water = crate::game_data::water_ids(vfs);
 
     let mut out = Vec::new();
-    for (name, path) in vfs.list_dir("history/provinces") {
-        if !name.to_lowercase().ends_with(".txt") {
-            continue;
-        }
-        let digits: String = name.chars().take_while(|c| c.is_ascii_digit()).collect();
-        let Ok(id) = digits.parse::<u32>() else {
-            continue;
-        };
+    for ast in crate::game_data::province_asts(vfs).iter() {
+        let id = ast.id;
         if water.contains(&id) {
             continue;
         }
-        let Ok(bytes) = std::fs::read(&path) else {
+        let Some(block) = &ast.block else {
             continue;
         };
-        let block = paradox::parse(&String::from_utf8_lossy(&bytes));
 
         let mut acc = Accum::default();
         // Top-level statements first (skip dated blocks).
@@ -219,7 +212,7 @@ pub fn trade_details(vfs: &Vfs, loc: &LocStore) -> Result<Vec<ProvinceTradeDetai
 
 /// Tauri command: the trade-node overlay data as of `date` (S3.3). Only decorated
 /// provinces are returned.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_trade_details(
     install_path: String,
     mod_path: Option<String>,

@@ -19,6 +19,7 @@
   import Timeline from "$lib/components/Timeline.svelte";
   import type { TimelineBlock, TimelineIntent } from "$lib/components/timeline";
   import { parseModeData } from "$lib/mapmode";
+  import { goodKeyOfGroup } from "$lib/components/tradegoods/types";
   import type { EditQueue } from "$lib/edits.svelte";
   import type { Calendar } from "$lib/calendar";
   import type { ProvinceDetails, DatedBlock, GeoOptions } from "./types";
@@ -125,9 +126,23 @@
     reg("event_modifiers").then((v) => (eventModifiers = v)).catch(() => {});
     reg("province_triggered_modifiers").then((v) => (triggeredModifiers = v)).catch(() => {});
     reg("rebel_types").then((v) => (rebelFactions = v)).catch(() => {});
-    // Trade goods from mode-data groups (colored swatches).
+    // Trade goods from mode-data groups (colored swatches). Undiscovered
+    // provinces come back as per-cluster groups (`unknown#N`, label suffixed
+    // with the likely-goods summary) — the dropdown wants ONE plain "unknown"
+    // option, so dedupe by base key and strip the cluster suffix.
     invoke<ArrayBuffer>("get_mode_data", { installPath: ip, modPath: mp, mode: "trade_goods" })
-      .then((buf) => { goods = parseModeData(buf).groups.map((g) => ({ key: g.key, label: g.label, swatch: css(g.color) })); })
+      .then((buf) => {
+        const seen = new Set<string>();
+        const out: DropdownItem[] = [];
+        for (const g of parseModeData(buf).groups) {
+          const key = goodKeyOfGroup(g.key);
+          if (seen.has(key)) continue;
+          seen.add(key);
+          const label = key === g.key ? g.label : (g.label.split(" — ")[0] ?? g.label);
+          out.push({ key, label, swatch: css(g.color) });
+        }
+        goods = out;
+      })
       .catch(() => {});
     // New command (needs registration in lib.rs); degrade gracefully if absent.
     invoke<GeoOptions>("get_geo_options", { installPath: ip, modPath: mp }).then((v) => (geo = v)).catch(() => (geo = null));

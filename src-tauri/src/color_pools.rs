@@ -234,7 +234,7 @@ fn load(vfs: &Vfs) -> ColorPools {
     ColorPools { groups }
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_color_pools(
     install_path: String,
     mod_path: Option<String>,

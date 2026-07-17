@@ -114,7 +114,7 @@ const DOMAIN_REGISTRY: &[(&str, DomainCheck)] = &[
 /// Runs one validation domain and returns its report.
 // Registered by the orchestrator in lib.rs; unused until then.
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn validate(
     domain: String,
     install_path: String,
@@ -154,7 +154,7 @@ pub struct DomainReport {
 /// list is byte-identical to calling `validate(domain, …)` for that domain.
 /// Date-aware domains (climate, diplomacy, wars) resolve the date the same way.
 #[allow(dead_code)]
-#[tauri::command]
+#[tauri::command(async)]
 pub fn validate_all(
     install_path: String,
     mod_path: Option<String>,
@@ -210,19 +210,12 @@ fn top_level_owners(vfs: &Vfs, ids: &HashSet<u32>, at: Date) -> HashMap<u32, Str
     if ids.is_empty() {
         return out;
     }
-    for (name, path) in vfs.list_dir("history/provinces") {
-        if !name.to_lowercase().ends_with(".txt") {
-            continue;
-        }
-        let digits: String = name.chars().take_while(|c| c.is_ascii_digit()).collect();
-        let Ok(id) = digits.parse::<u32>() else {
-            continue;
-        };
+    for ast in crate::game_data::province_asts(vfs).iter() {
+        let id = ast.id;
         if !ids.contains(&id) {
             continue;
         }
-        if let Ok(bytes) = std::fs::read(&path) {
-            let block = paradox::parse(&String::from_utf8_lossy(&bytes));
+        if let Some(block) = &ast.block {
             let mut owner = block.get_scalar("owner").map(str::to_string);
             for (k, v) in &block.items {
                 let (Some(k), crate::paradox::Value::Block(b)) = (k, v) else {

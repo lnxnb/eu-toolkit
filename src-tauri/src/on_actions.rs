@@ -172,7 +172,7 @@ pub fn load_on_actions(vfs: &Vfs) -> Vec<OnActionHook> {
 }
 
 /// Tauri command: list all on_action hooks (base + mod) for the overlay.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_on_actions(
     install_path: String,
     mod_path: Option<String>,
@@ -192,7 +192,7 @@ pub struct OnActionScaffold {
 /// Tauri command: scaffold a new (or override) on_action hook block. Returns the
 /// toolkit project file + a `<hook> = { events = { } }` statement the frontend
 /// queues (InsertStatement into an existing toolkit file, else CreateFile).
-#[tauri::command]
+#[tauri::command(async)]
 pub fn scaffold_on_action(hook: String) -> Result<OnActionScaffold, String> {
     let hook = hook.trim();
     if hook.is_empty() || !hook.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {

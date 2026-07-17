@@ -184,7 +184,7 @@ pub fn load_decisions(vfs: &Vfs, loc: &loc::LocStore) -> Vec<DecisionEntry> {
 }
 
 /// Tauri command: list all decisions (base + mod) for the Decisions overlay.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_decisions(
     install_path: String,
     mod_path: Option<String>,
@@ -200,7 +200,7 @@ pub fn get_decisions(
 /// simply `potential ++ allow` evaluated as one implicit AND (`Yes∧Yes = Yes`,
 /// any `No = No`, else `Unknown`). The `unevaluated` set (the "approximate — N
 /// conditions not evaluated" badge) is the union across both blocks.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn evaluate_decision(
     install_path: String,
     mod_path: Option<String>,

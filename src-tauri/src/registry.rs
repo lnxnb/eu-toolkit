@@ -382,7 +382,7 @@ pub fn load_registry(vfs: &Vfs, loc: &LocStore, name: &str) -> Result<Vec<Regist
 }
 
 /// Tauri command: load a registry as JSON entries.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_registry(
     name: String,
     install_path: String,
@@ -580,7 +580,7 @@ pub fn known_modifiers() -> &'static [KnownModifier] {
 }
 
 /// Tauri command: serve the known-modifier list to the frontend.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_known_modifiers() -> Vec<KnownModifier> {
     KNOWN_MODIFIERS.to_vec()
 }
