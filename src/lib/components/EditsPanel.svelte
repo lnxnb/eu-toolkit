@@ -196,17 +196,17 @@
     z-index: 10;
     display: flex;
     flex-direction: column;
-    background: #2b323d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-size: 0.85rem;
     box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.4);
   }
 
   .chrome {
     flex: none;
-    background: #3f4855;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
   }
 
   .titlebar {
@@ -226,30 +226,30 @@
     min-width: 1.3rem;
     text-align: center;
     padding: 0.05rem 0.4rem;
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
     font-variant-numeric: tabular-nums;
     font-size: 0.75rem;
     border: 1px solid rgba(0, 0, 0, 0.35);
   }
 
   .dirty.none {
-    background: #333b46;
-    color: #8a919c;
+    background: var(--bg-3);
+    color: var(--text-2);
   }
 
   .close {
     flex: none;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-size: 1.2rem;
     line-height: 1;
     padding: 0 0.25rem;
     cursor: pointer;
   }
   .close:hover {
-    color: #fff;
+    color: var(--text-inverse);
   }
 
   .body {
@@ -260,7 +260,7 @@
   }
 
   .empty {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.8rem;
     padding: 0.5rem 0.2rem;
   }
@@ -272,8 +272,8 @@
   }
 
   .row {
-    border: 1px solid #1f242c;
-    background: #262c35;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
     margin-bottom: 0.3rem;
   }
 
@@ -289,20 +289,20 @@
     min-width: 0;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font: inherit;
     text-align: left;
     padding: 0.3rem 0.4rem;
     cursor: pointer;
   }
   .expander:hover {
-    background: #333b46;
+    background: var(--bg-3);
   }
 
   .caret {
     flex: none;
     width: 0.8rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .label {
@@ -316,8 +316,8 @@
   .date-tag {
     flex: none;
     font-size: 0.68rem;
-    color: #9aa2ad;
-    background: #1f242c;
+    color: var(--text-2);
+    background: var(--border);
     padding: 0 0.3rem;
     font-variant-numeric: tabular-nums;
   }
@@ -325,8 +325,8 @@
   .count {
     flex: none;
     font-size: 0.7rem;
-    color: #8a919c;
-    background: #1f242c;
+    color: var(--text-2);
+    background: var(--border);
     padding: 0 0.35rem;
     min-width: 1.1rem;
     text-align: center;
@@ -339,18 +339,18 @@
   }
 
   .act {
-    border: 1px solid #3a434f;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--bg-3);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.7rem;
     padding: 0.12rem 0.45rem;
     cursor: pointer;
   }
   .act:hover:not(:disabled) {
-    background: #4a6da7;
-    border-color: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--text-inverse);
   }
   .act:disabled {
     opacity: 0.4;
@@ -361,7 +361,7 @@
     list-style: none;
     margin: 0;
     padding: 0.1rem 0.4rem 0.4rem 1.2rem;
-    border-top: 1px solid #1f242c;
+    border-top: 1px solid var(--border);
   }
 
   .edit {
@@ -369,7 +369,7 @@
     flex-direction: column;
     gap: 0.05rem;
     padding: 0.2rem 0;
-    border-bottom: 1px solid #21262e;
+    border-bottom: 1px solid var(--bg-1);
   }
   .edit:last-child {
     border-bottom: none;
@@ -377,7 +377,7 @@
 
   .edit-file {
     font-size: 0.68rem;
-    color: #9aecc0;
+    color: var(--ok);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -385,7 +385,7 @@
 
   .edit-detail {
     font-size: 0.74rem;
-    color: #cfd4db;
+    color: var(--text-1);
     word-break: break-word;
   }
 
@@ -395,7 +395,7 @@
     gap: 0.5rem;
     margin: 0.5rem 0 0.3rem;
     padding: 0.2rem 0.2rem;
-    border-top: 1px solid #1f242c;
+    border-top: 1px solid var(--border);
   }
 
   .saved-title {
@@ -403,22 +403,22 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .clear {
-    border: 1px solid #3a434f;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--bg-3);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.7rem;
     padding: 0.1rem 0.5rem;
     cursor: pointer;
   }
   .clear:hover {
-    background: #4a6da7;
-    border-color: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--text-inverse);
   }
 
   .saved-row {

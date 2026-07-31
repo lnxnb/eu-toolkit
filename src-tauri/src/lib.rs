@@ -38,6 +38,7 @@ mod on_actions;
 mod paradox;
 mod project_diff;
 mod province_details;
+mod province_edit;
 mod province_names;
 mod rebels;
 mod recents;
@@ -55,6 +56,7 @@ mod vfs;
 mod wars;
 mod workshop;
 
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use installations::Installation;
@@ -119,6 +121,47 @@ fn validate_project(path: String) -> Result<String, String> {
                 .map(|n| n.to_string_lossy().into_owned())
         })
         .unwrap_or(path);
+    Ok(name)
+}
+
+/// Renames the project: rewrites the `name` scalar in every root `.mod`
+/// descriptor, byte-surgically (only the name's value span moves, so comments
+/// and Windows-1252 bytes round-trip). A descriptor with no `name` key gets one
+/// appended. Returns the new name. The Documents-folder pointer `.mod` is not
+/// touched here — `export_and_launch` regenerates it from the descriptor.
+#[tauri::command(async)]
+fn rename_project(mod_path: String, name: String) -> Result<String, String> {
+    let name = name.trim().to_string();
+    if name.is_empty() {
+        return Err("The project name cannot be empty.".into());
+    }
+    let dir = PathBuf::from(&mod_path);
+    if !vfs::is_mod_project(&dir) {
+        return Err(format!("{mod_path} is not a mod project."));
+    }
+    let descriptors = vfs::descriptor_paths(&dir);
+    if descriptors.is_empty() {
+        return Err("This project has no .mod descriptor to rename.".into());
+    }
+    for path in &descriptors {
+        let src = std::fs::read(path).map_err(|e| format!("Failed to read {}: {e}", path.display()))?;
+        let set = mod_writer::Edit::SetScalar {
+            path: vec!["name".into()],
+            value: name.clone(),
+            quoted: true,
+        };
+        let out = match mod_writer::apply(&src, &set) {
+            Ok(bytes) => bytes,
+            // No `name` key yet: append one rather than failing the rename.
+            Err(_) => mod_writer::apply(
+                &src,
+                &mod_writer::Edit::Append {
+                    text: format!("name=\"{name}\""),
+                },
+            )?,
+        };
+        std::fs::write(path, &out).map_err(|e| format!("Failed to write {}: {e}", path.display()))?;
+    }
     Ok(name)
 }
 
@@ -638,6 +681,28 @@ fn set_view_toggle(app: tauri::AppHandle, key: String, value: bool) -> Result<()
     db::set_setting(&app, &format!("view_toggle:{key}"), if value { "1" } else { "0" })
 }
 
+/// Global serialized workspace layout. Kept separate from boolean view toggles
+/// because window rectangles, tabs, and typed view parameters are JSON data.
+#[tauri::command(async)]
+fn get_ui_layout(app: tauri::AppHandle) -> Result<Option<String>, String> {
+    db::get_setting(&app, "ui_layout")
+}
+
+#[tauri::command(async)]
+fn set_ui_layout(app: tauri::AppHandle, value: String) -> Result<(), String> {
+    db::set_setting(&app, "ui_layout", &value)
+}
+
+#[tauri::command(async)]
+fn get_window_geometry(app: tauri::AppHandle) -> Result<Option<String>, String> {
+    db::get_setting(&app, "window_geometry")
+}
+
+#[tauri::command(async)]
+fn set_window_geometry(app: tauri::AppHandle, value: String) -> Result<(), String> {
+    db::set_setting(&app, "window_geometry", &value)
+}
+
 /// Settings-DB key prefix scoping culture display-color overrides to a project
 /// (or the base game). Cultures have no color in the game files (Sprint 6.1); an
 /// override is toolkit-only state keyed per (mod|base, culture key).
@@ -692,6 +757,21 @@ fn get_province_political(
     let vfs = open_vfs(&install_path, &mod_path)?;
     let at = bookmarks::resolve_date(&vfs, date.as_deref())?;
     Ok(game_data::province_political_at(&vfs, at))
+}
+
+/// Per province, the keys already assigned by dated blocks at or before `date`.
+/// The map brushes consult this to decide whether a history write at the
+/// selected date can target the top level or must emit a dated block — see
+/// `game_data::province_shadowed_keys`.
+#[tauri::command(async)]
+fn get_province_shadowed_keys(
+    install_path: String,
+    mod_path: Option<String>,
+    date: Option<String>,
+) -> Result<HashMap<u32, Vec<String>>, String> {
+    let vfs = open_vfs(&install_path, &mod_path)?;
+    let at = bookmarks::resolve_date(&vfs, date.as_deref())?;
+    Ok(game_data::province_shadowed_keys(&vfs, at))
 }
 
 #[tauri::command(async)]
@@ -877,6 +957,17 @@ fn list_countries(
     Ok(game_data::country_list(&vfs, &loc))
 }
 
+/// Every province id with its display name, for the province picker.
+#[tauri::command(async)]
+fn list_provinces(
+    install_path: String,
+    mod_path: Option<String>,
+) -> Result<Vec<game_data::ProvinceBrief>, String> {
+    let vfs = open_vfs(&install_path, &mod_path)?;
+    let loc = loc::store(&vfs, &install_path, mod_path.as_deref());
+    Ok(game_data::province_list(&vfs, &loc))
+}
+
 /// Converts a user-picked image file into a 128x128 flag. Returns the TGA bytes
 /// (for the `gfx/flags/TAG.tga` binary-asset edit) plus a PNG preview (for the
 /// panel to show the pending flag before save). Both cross IPC as byte arrays.
@@ -1030,6 +1121,7 @@ pub fn run() {
             save_installation,
             clear_saved_installation,
             validate_project,
+            rename_project,
             record_recent_project,
             list_recent_projects,
             remove_recent_project,
@@ -1049,6 +1141,7 @@ pub fn run() {
             get_province_ids,
             get_mode_data,
             get_province_political,
+            get_province_shadowed_keys,
             get_country_details,
             get_country_flag,
             list_religions,
@@ -1064,6 +1157,7 @@ pub fn run() {
             set_culture_color_override,
             clear_culture_color_override,
             list_countries,
+            list_provinces,
             list_idea_groups,
             list_units,
             convert_flag,
@@ -1090,6 +1184,7 @@ pub fn run() {
             gfx::get_sprite_index,
             gfx::get_sprite,
             icons::get_icon_atlas,
+            icons::get_modifier_icon,
             icons::import_icon,
             validation::validate,
             validation::validate_all,
@@ -1115,6 +1210,7 @@ pub fn run() {
             geography::scaffold_superregion_block,
             geography::scaffold_continent_block,
             country_create::prepare_country_scaffold,
+            province_edit::add_province_scaffold,
             group_create::prepare_religion_group_scaffold,
             group_create::prepare_culture_group_scaffold,
             country_delete::get_country_blast_radius,
@@ -1130,6 +1226,10 @@ pub fn run() {
             set_selected_date,
             get_view_toggle,
             set_view_toggle,
+            get_ui_layout,
+            set_ui_layout,
+            get_window_geometry,
+            set_window_geometry,
             estates::get_estates,
             estates::scaffold_estate_object,
             estates::get_privilege_holders,
@@ -1175,6 +1275,50 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Renaming rewrites only the name's value span (comments, other keys and
+    /// Windows-1252 bytes survive) across every root descriptor.
+    #[test]
+    fn rename_project_is_byte_surgical() {
+        let dir = std::env::temp_dir().join("eu_toolkit_rename_test");
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let original =
+            b"name=\"Old Name\"\t# keep me\r\npath=\"C:/mods/x\"\r\ntags={ \"Map\" }\r\n";
+        std::fs::write(dir.join("descriptor.mod"), original).unwrap();
+        std::fs::write(dir.join("Old Name.mod"), b"name=\"Old Name\"\n").unwrap();
+
+        let out = rename_project(dir.to_string_lossy().into_owned(), "  Sk\u{e5}ne  ".into())
+            .unwrap();
+        assert_eq!(out, "Skåne");
+
+        let desc = std::fs::read(dir.join("descriptor.mod")).unwrap();
+        // 0xE5 = å in Windows-1252, not the two UTF-8 bytes.
+        assert_eq!(
+            desc,
+            b"name=\"Sk\xe5ne\"\t# keep me\r\npath=\"C:/mods/x\"\r\ntags={ \"Map\" }\r\n".to_vec()
+        );
+        let sibling = std::fs::read(dir.join("Old Name.mod")).unwrap();
+        assert_eq!(sibling, b"name=\"Sk\xe5ne\"\n".to_vec());
+
+        assert!(rename_project(dir.to_string_lossy().into_owned(), "  ".into()).is_err());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// A descriptor with no `name` key gets one appended rather than erroring.
+    #[test]
+    fn rename_project_appends_missing_name() {
+        let dir = std::env::temp_dir().join("eu_toolkit_rename_append_test");
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("descriptor.mod"), b"path=\"C:/mods/x\"\n").unwrap();
+
+        rename_project(dir.to_string_lossy().into_owned(), "Fresh".into()).unwrap();
+        let desc = std::fs::read_to_string(dir.join("descriptor.mod")).unwrap();
+        assert!(desc.contains("path=\"C:/mods/x\""));
+        assert!(desc.contains("name=\"Fresh\""));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     /// Copy-on-write save into a fresh project dir, sourcing from a fake base.
     #[test]

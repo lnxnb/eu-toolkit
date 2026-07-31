@@ -124,7 +124,7 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .row {
@@ -138,7 +138,7 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .check {
@@ -150,13 +150,13 @@
   }
 
   .reason {
-    color: #d3b271;
+    color: var(--warn);
     font-size: 0.83rem;
     margin: 0 0 0.5rem;
   }
 
   .ok {
-    color: #86c58a;
+    color: var(--ok);
     font-size: 0.83rem;
   }
 
@@ -167,9 +167,9 @@
   }
 
   .text {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.25rem 0.4rem;
@@ -178,7 +178,7 @@
 
   .btn {
     align-self: flex-start;
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     background: transparent;
     color: inherit;
     font-family: inherit;
@@ -188,8 +188,8 @@
   }
 
   .btn:hover {
-    border-color: #9ca3af;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--text-2);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 </style>

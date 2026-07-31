@@ -20,7 +20,9 @@
   toolbar (10) and popover (20) layers.
 -->
 <script lang="ts">
-  import type { Snippet } from "svelte";
+  import { getContext, type Snippet } from "svelte";
+
+  const workspaceHosted = getContext<boolean>("eu-toolkit-workspace-window") ?? false;
 
   let {
     open = $bindable(false),
@@ -71,7 +73,12 @@
   }
 </script>
 
-{#if open}
+{#if open && workspaceHosted}
+  <section class="workspace-overlay-content" aria-label={title}>
+    {#if toolbar}<div class="workspace-overlay-toolbar">{@render toolbar()}</div>{/if}
+    <div class="overlay-body">{@render children()}</div>
+  </section>
+{:else if open}
   <div class="overlay-root" role="dialog" aria-modal="true" aria-label={title}>
     <button
       class="overlay-backdrop"
@@ -101,9 +108,12 @@
   .overlay-root {
     position: fixed;
     inset: 0;
-    z-index: 100;
+    z-index: var(--z-modal);
     display: flex;
   }
+
+  .workspace-overlay-content { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+  .workspace-overlay-toolbar { flex: none; display: flex; align-items: center; gap: var(--sp-2); padding-bottom: var(--sp-3); }
 
   .overlay-backdrop {
     position: absolute;
@@ -115,16 +125,16 @@
 
   .overlay-panel {
     position: relative;
-    z-index: 101;
+    z-index: var(--z-modal-content);
     display: flex;
     flex-direction: column;
     /* Near-full-viewport, with a small margin so the backdrop stays clickable. */
     margin: 1.5rem;
     flex: 1;
     min-width: 0;
-    background: #2b323d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
   }
 
@@ -134,8 +144,8 @@
     gap: 0.6rem;
     flex: none;
     padding: 0.45rem 0.6rem;
-    background: #3f4855;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
   }
 
   .overlay-title {
@@ -160,7 +170,7 @@
     flex: none;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-size: 1.4rem;
     line-height: 1;
     cursor: pointer;
@@ -168,7 +178,7 @@
   }
 
   .overlay-close:hover {
-    color: #fff;
+    color: var(--text-inverse);
   }
 
   .overlay-body {

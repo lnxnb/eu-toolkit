@@ -3,6 +3,8 @@ import {
   foldAdjacencies,
   rewriteEdit,
   adjLinePieces,
+  adjSegments,
+  trimSegment,
   dashForType,
   colorForType,
   adjacencyAt,
@@ -85,6 +87,58 @@ describe("wrap-aware line geometry", () => {
   });
 });
 
+describe("segment trimming (edge-to-edge crossings)", () => {
+  // A 40px-wide, 1D world: province 1 at x<10, water 99 at 10..19, province 2
+  // at x>=20 (any y).
+  const W = 40;
+  const idAt = (x: number) => (x < 10 ? 1 : x < 20 ? 99 : 2);
+
+  it("trims a centroid-to-centroid line to the crossing gap", () => {
+    const [a, b] = trimSegment([5, 0], [25, 0], 1, 2, idAt, W);
+    // Exit of province 1 (last sample inside it) and entry into province 2.
+    expect(a[0]).toBeGreaterThanOrEqual(9);
+    expect(a[0]).toBeLessThan(10.5);
+    expect(b[0]).toBeGreaterThanOrEqual(19.5);
+    expect(b[0]).toBeLessThan(21);
+  });
+
+  it("falls back to the untrimmed endpoints when sampling never crosses", () => {
+    const land = () => 7;
+    expect(trimSegment([5, 0], [25, 0], 1, 2, land, W)).toEqual([
+      [5, 0],
+      [25, 0],
+    ]);
+  });
+
+  it("trims across the antimeridian the short way", () => {
+    // Province 1 at x<3, province 2 at x>=37, water between: the short way
+    // crosses the seam, and the trimmed span is tiny (not ~mapW).
+    const wrapIdAt = (x: number) => (x < 3 ? 1 : x >= 37 ? 2 : 99);
+    const [a, b] = trimSegment([1, 0], [38, 0], 1, 2, wrapIdAt, W);
+    const pieces = adjLinePieces(a, b, W);
+    let span = 0;
+    for (const p of pieces) {
+      for (let i = 1; i < p.length; i++) span += Math.abs(p[i][0] - p[i - 1][0]);
+    }
+    expect(span).toBeLessThan(10);
+  });
+
+  it("adjSegments maps rows and passes untrimmed when no sampler", () => {
+    const centroids = new Map<number, Point>([
+      [1, { x: 5, y: 0 }],
+      [2, { x: 25, y: 0 }],
+    ]);
+    const segs = adjSegments([row(1, 2), row(1, 999)], centroids, null, W);
+    expect(segs[0]).toEqual([
+      [5, 0],
+      [25, 0],
+    ]);
+    expect(segs[1]).toBeNull();
+    const trimmed = adjSegments([row(1, 2)], centroids, (x) => idAt(x), W);
+    expect(trimmed[0]![0][0]).toBeGreaterThanOrEqual(9);
+  });
+});
+
 describe("hit-testing", () => {
   const centroids = new Map<number, Point>([
     [1, { x: 100, y: 100 }],
@@ -92,18 +146,18 @@ describe("hit-testing", () => {
     [3, { x: 100, y: 400 }],
   ]);
   const view = { scale: 1, offsetX: 0, offsetY: 0 };
-  const rows = [row(1, 2), row(1, 3)];
+  const segs = adjSegments([row(1, 2), row(1, 3)], centroids, null, MAPW);
 
   it("finds the line under the cursor", () => {
     // Midpoint of the 1↔2 horizontal line is (200,100).
-    expect(adjacencyAt(rows, centroids, 200, 101, view, MAPW, 6)).toBe(0);
+    expect(adjacencyAt(segs, 200, 101, view, MAPW, 6)).toBe(0);
   });
   it("returns null when far from any line", () => {
-    expect(adjacencyAt(rows, centroids, 250, 260, view, MAPW, 6)).toBeNull();
+    expect(adjacencyAt(segs, 250, 260, view, MAPW, 6)).toBeNull();
   });
   it("skips rows whose endpoint centroid is unknown", () => {
-    const bad = [row(1, 999)];
-    expect(adjacencyAt(bad, centroids, 200, 100, view, MAPW, 6)).toBeNull();
+    const bad = adjSegments([row(1, 999)], centroids, null, MAPW);
+    expect(adjacencyAt(bad, 200, 100, view, MAPW, 6)).toBeNull();
   });
 });
 

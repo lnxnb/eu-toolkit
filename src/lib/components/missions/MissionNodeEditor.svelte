@@ -225,54 +225,54 @@
 <style>
   .ned { display: flex; flex-direction: column; gap: 0.5rem; }
   .idrow { display: flex; align-items: center; gap: 0.5rem; }
-  .id { color: #9aecc0; background: #16191f; padding: 0.05rem 0.35rem; font-size: 0.8rem; }
-  .pos { font-size: 0.72rem; color: #8a919c; }
+  .id { color: var(--ok); background: var(--bg-0); padding: 0.05rem 0.35rem; font-size: 0.8rem; }
+  .pos { font-size: 0.72rem; color: var(--text-2); }
 
-  .fld { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.76rem; color: #9aa2ad; }
+  .fld { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.76rem; color: var(--text-2); }
   .fld input, .fld textarea {
-    background: #21262e; border: 1px solid #1f242c; color: #cfd4db;
+    background: var(--bg-1); border: 1px solid var(--border); color: var(--text-1);
     font-family: inherit; font-size: 0.84rem; padding: 0.25rem 0.35rem; resize: vertical;
   }
-  .adv { text-transform: none; color: #6d7683; font-size: 0.7rem; }
+  .adv { text-transform: none; color: var(--text-3); font-size: 0.7rem; }
 
   .picrow { display: flex; align-items: center; gap: 0.5rem; }
-  .mono { color: #cfd4db; background: #16191f; padding: 0.05rem 0.35rem; font-size: 0.74rem; }
+  .mono { color: var(--text-1); background: var(--bg-0); padding: 0.05rem 0.35rem; font-size: 0.74rem; }
   .mini {
-    border: 1px solid #1f242c; background: #3f4855; color: #cfd4db;
+    border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1);
     font-family: inherit; font-size: 0.74rem; padding: 0.1rem 0.5rem; cursor: pointer;
   }
-  .mini:hover { background: #4a6da7; color: #fff; }
+  .mini:hover { background: var(--accent); color: var(--text-inverse); }
   .picker { height: 20rem; margin-top: 0.3rem; }
 
-  .block { border-top: 1px solid #1f242c; padding-top: 0.4rem; }
+  .block { border-top: 1px solid var(--border); padding-top: 0.4rem; }
   .block h4 {
     margin: 0 0 0.35rem; font-size: 0.76rem; text-transform: uppercase;
-    letter-spacing: 0.04em; color: #9aa2ad;
+    letter-spacing: 0.04em; color: var(--text-2);
   }
-  .note { margin: 0.1rem 0; font-size: 0.78rem; color: #8a919c; }
+  .note { margin: 0.1rem 0; font-size: 0.78rem; color: var(--text-2); }
 
   .reqs { display: flex; flex-wrap: wrap; gap: 0.3rem; }
   .req {
     display: inline-flex; align-items: center; gap: 0.3rem;
-    border: 1px solid #1f242c; background: #21262e; padding: 0.1rem 0.3rem;
+    border: 1px solid var(--border); background: var(--bg-1); padding: 0.1rem 0.3rem;
   }
-  .req code { font-size: 0.74rem; color: #cfd4db; }
+  .req code { font-size: 0.74rem; color: var(--text-1); }
   .unlink {
-    border: none; background: transparent; color: #d9756b;
+    border: none; background: transparent; color: var(--err);
     font-size: 0.95rem; line-height: 1; cursor: pointer; padding: 0;
   }
-  .unlink:hover { color: #ff8f82; }
+  .unlink:hover { color: var(--err); }
 
   .add-block {
-    align-self: flex-start; border: 1px solid #1f242c; background: #3f4855; color: #cfd4db;
+    align-self: flex-start; border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1);
     font-family: inherit; font-size: 0.78rem; padding: 0.25rem 0.6rem; cursor: pointer;
   }
-  .add-block:hover { background: #4a6da7; color: #fff; }
+  .add-block:hover { background: var(--accent); color: var(--text-inverse); }
 
   .danger { display: flex; }
   .del {
-    border: 1px solid #6e2f2a; background: #3a2320; color: #e0a49c;
+    border: 1px solid var(--danger-bg); background: var(--bg-1); color: var(--err);
     font-family: inherit; font-size: 0.78rem; padding: 0.25rem 0.7rem; cursor: pointer;
   }
-  .del:hover { background: #6e2f2a; color: #fff; }
+  .del:hover { background: var(--danger-bg); color: var(--text-inverse); }
 </style>

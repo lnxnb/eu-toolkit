@@ -296,7 +296,7 @@ impl GroupInterner {
 
 /// definition.csv rows as `(id, rgb, name)` — the province universe and its
 /// raw map colors. Reused for the province-count bound and Provinces mode.
-fn province_definitions(vfs: &Vfs) -> Vec<(u32, [u8; 3], String)> {
+pub(crate) fn province_definitions(vfs: &Vfs) -> Vec<(u32, [u8; 3], String)> {
     let mut out = Vec::new();
     let Ok(bytes) = vfs.read("map/definition.csv") else {
         return out;
@@ -2333,6 +2333,31 @@ pub fn country_list(vfs: &Vfs, loc: &LocStore) -> Vec<CountryBrief> {
     out
 }
 
+/// A province with its display name, for the province picker.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct ProvinceBrief {
+    pub id: u32,
+    pub name: String,
+}
+
+/// Every province in definition.csv (the province universe), named the way the
+/// game shows it: the `PROV<id>` loc string, else definition.csv's name column,
+/// else the bare id. Ordered by id — the identity the user searches by.
+pub fn province_list(vfs: &Vfs, loc: &LocStore) -> Vec<ProvinceBrief> {
+    province_definitions(vfs)
+        .into_iter()
+        .map(|(id, _, name)| ProvinceBrief {
+            id,
+            name: loc
+                .get(&format!("PROV{id}"))
+                .map(str::to_string)
+                .filter(|s| !s.is_empty())
+                .or_else(|| Some(name).filter(|s| !s.is_empty()))
+                .unwrap_or_else(|| format!("Province {id}")),
+        })
+        .collect()
+}
+
 /// Converts an image file (PNG/JPG/BMP/TGA) picked by the user into a 128x128
 /// flag: returns `(tga_bytes, png_preview)`. The TGA is what the game wants at
 /// `gfx/flags/TAG.tga` (TGA has no magic bytes, so the format is set explicitly
@@ -2522,6 +2547,49 @@ pub fn province_history_at(vfs: &Vfs, date: Date) -> HashMap<u32, ProvinceState>
         states.insert(id, acc.into_state());
     }
     states
+}
+
+/// Per province, the statement keys assigned by dated blocks at or before
+/// `date` — i.e. the keys for which the file's TOP LEVEL is no longer the state
+/// at that date.
+///
+/// This exists because the top level of a history file is not universally the
+/// start state. In vanilla it is (every dated block is post-start), but a
+/// timeline mod (Extended Timeline, Imperium Universalis) keeps a baseline epoch
+/// at the top level and replays history forward in dated blocks, so a top-level
+/// write at the start date is overridden by every intervening block and has no
+/// effect on the world the player loads. The frontend uses this set to decide
+/// whether a write can target the top level or must emit a dated block; see
+/// `src/lib/editAtDate.ts`.
+///
+/// Only provinces with at least one qualifying dated block appear, so on vanilla
+/// at 1444.11.11 the payload is near-empty.
+pub fn province_shadowed_keys(vfs: &Vfs, date: Date) -> HashMap<u32, Vec<String>> {
+    let mut out = HashMap::new();
+    for ast in province_asts(vfs).iter() {
+        let Some(block) = &ast.block else { continue };
+        let mut keys: Vec<String> = Vec::new();
+        for (k, v) in &block.items {
+            let (Some(k), Value::Block(b)) = (k, v) else {
+                continue;
+            };
+            let Some(d) = parse_date(k) else { continue };
+            if d > date {
+                continue;
+            }
+            for (ek, _) in &b.items {
+                if let Some(ek) = ek {
+                    if !keys.iter().any(|k| k == ek) {
+                        keys.push(ek.clone());
+                    }
+                }
+            }
+        }
+        if !keys.is_empty() {
+            out.insert(ast.id, keys);
+        }
+    }
+    out
 }
 
 /// Water province ids (sea + lakes) from map/default.map.
@@ -3006,6 +3074,49 @@ mod tests {
             .join("provinces.bmp")
             .is_file()
             .then(|| Vfs::new(INSTALL, None).unwrap())
+    }
+
+    // --- Timeline-mod shadow query -----------------------------------------
+
+    #[test]
+    fn province_shadowed_keys_reports_only_pre_date_dated_keys() {
+        // The map brushes use this to tell "the top level is the start state"
+        // (vanilla) from "the top level is a baseline epoch the dated blocks have
+        // already overridden" (Extended Timeline & co).
+        let root = std::env::temp_dir().join("eu_toolkit_shadowed_keys_test");
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("history/provinces")).unwrap();
+        // Timeline-shaped: epoch baseline + pre-start ownership changes.
+        std::fs::write(
+            root.join("history/provinces/167 - Caux.txt"),
+            "owner = ROM\ncontroller = ROM\n1204.6.24 = { owner = FRA controller = FRA }\n1450.1.1 = { unrest = 3 }\n",
+        )
+        .unwrap();
+        // Vanilla-shaped: every dated block is post-start.
+        std::fs::write(
+            root.join("history/provinces/223 - Granada.txt"),
+            "owner = GRA\n1492.1.2 = { owner = CAS }\n",
+        )
+        .unwrap();
+        let vfs = Vfs::new(root.to_str().unwrap(), None).unwrap();
+
+        let at_start = province_shadowed_keys(&vfs, (1302, 9, 1));
+        let caux = at_start.get(&167).expect("Caux has pre-start dated blocks");
+        assert!(caux.contains(&"owner".to_string()));
+        assert!(caux.contains(&"controller".to_string()));
+        // The 1450 block is after the date and must not appear.
+        assert!(!caux.contains(&"unrest".to_string()));
+        // A province with nothing before the date is absent entirely.
+        assert!(!at_start.contains_key(&223));
+
+        // Vanilla start: nothing is shadowed, so writes stay top-level.
+        let vanilla = province_shadowed_keys(&vfs, (1000, 1, 1));
+        assert!(vanilla.is_empty());
+
+        // Later dates accumulate the union of every block up to that point.
+        let late = province_shadowed_keys(&vfs, (1500, 1, 1));
+        assert!(late.get(&167).unwrap().contains(&"unrest".to_string()));
+        assert!(late.get(&223).unwrap().contains(&"owner".to_string()));
     }
 
     // --- Simple Terrain / Winter parsing (Sprint 11.1/11.2) ---

@@ -62,9 +62,9 @@
 </div>
 
 <style>
-  .opts { border-top: 1px solid #1f242c; margin-top: 0.4rem; padding-top: 0.4rem; }
-  h4 { margin: 0 0 0.3rem; font-size: 0.8rem; color: #c9a978; font-weight: 600; }
+  .opts { border-top: 1px solid var(--border); margin-top: 0.4rem; padding-top: 0.4rem; }
+  h4 { margin: 0 0 0.3rem; font-size: 0.8rem; color: var(--warn); font-weight: 600; }
   .opt { display: flex; flex-direction: column; gap: 0.15rem; margin-bottom: 0.35rem; }
-  .idx { font-size: 0.74rem; color: #8a919c; font-family: monospace; }
-  .msg { color: #8a919c; font-size: 0.82rem; margin: 0.1rem 0; }
+  .idx { font-size: 0.74rem; color: var(--text-2); font-family: monospace; }
+  .msg { color: var(--text-2); font-size: 0.82rem; margin: 0.1rem 0; }
 </style>

@@ -136,8 +136,8 @@
 
 <style>
   .script-editor {
-    background: #1b2027;
-    border: 1px solid #1f242c;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
   }
 
   .toolbar {
@@ -145,21 +145,21 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.3rem 0.4rem;
-    background: #2b323d;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border);
   }
 
   .reg-tag {
     font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #cfd4db;
-    background: #3f8a6d;
+    color: var(--text-1);
+    background: var(--ok);
     padding: 0.08rem 0.4rem;
   }
 
   .reg-tag.effects {
-    background: #b8863b;
+    background: var(--warn);
   }
 
   .spacer {
@@ -167,9 +167,9 @@
   }
 
   .mode-btn {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.76rem;
     padding: 0.2rem 0.6rem;
@@ -177,8 +177,8 @@
   }
 
   .mode-btn:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .tree {
@@ -193,7 +193,7 @@
 
   .empty {
     margin: 0 0 0.3rem;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.8rem;
   }
 
@@ -205,9 +205,9 @@
     width: 100%;
     min-height: 12rem;
     resize: vertical;
-    background: #16191f;
-    border: 1px solid #1f242c;
-    color: #d7dbe0;
+    background: var(--bg-0);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: "Consolas", "Courier New", monospace;
     font-size: 0.8rem;
     line-height: 1.4;
@@ -219,16 +219,16 @@
 
   .raw-block-error {
     margin-top: 0.3rem;
-    background: #7a2e2e;
-    color: #f2dede;
-    border: 1px solid #a13636;
+    background: var(--danger-bg);
+    color: var(--text-1);
+    border: 1px solid var(--err);
     padding: 0.25rem 0.5rem;
     font-size: 0.78rem;
   }
 
   .raw-hint {
     margin: 0.35rem 0 0;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.74rem;
   }
 </style>

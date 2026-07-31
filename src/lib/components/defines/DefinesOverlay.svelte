@@ -155,30 +155,30 @@
 
 <style>
   .bar { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
-  .q { flex: 1; background: #16191f; border: 1px solid #1f242c; color: #cfd4db; padding: 0.3rem 0.5rem; font-family: inherit; font-size: 0.85rem; }
-  .chip { border: 1px solid #3a434f; background: #2b323d; color: #cfd4db; font-family: inherit; font-size: 0.74rem; padding: 0.2rem 0.6rem; cursor: pointer; white-space: nowrap; }
-  .chip.on { background: #4a6da7; border-color: #4a6da7; color: #fff; }
-  .count { font-size: 0.72rem; color: #8a919c; white-space: nowrap; }
+  .q { flex: 1; background: var(--bg-0); border: 1px solid var(--border); color: var(--text-1); padding: 0.3rem 0.5rem; font-family: inherit; font-size: 0.85rem; }
+  .chip { border: 1px solid var(--bg-3); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 0.74rem; padding: 0.2rem 0.6rem; cursor: pointer; white-space: nowrap; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: var(--text-inverse); }
+  .count { font-size: 0.72rem; color: var(--text-2); white-space: nowrap; }
   .ns { margin-bottom: 0.25rem; }
-  .ns-head { display: flex; align-items: center; gap: 0.4rem; width: 100%; text-align: left; border: none; background: #21262e; color: #cfd4db; font-family: inherit; font-size: 0.82rem; padding: 0.25rem 0.4rem; cursor: pointer; }
-  .caret { color: #8a919c; width: 0.8rem; }
-  .ns-name { font-weight: 700; color: #9aecc0; }
-  .ns-count { color: #8a919c; font-size: 0.72rem; }
+  .ns-head { display: flex; align-items: center; gap: 0.4rem; width: 100%; text-align: left; border: none; background: var(--bg-1); color: var(--text-1); font-family: inherit; font-size: 0.82rem; padding: 0.25rem 0.4rem; cursor: pointer; }
+  .caret { color: var(--text-2); width: 0.8rem; }
+  .ns-name { font-weight: 700; color: var(--ok); }
+  .ns-count { color: var(--text-2); font-size: 0.72rem; }
   .rows { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
-  .rows td { padding: 0.1rem 0.4rem; border-bottom: 1px solid #21262e; vertical-align: middle; }
-  tr.overridden td.k code { color: #ffd479; }
-  tr.overridden { background: #262218; }
+  .rows td { padding: 0.1rem 0.4rem; border-bottom: 1px solid var(--bg-1); vertical-align: middle; }
+  tr.overridden td.k code { color: var(--warn); }
+  tr.overridden { background: var(--bg-1); }
   td.k { width: 40%; }
-  td.k code { color: #cfd4db; background: #16191f; padding: 0 0.3rem; }
+  td.k code { color: var(--text-1); background: var(--bg-0); padding: 0 0.3rem; }
   td.v { width: 30%; }
-  td.v input { width: 100%; background: #16191f; border: 1px solid #1f242c; color: #cfd4db; padding: 0.15rem 0.35rem; font-family: inherit; font-size: 0.78rem; }
-  .toggle { border: 1px solid #1f242c; background: #21262e; color: #cfd4db; font-family: inherit; font-size: 0.76rem; padding: 0.12rem 0.6rem; cursor: pointer; }
-  .toggle.on { background: #4a6da7; color: #fff; }
-  td.t { color: #8a919c; font-size: 0.7rem; width: 5rem; }
-  td.base { color: #8a919c; font-size: 0.72rem; white-space: nowrap; }
-  .base-val { color: #d8b45a; }
-  .added { color: #9aecc0; }
-  .reset { border: none; background: transparent; color: #8a919c; cursor: pointer; font-size: 0.9rem; padding: 0 0.2rem; }
-  .reset:hover { color: #fff; }
-  .dim { color: #8a919c; font-size: 0.8rem; }
+  td.v input { width: 100%; background: var(--bg-0); border: 1px solid var(--border); color: var(--text-1); padding: 0.15rem 0.35rem; font-family: inherit; font-size: 0.78rem; }
+  .toggle { border: 1px solid var(--border); background: var(--bg-1); color: var(--text-1); font-family: inherit; font-size: 0.76rem; padding: 0.12rem 0.6rem; cursor: pointer; }
+  .toggle.on { background: var(--accent); color: var(--text-inverse); }
+  td.t { color: var(--text-2); font-size: 0.7rem; width: 5rem; }
+  td.base { color: var(--text-2); font-size: 0.72rem; white-space: nowrap; }
+  .base-val { color: var(--warn); }
+  .added { color: var(--ok); }
+  .reset { border: none; background: transparent; color: var(--text-2); cursor: pointer; font-size: 0.9rem; padding: 0 0.2rem; }
+  .reset:hover { color: var(--text-inverse); }
+  .dim { color: var(--text-2); font-size: 0.8rem; }
 </style>

@@ -10,6 +10,7 @@
   import { editAtDate } from "$lib/editAtDate";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
   import type { CountryEstates, EstateBrief, StartingPrivilege } from "$lib/estates";
+  import { AtlasIcon, LoadingState } from "$lib/components/ui";
   import { SET_PRIVILEGE, foldStartingPrivileges } from "./starting";
 
   let {
@@ -160,11 +161,12 @@
     {#if error}
       <p class="err">{error}</p>
     {:else if !fetched}
-      <p class="dim">Loading…</p>
+      <LoadingState label="Loading estates…" />
     {:else}
       {#each groups as g (g.key)}
         <div class="grp">
           <div class="grp-head">
+            {#if g.estate?.icon != null}<AtlasIcon {installPath} {modPath} kind="estates" frame={Math.max(0, Number(g.estate.icon))} size={24} label={g.estate.name} />{/if}
             <strong>{g.estate ? g.estate.name : "Other / unknown estate"}</strong>
             {#if g.estate}
               <button class="jump" title="Open in Estates editor" onclick={() => onopenestates?.(g.estate!.key)}>edit</button>
@@ -209,7 +211,7 @@
 
 <style>
   .estates {
-    border-top: 1px solid #232a33;
+    border-top: 1px solid var(--bg-1);
     padding: 0.35rem 0 0.2rem;
   }
   .head {
@@ -219,13 +221,13 @@
     width: 100%;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     cursor: pointer;
     padding: 0.1rem 0;
   }
   .caret {
-    color: #8a919c;
+    color: var(--text-2);
     width: 0.8rem;
   }
   .h-title {
@@ -235,33 +237,33 @@
   .count {
     margin-left: auto;
     font-size: 0.72rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .grp {
     margin: 0.35rem 0 0.5rem;
     padding-left: 0.3rem;
-    border-left: 2px solid #2b323d;
+    border-left: 2px solid var(--bg-2);
   }
   .grp-head {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     font-size: 0.82rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .jump {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.68rem;
     padding: 0 0.3rem;
     cursor: pointer;
   }
   .jump:hover {
-    border-color: #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .chips {
     display: flex;
@@ -273,58 +275,58 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    border: 1px solid #2f3946;
-    background: #1b2027;
-    color: #cfd4db;
+    border: 1px solid var(--bg-3);
+    background: var(--bg-1);
+    color: var(--text-1);
     font-size: 0.74rem;
     padding: 0.08rem 0.3rem;
   }
   .cdate {
-    color: #8a919c;
+    color: var(--text-2);
   }
   .x {
     border: none;
     background: transparent;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.9rem;
     line-height: 1;
     cursor: pointer;
     padding: 0;
   }
   .x:hover {
-    color: #fca5a5;
+    color: var(--err);
   }
   .picker {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.15rem 0.3rem;
     margin-right: 0.3rem;
   }
   .mini {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.72rem;
     padding: 0.1rem 0.4rem;
     cursor: pointer;
   }
   .mini:hover {
-    border-color: #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .dim {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .small {
     font-size: 0.74rem;
   }
   .err {
-    color: #fca5a5;
+    color: var(--err);
     font-size: 0.78rem;
   }
 </style>

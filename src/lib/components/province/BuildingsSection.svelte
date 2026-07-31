@@ -5,7 +5,7 @@
   never block) — the game only honours one fort per province.
 -->
 <script lang="ts">
-  import { ListSection } from "$lib/components/ui";
+  import { ListSection, SpriteIcon } from "$lib/components/ui";
   import type { DropdownItem } from "$lib/components/ui";
   import type { EditQueue } from "$lib/edits.svelte";
   import type { ProvinceDetails, ProvinceSnapshot } from "./types";
@@ -18,6 +18,8 @@
     queue,
     buildings,
     dateCtx,
+    installPath,
+    modPath,
   }: {
     details: ProvinceDetails;
     effective: ProvinceSnapshot;
@@ -26,6 +28,8 @@
     buildings: DropdownItem[];
     /** Sprint 12.3 date context; later dates write into a dated block. */
     dateCtx?: DateCtx;
+    installPath: string;
+    modPath: string | null;
   } = $props();
 
   const top = $derived(details.top_level);
@@ -70,6 +74,7 @@
     {#each filtered as b (b.key)}
       <label class="row" class:on={isOn(b.key)}>
         <input type="checkbox" checked={isOn(b.key)} onchange={() => toggle(b.key)} />
+        <SpriteIcon {installPath} {modPath} name={`GFX_${b.key}`} size={24} label={b.label} />
         <span class="nm">{b.label}</span>
       </label>
     {/each}
@@ -78,11 +83,11 @@
 
 <style>
   section { margin-bottom: 1rem; }
-  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; }
-  .warn { margin: 0 0 0.4rem; color: #fbbf24; font-size: 0.78rem; }
-  .srch { width: 8rem; background: #21262e; border: 1px solid #1f242c; color: #cfd4db; font-family: inherit; font-size: 0.78rem; padding: 0.1rem 0.35rem; outline: none; }
+  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2); }
+  .warn { margin: 0 0 var(--sp-2); color: var(--warn); font-size: var(--fs-xs); }
+  .srch { width: 8rem; background: var(--bg-1); border: 1px solid var(--border); color: var(--text-1); font-family: inherit; font-size: 0.78rem; padding: 0.1rem 0.35rem; outline: none; }
   .row { display: flex; align-items: center; gap: 0.4rem; padding: 0.15rem 0.25rem; font-size: 0.82rem; cursor: pointer; }
-  .row.on { color: #fff; }
-  .row:hover { background: #2f3742; }
+  .row.on { color: var(--text-1); }
+  .row:hover { background: var(--bg-hover); }
   .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>

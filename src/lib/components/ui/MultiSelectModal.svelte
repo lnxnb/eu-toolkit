@@ -142,7 +142,7 @@
   .modal-root {
     position: fixed;
     inset: 0;
-    z-index: 100;
+    z-index: var(--z-modal);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -158,15 +158,15 @@
 
   .dialog {
     position: relative;
-    z-index: 101;
+    z-index: var(--z-modal-content);
     display: flex;
     flex-direction: column;
     width: 26rem;
     max-width: calc(100vw - 2rem);
     max-height: calc(100vh - 4rem);
-    background: #2b323d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
   }
 
@@ -174,8 +174,8 @@
     display: flex;
     align-items: center;
     padding: 0.45rem 0.6rem;
-    background: #3f4855;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
   }
 
   .dialog-title {
@@ -186,7 +186,7 @@
   .close {
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-size: 1.2rem;
     line-height: 1;
     cursor: pointer;
@@ -194,22 +194,22 @@
   }
 
   .close:hover {
-    color: #ffffff;
+    color: var(--text-inverse);
   }
 
   .search {
     display: flex;
     gap: 0.4rem;
     padding: 0.5rem 0.6rem;
-    border-bottom: 1px solid #1f242c;
+    border-bottom: 1px solid var(--border);
   }
 
   .search input {
     flex: 1;
     min-width: 0;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.3rem 0.45rem;
@@ -218,9 +218,9 @@
 
   .select-all {
     flex: none;
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.3rem 0.5rem;
@@ -228,8 +228,8 @@
   }
 
   .select-all:hover {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .items {
@@ -250,7 +250,7 @@
   }
 
   .row:hover {
-    background: #333b46;
+    background: var(--bg-3);
   }
 
   .row.checked {
@@ -267,7 +267,7 @@
   .row-badge {
     flex: none;
     font-size: 0.72rem;
-    color: #8a919c;
+    color: var(--text-2);
     font-variant-numeric: tabular-nums;
   }
 
@@ -276,13 +276,13 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.5rem 0.6rem;
-    background: #262c35;
-    border-top: 1px solid #1f242c;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
   }
 
   .count {
     font-size: 0.8rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .spacer {
@@ -290,9 +290,9 @@
   }
 
   .btn {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.3rem 0.8rem;
@@ -300,19 +300,19 @@
   }
 
   .btn:hover {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .btn.primary {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
     font-weight: 600;
   }
 
   .empty {
     padding: 0.5rem;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.82rem;
   }
 </style>

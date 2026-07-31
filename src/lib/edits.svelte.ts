@@ -56,7 +56,18 @@ export type TypedEdit =
   // Mirrors backend `TypedEdit::LocRemove`.
   | { kind: "locRemove"; key: string }
   | { kind: "binaryAsset"; file: string; bytes: number[] }
+  // Rewrite map/provinces.bmp by replaying color-space pixel ops against the
+  // copy-on-write base bitmap (Province Colors add/expand/dissolve). The frontend
+  // ships semantic ops, never the bitmap. Mirrors backend `TypedEdit::ProvinceBmp`.
+  | { kind: "provinceBmp"; file: string; ops: BmpOp[] }
   | { kind: "renameRuler"; tag: string; name: string };
+
+/** One color-space province-bitmap op. Mirrors backend `province_edit::BmpOp`. */
+export type BmpOp =
+  // Set every listed pixel (top-down flat index `y*width + x`) to `color`.
+  | { op: "paint"; pixels: number[]; color: [number, number, number] }
+  // Reassign every pixel of `from` among `into`, each to the nearest target.
+  | { op: "dissolve"; from: [number, number, number]; into: [number, number, number][] };
 
 /** One undo unit: a human label plus the edits it applies, in order. */
 export interface Composite {

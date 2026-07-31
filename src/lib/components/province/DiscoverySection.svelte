@@ -53,9 +53,9 @@
 
 <style>
   section { margin-bottom: 1rem; }
-  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; }
+  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2); }
   .list-field { display: flex; flex-direction: column; gap: 0.3rem; }
-  .chip { display: inline-flex; align-items: center; gap: 0.3rem; align-self: flex-start; background: #21262e; border: 1px solid #1f242c; color: #cfd4db; font-size: 0.8rem; padding: 0.12rem 0.2rem 0.12rem 0.45rem; }
-  .x { border: none; background: transparent; color: #9ca3af; cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 0 0.2rem; }
-  .x:hover { color: #fca5a5; }
+  .chip { display: inline-flex; align-items: center; gap: 0.3rem; align-self: flex-start; background: var(--bg-1); border: 1px solid var(--border); color: var(--text-1); font-size: 0.8rem; padding: 0.12rem 0.2rem 0.12rem 0.45rem; }
+  .x { border: none; background: transparent; color: var(--text-2); cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 0 0.2rem; }
+  .x:hover { color: var(--err); }
 </style>

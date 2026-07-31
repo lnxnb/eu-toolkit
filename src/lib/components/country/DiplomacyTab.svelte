@@ -357,32 +357,32 @@
     gap: 0.6rem;
   }
   .add {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.25rem 0.6rem;
     cursor: pointer;
   }
   .add:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .toggle {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
     font-size: 0.78rem;
-    color: #9ca3af;
+    color: var(--text-2);
     cursor: pointer;
   }
   .add-form {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
-    border: 1px solid #1f242c;
-    background: #262c35;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
     padding: 0.5rem;
   }
   .field {
@@ -394,12 +394,12 @@
     font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .field select {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.83rem;
     padding: 0.25rem 0.3rem;
@@ -413,17 +413,17 @@
   .note {
     margin: 0;
     font-size: 0.72rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .err {
     margin: 0;
     font-size: 0.75rem;
-    color: #fca5a5;
+    color: var(--err);
   }
   .warn {
     margin: 0;
     font-size: 0.75rem;
-    color: #fde68a;
+    color: var(--warn);
   }
   .actions {
     display: flex;
@@ -431,31 +431,31 @@
   }
   .confirm,
   .cancel {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.25rem 0.7rem;
     cursor: pointer;
   }
   .confirm:hover:not(:disabled) {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .confirm:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
   .cancel:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .empty {
     margin: 0;
     padding: 0.25rem 0.3rem;
     font-size: 0.76rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .rf {
     display: flex;
@@ -463,9 +463,9 @@
     gap: 0.4rem;
     width: 100%;
     border: none;
-    border-bottom: 1px solid #1f242c;
+    border-bottom: 1px solid var(--border);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.2rem 0.15rem;
@@ -476,18 +476,18 @@
     border-bottom: none;
   }
   .rf:hover {
-    color: #fff;
+    color: var(--text-inverse);
   }
   .rf-badge {
     font-size: 0.62rem;
     padding: 0.02rem 0.3rem;
-    color: #fff;
+    color: var(--text-inverse);
     text-transform: uppercase;
   }
   .rf-badge.rival {
-    background: #c0392b;
+    background: var(--err);
   }
   .rf-badge.friend {
-    background: #2f7a44;
+    background: var(--ok);
   }
 </style>

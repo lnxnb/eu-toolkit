@@ -46,19 +46,19 @@
     align-items: center;
     gap: 0.4rem;
     font-size: 0.82rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
 
   .lbl {
     text-transform: uppercase;
     letter-spacing: 0.04em;
     font-size: 0.72rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   input[type="range"] {
     width: 9rem;
-    accent-color: #4a6da7;
+    accent-color: var(--accent);
     cursor: pointer;
   }
 
@@ -66,11 +66,11 @@
     min-width: 3rem;
     text-align: right;
     font-variant-numeric: tabular-nums;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   /* Range bounds hint (referenced so tooling knows they exist). */
   input[type="range"]::-webkit-slider-runnable-track {
-    background: #2b323d;
+    background: var(--bg-2);
   }
 </style>

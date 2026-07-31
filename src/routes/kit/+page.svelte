@@ -56,6 +56,7 @@
   let activeTab = $state("country");
 
   // --- SearchDropdown: a fake tag/country picker with color swatches ---
+  // Demonstration data swatches and canvas paint below are intentionally literal.
   const tagItems: DropdownItem[] = [
     { key: "FRA", label: "France", swatch: "#2b6cb0" },
     { key: "ENG", label: "England", swatch: "#c53030" },
@@ -620,8 +621,8 @@
 <style>
   .bench {
     min-height: 100vh;
-    background: #14181d;
-    color: #cfd4db;
+    background: var(--bg-0);
+    color: var(--text-1);
     font-family: Inter, system-ui, sans-serif;
     padding: 1rem 22rem 4rem 1rem; /* right padding clears the floating SidePanel */
   }
@@ -639,7 +640,7 @@
   }
 
   .note {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.85rem;
   }
 
@@ -650,8 +651,8 @@
   }
 
   .card {
-    background: #2b323d;
-    border: 1px solid #1f242c;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
     padding: 0.75rem;
   }
 
@@ -668,30 +669,30 @@
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .out {
     margin: 0.5rem 0 0;
     font-size: 0.8rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .out.ok {
-    color: #86efac;
+    color: var(--ok);
   }
 
   code {
-    color: #cfd4db;
-    background: #21262e;
+    color: var(--text-1);
+    background: var(--bg-1);
     padding: 0 0.25rem;
   }
 
   .demo-btn,
   .danger {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.83rem;
     padding: 0.3rem 0.7rem;
@@ -699,13 +700,13 @@
   }
 
   .demo-btn:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .danger {
-    background: #7a3f3f;
-    color: #fff;
+    background: var(--danger-bg);
+    color: var(--text-inverse);
   }
 
   .danger:disabled {
@@ -719,15 +720,15 @@
   }
 
   .list-row:hover {
-    background: #333b46;
+    background: var(--bg-3);
   }
 
   .fake-map {
     position: relative;
     height: 16rem;
     background:
-      repeating-linear-gradient(45deg, #1b2027 0 12px, #1e242c 12px 24px);
-    border: 1px solid #1f242c;
+      repeating-linear-gradient(45deg, var(--bg-1) 0 12px, var(--bg-1) 12px 24px);
+    border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -736,14 +737,14 @@
   }
 
   .map-hint {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.85rem;
     pointer-events: none;
   }
 
   .panel-chip {
     font-size: 0.78rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .panel-body {
@@ -763,7 +764,7 @@
     align-items: center;
     gap: 0.4rem;
     font-size: 0.8rem;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .ov-controls label.chk {
@@ -776,7 +777,7 @@
 
   .ov-stage {
     position: relative;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     overflow: hidden;
   }
 

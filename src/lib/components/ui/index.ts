@@ -2,10 +2,16 @@
 // Import components + types from a single path: `$lib/components/ui`.
 
 export { default as SidePanel } from "./SidePanel.svelte";
+export { default as AtlasIcon } from "./AtlasIcon.svelte";
+export { default as SpriteIcon } from "./SpriteIcon.svelte";
+export { default as EditableHeading } from "./EditableHeading.svelte";
+export { default as LoadingState } from "./LoadingState.svelte";
+export { default as EmptyState } from "./EmptyState.svelte";
 export { default as ListSection } from "./ListSection.svelte";
 export { default as SearchDropdown } from "./SearchDropdown.svelte";
 export { default as MultiSelectModal } from "./MultiSelectModal.svelte";
 export { default as ModifierEditor } from "./ModifierEditor.svelte";
+export { default as ModifierIcon } from "./ModifierIcon.svelte";
 export { default as ColorPicker } from "./ColorPicker.svelte";
 export { default as DatePicker } from "./DatePicker.svelte";
 export { default as SliderGroup } from "./SliderGroup.svelte";

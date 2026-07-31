@@ -55,9 +55,9 @@
     align-items: center;
     gap: 0.6rem;
     padding: 0.4rem 0.9rem;
-    background: #3f4855;
-    border: 1px solid #2b323d;
-    color: #cfd4db;
+    background: var(--bg-3);
+    border: 1px solid var(--bg-2);
+    color: var(--text-1);
     font-size: 0.9rem;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
   }
@@ -91,7 +91,7 @@
     width: 0.55rem;
     height: 0.55rem;
     border-radius: 50%;
-    background: #4a6da7;
+    background: var(--accent);
     animation: pulse 1.2s ease-in-out infinite;
   }
 
@@ -110,9 +110,9 @@
   }
 
   .cancel {
-    border: 1px solid #2b323d;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--bg-2);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.2rem 0.5rem;
@@ -120,7 +120,7 @@
   }
 
   .cancel:hover {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 </style>

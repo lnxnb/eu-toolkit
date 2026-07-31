@@ -128,9 +128,9 @@
 
   input,
   select {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.83rem;
     padding: 0.2rem 0.3rem;
@@ -146,6 +146,6 @@
   }
 
   .sep {
-    color: #8a919c;
+    color: var(--text-2);
   }
 </style>

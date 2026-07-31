@@ -77,12 +77,12 @@
 </div>
 
 <style>
-  .avail { margin-top: 0.3rem; font-size: 0.8rem; color: #cfd4db; }
-  .load { border: 1px solid #4b5563; background: #2b323d; color: #cfd4db; font-family: inherit; font-size: 0.76rem; padding: 0.2rem 0.5rem; cursor: pointer; }
-  .load:hover { border-color: #4a6da7; background: #4a6da7; color: #fff; }
-  code { color: #9aecc0; background: #16191f; padding: 0 0.25rem; font-size: 0.74rem; }
-  .res { color: #b9bec7; }
-  .approx { color: #d0a24a; font-size: 0.76rem; margin-top: 0.15rem; }
-  .dim { color: #9ca3af; }
-  .err { color: #fca5a5; }
+  .avail { margin-top: 0.3rem; font-size: 0.8rem; color: var(--text-1); }
+  .load { border: 1px solid var(--border-strong); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 0.76rem; padding: 0.2rem 0.5rem; cursor: pointer; }
+  .load:hover { border-color: var(--accent); background: var(--accent); color: var(--text-inverse); }
+  code { color: var(--ok); background: var(--bg-0); padding: 0 0.25rem; font-size: 0.74rem; }
+  .res { color: var(--text-1); }
+  .approx { color: var(--warn); font-size: 0.76rem; margin-top: 0.15rem; }
+  .dim { color: var(--text-2); }
+  .err { color: var(--err); }
 </style>

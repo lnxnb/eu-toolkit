@@ -10,7 +10,7 @@
   // "religious_schools", key] path prefix through every edit.
   import { SpritePicker } from "$lib/components/script";
   import type { KnownKey } from "$lib/components/script";
-  import { SearchDropdown } from "$lib/components/ui";
+  import { SearchDropdown, AtlasIcon, SpriteIcon } from "$lib/components/ui";
   import type { DropdownItem, KnownModifier, ModifierRow } from "$lib/components/ui";
   import EstateModifierBlock from "$lib/components/estates/EstateModifierBlock.svelte";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
@@ -73,6 +73,7 @@
   const basePath = $derived<string[]>(
     obj.group ? [obj.group, "religious_schools", editKey] : [editKey],
   );
+  function previewFrame(value: string): number { let h = 2166136261; for (let i=0;i<value.length;i++) h=Math.imul(h^value.charCodeAt(i),16777619); return (h>>>0)%18; }
 
   // --- Loc name / desc ---
   const liveName = $derived(queue.pendingLocOverride(obj.nameKey) ?? obj.name);
@@ -286,6 +287,9 @@
 </script>
 
 <div class="editor">
+  {#if meta.id === "buildings"}
+    <div class="entity-art"><SpriteIcon {installPath} {modPath} name={`GFX_${obj.key}`} size={32} label={`${liveName} building icon`} /><strong>{liveName}</strong></div>
+  {/if}
   <!-- Loc name + description -->
   <div class="field">
     <label for={`mec-name-${key}`}>Name</label>
@@ -301,6 +305,7 @@
     <div class="field">
       <span class="lbl">Icon (sprite)</span>
       <div class="iconrow">
+        {#if liveIcon}<SpriteIcon {installPath} {modPath} name={liveIcon} size={32} label={`${liveName} icon`} />{/if}
         <code class="iconval">{liveIcon || "(none)"}</code>
         <button class="mini" onclick={() => (pickIcon = !pickIcon)}>{pickIcon ? "close" : "change…"}</button>
       </div>
@@ -314,6 +319,7 @@
     <!-- Named-icon reference (e.g. reform `icon = "crown"`), written quoted. -->
     <div class="field">
       <span class="lbl">Icon (named)</span>
+      {#if liveIcon}<SpriteIcon {installPath} {modPath} name={`GFX_${liveIcon}`} size={32} label={`${liveName} icon`} />{/if}
       <input
         class="txt"
         placeholder="(e.g. crown)"
@@ -497,6 +503,7 @@
     {#each obj.orderedChildren as step, i (step.key)}
       <div class="modblock">
         <div class="mb-head">
+          {#if meta.id === "idea_groups"}<AtlasIcon {installPath} {modPath} kind="idea_modifiers" frame={previewFrame(step.key)} size={28} label={`${step.key} idea icon`} />{/if}
           <span class="step-n">{i + 1}</span>
           <code>{step.key}</code>
           {#if !step.flat}<span class="tag-raw">nested — read-only</span>{/if}
@@ -601,56 +608,57 @@
 </div>
 
 <style>
+  .entity-art { display: flex; align-items: center; gap: var(--sp-2); }
   .editor { padding: 0.35rem 0.1rem 0.3rem; display: flex; flex-direction: column; gap: 0.35rem; }
   .field { display: flex; align-items: center; gap: 0.5rem; }
-  .field label, .field .lbl, .lbl { width: 9rem; flex: none; font-size: 0.78rem; color: #9ca3af; }
-  .txt { flex: 1; min-width: 0; background: #14181d; border: 1px solid #4b5563; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.35rem; }
-  .num { width: 5rem; background: #14181d; border: 1px solid #4b5563; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.35rem; }
+  .field label, .field .lbl, .lbl { width: 9rem; flex: none; font-size: 0.78rem; color: var(--text-2); }
+  .txt { flex: 1; min-width: 0; background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.35rem; }
+  .num { width: 5rem; background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.35rem; }
   .num.wide { width: 8rem; }
-  .sel { background: #14181d; border: 1px solid #4b5563; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.25rem; }
+  .sel { background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.25rem; }
   .iconrow, .colorrow { display: flex; align-items: center; gap: 0.4rem; }
-  .iconval { color: #9aecc0; background: #16191f; padding: 0.05rem 0.3rem; font-size: 0.76rem; }
-  .swatch { width: 1.1rem; height: 1.1rem; border: 1px solid #1f242c; flex: none; }
+  .iconval { color: var(--ok); background: var(--bg-0); padding: 0.05rem 0.3rem; font-size: 0.76rem; }
+  .swatch { width: 1.1rem; height: 1.1rem; border: 1px solid var(--border); flex: none; }
   .picker { height: 22rem; margin: 0.2rem 0; }
-  .section-title { margin-top: 0.4rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; color: #9ca3af; border-bottom: 1px solid #232a33; padding-bottom: 0.15rem; }
+  .section-title { margin-top: 0.4rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-2); border-bottom: 1px solid var(--bg-1); padding-bottom: 0.15rem; }
   .grid { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; }
   .scalar { display: flex; align-items: center; gap: 0.4rem; }
-  .sk { font-size: 0.76rem; color: #cfd4db; }
+  .sk { font-size: 0.76rem; color: var(--text-1); }
   .flags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-  .flag { display: inline-flex; align-items: center; gap: 0.25rem; border: 1px solid #1f242c; background: #21262e; color: #cfd4db; font-family: inherit; font-size: 0.74rem; padding: 0.1rem 0.4rem; cursor: pointer; }
-  .flag.on { background: #4a6da7; color: #fff; border-color: #4a6da7; }
+  .flag { display: inline-flex; align-items: center; gap: 0.25rem; border: 1px solid var(--border); background: var(--bg-1); color: var(--text-1); font-family: inherit; font-size: 0.74rem; padding: 0.1rem 0.4rem; cursor: pointer; }
+  .flag.on { background: var(--accent); color: var(--text-inverse); border-color: var(--accent); }
   .flag.absent { opacity: 0.75; font-style: italic; }
   .fmark { width: 0.7rem; display: inline-block; }
   .refs { display: flex; flex-direction: column; gap: 0.3rem; }
   .pickerslot { flex: 1; min-width: 0; }
   .tokens { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; }
-  .chip { display: inline-flex; align-items: center; gap: 0.25rem; background: #21262e; border: 1px solid #1f242c; color: #cfd4db; font-size: 0.78rem; padding: 0.08rem 0.2rem 0.08rem 0.4rem; }
-  .chip .x { border: none; background: transparent; color: #9ca3af; cursor: pointer; font-size: 0.9rem; line-height: 1; padding: 0 0.15rem; }
-  .chip .x:hover { color: #fca5a5; }
+  .chip { display: inline-flex; align-items: center; gap: 0.25rem; background: var(--bg-1); border: 1px solid var(--border); color: var(--text-1); font-size: 0.78rem; padding: 0.08rem 0.2rem 0.08rem 0.4rem; }
+  .chip .x { border: none; background: transparent; color: var(--text-2); cursor: pointer; font-size: 0.9rem; line-height: 1; padding: 0 0.15rem; }
+  .chip .x:hover { color: var(--err); }
   .selfrows { display: flex; flex-direction: column; gap: 0.2rem; }
   .selfrow { display: flex; align-items: center; gap: 0.4rem; }
-  .selfrow .rk { flex: 1; color: #cfd4db; background: #16191f; padding: 0.1rem 0.35rem; font-size: 0.76rem; }
-  .rk-in { flex: 1; background: #14181d; border: 1px solid #4b5563; color: #cfd4db; font-family: inherit; font-size: 0.78rem; padding: 0.15rem 0.35rem; }
+  .selfrow .rk { flex: 1; color: var(--text-1); background: var(--bg-0); padding: 0.1rem 0.35rem; font-size: 0.76rem; }
+  .rk-in { flex: 1; background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1); font-family: inherit; font-size: 0.78rem; padding: 0.15rem 0.35rem; }
   .addrow { margin-top: 0.15rem; }
   .subgroup { display: flex; flex-direction: column; gap: 0.3rem; }
-  .modblock { border: 1px solid #232a33; padding: 0.3rem; }
+  .modblock { border: 1px solid var(--bg-1); padding: 0.3rem; }
   .mb-head { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.25rem; }
-  .mb-head code { color: #9aecc0; background: #16191f; padding: 0 0.3rem; font-size: 0.76rem; }
-  .step-n { font-size: 0.7rem; color: #8a919c; width: 1rem; }
+  .mb-head code { color: var(--ok); background: var(--bg-0); padding: 0 0.3rem; font-size: 0.76rem; }
+  .step-n { font-size: 0.7rem; color: var(--text-2); width: 1rem; }
   .spacer { flex: 1; }
-  .tag-abs, .tag-raw { font-size: 0.65rem; text-transform: uppercase; color: #8a919c; }
-  .tag-raw { color: #d0a24a; }
+  .tag-abs, .tag-raw { font-size: 0.65rem; text-transform: uppercase; color: var(--text-2); }
+  .tag-raw { color: var(--warn); }
   .idlist { display: flex; flex-wrap: wrap; gap: 0.25rem; }
-  .idchip { color: #b9bec7; background: #16191f; padding: 0.05rem 0.3rem; font-size: 0.72rem; }
-  .idchip.raw { color: #9ca3af; font-style: italic; }
-  .mini { border: 1px solid #4b5563; background: #2b323d; color: #cfd4db; font-family: inherit; font-size: 0.72rem; padding: 0.05rem 0.4rem; cursor: pointer; }
-  .mini:hover:not(:disabled) { border-color: #4a6da7; background: #4a6da7; color: #fff; }
+  .idchip { color: var(--text-1); background: var(--bg-0); padding: 0.05rem 0.3rem; font-size: 0.72rem; }
+  .idchip.raw { color: var(--text-2); font-style: italic; }
+  .mini { border: 1px solid var(--border-strong); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 0.72rem; padding: 0.05rem 0.4rem; cursor: pointer; }
+  .mini:hover:not(:disabled) { border-color: var(--accent); background: var(--accent); color: var(--text-inverse); }
   .mini:disabled { opacity: 0.4; cursor: default; }
-  .mini.danger { color: #fca5a5; border-color: #6b3630; }
-  .dim { color: #9ca3af; }
+  .mini.danger { color: var(--err); border-color: var(--danger-bg); }
+  .dim { color: var(--text-2); }
   .small { font-size: 0.74rem; }
   .danger-zone { margin-top: 0.5rem; }
-  .btn { border: 1px solid #4b5563; background: transparent; color: #cfd4db; font-family: inherit; font-size: 0.78rem; padding: 0.2rem 0.6rem; cursor: pointer; }
-  .btn.danger { color: #fca5a5; border-color: #6b3630; }
-  .btn.danger:hover { background: #7a2820; border-color: #9a3226; color: #fff; }
+  .btn { border: 1px solid var(--border-strong); background: transparent; color: var(--text-1); font-family: inherit; font-size: 0.78rem; padding: 0.2rem 0.6rem; cursor: pointer; }
+  .btn.danger { color: var(--err); border-color: var(--danger-bg); }
+  .btn.danger:hover { background: var(--danger-bg); border-color: var(--danger-bg); color: var(--text-inverse); }
 </style>

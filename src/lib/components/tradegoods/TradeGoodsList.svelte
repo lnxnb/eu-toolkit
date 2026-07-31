@@ -220,9 +220,9 @@
     width: 23rem;
     display: flex;
     flex-direction: column;
-    background: #2b323d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-size: 0.9rem;
     box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.4);
   }
@@ -233,8 +233,8 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.4rem 0.6rem;
-    background: #3f4855;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
   }
 
   .title {
@@ -245,23 +245,23 @@
     font-size: 0.72rem;
     line-height: 1;
     padding: 0.12rem 0.4rem;
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
     font-variant-numeric: tabular-nums;
   }
 
   .create {
     flex: none;
     padding: 0.4rem;
-    border-bottom: 1px solid #1f242c;
-    background: #262c35;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-2);
   }
 
   .new-btn {
     width: 100%;
-    border: 1px dashed #4b5563;
+    border: 1px dashed var(--border-strong);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.35rem;
@@ -269,9 +269,9 @@
   }
 
   .new-btn:hover {
-    border-color: #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .name-prompt {
@@ -283,9 +283,9 @@
   .name-prompt .text {
     flex: 1;
     min-width: 0;
-    background: #14181d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.25rem 0.4rem;
@@ -295,9 +295,9 @@
   .name-prompt .ok,
   .name-prompt .x {
     flex: none;
-    border: 1px solid #1f242c;
-    background: #14181d;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-0);
+    color: var(--text-1);
     font-size: 0.9rem;
     line-height: 1;
     padding: 0.25rem 0.4rem;
@@ -305,13 +305,13 @@
   }
 
   .name-prompt .ok:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .name-prompt .x:hover {
-    background: #7a3f3f;
-    color: #fff;
+    background: var(--danger-bg);
+    color: var(--text-inverse);
   }
 
   .scroll {
@@ -323,7 +323,7 @@
   .row {
     display: flex;
     align-items: stretch;
-    border-bottom: 1px solid #1f242c;
+    border-bottom: 1px solid var(--border);
   }
 
   .row.selected {
@@ -357,9 +357,9 @@
     justify-content: center;
     width: 26px;
     height: 26px;
-    border: 1px solid #1f242c;
-    background: #14181d;
-    color: #8a919c;
+    border: 1px solid var(--border);
+    background: var(--bg-0);
+    color: var(--text-2);
     font-size: 0.9rem;
     grid-row: 1 / span 2;
   }
@@ -379,7 +379,7 @@
     flex: 1;
     min-width: 0;
     font-size: 0.88rem;
-    color: #e5e7eb;
+    color: var(--text-1);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -391,11 +391,11 @@
     gap: 0.5rem;
     font-size: 0.76rem;
     font-variant-numeric: tabular-nums;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .price {
-    color: #86efac;
+    color: var(--ok);
   }
 
   .sub2 {
@@ -404,7 +404,7 @@
     flex-direction: column;
     gap: 0.05rem;
     font-size: 0.73rem;
-    color: #b9bec7;
+    color: var(--text-1);
     overflow: hidden;
   }
 
@@ -415,11 +415,11 @@
   }
 
   .sub2 .prov {
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .sub2.dim {
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .tag {
@@ -430,21 +430,21 @@
   }
 
   .tag.new {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .tag.latent {
-    background: #6b5b95;
-    color: #fff;
+    background: var(--accent-text);
+    color: var(--text-inverse);
   }
 
   .edit-btn {
     flex: none;
     border: none;
-    border-left: 1px solid #1f242c;
+    border-left: 1px solid var(--border);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0 0.7rem;
@@ -453,8 +453,8 @@
 
   .edit-btn:hover,
   .edit-btn.on {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .mono {

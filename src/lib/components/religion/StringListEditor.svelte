@@ -69,29 +69,29 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.1rem 0.4rem;
-    background: #2b323d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-size: 0.8rem;
   }
   .x {
     border: none;
     background: transparent;
-    color: #9ca3af;
+    color: var(--text-2);
     cursor: pointer;
     font-size: 0.9rem;
     line-height: 1;
     padding: 0;
   }
   .x:hover {
-    color: #fca5a5;
+    color: var(--err);
   }
   .add {
     flex: 1;
     min-width: 6rem;
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.15rem 0.4rem;

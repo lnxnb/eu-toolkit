@@ -160,8 +160,8 @@
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    background: #21262e;
-    border: 1px solid #1f242c;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
     padding: 0.2rem 0.4rem;
   }
 
@@ -174,19 +174,19 @@
     min-width: 0;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     outline: none;
   }
 
   .input::placeholder {
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .caret {
     flex: none;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.7rem;
     pointer-events: none;
   }
@@ -202,8 +202,8 @@
     list-style: none;
     max-height: 14rem;
     overflow-y: auto;
-    background: #3f4855;
-    border: 1px solid #1f242c;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
     box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.4);
   }
 
@@ -215,7 +215,7 @@
     text-align: left;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.3rem 0.45rem;
@@ -223,8 +223,8 @@
   }
 
   .option.highlighted {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .option.selected {
@@ -241,7 +241,7 @@
     flex: none;
     width: 0.8rem;
     height: 0.8rem;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     display: inline-block;
   }
 
@@ -250,12 +250,12 @@
     width: 1.1rem;
     height: 1.1rem;
     object-fit: cover;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
 
   .empty {
     padding: 0.35rem 0.45rem;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.82rem;
   }
 </style>

@@ -187,6 +187,7 @@
     const boxH = fontPx + padY * 2;
     ctx.fillStyle = "rgba(20, 24, 29, 0.72)";
     ctx.fillRect(x - boxW / 2, y - boxH / 2, boxW, boxH);
+    // Canvas glyph ink is part of the rendered map overlay, not DOM chrome.
     ctx.fillStyle = "#eef1f5";
     ctx.fillText(text, x, y + 0.5);
   }

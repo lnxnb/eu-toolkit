@@ -119,22 +119,22 @@
 </div>
 
 <style>
-  .sub { border: 1px solid #232a33; padding: 0.3rem; display: flex; flex-direction: column; gap: 0.25rem; }
+  .sub { border: 1px solid var(--bg-1); padding: 0.3rem; display: flex; flex-direction: column; gap: 0.25rem; }
   .sub-head { display: flex; align-items: center; gap: 0.4rem; }
-  .sub-head .sk { color: #9aecc0; background: #16191f; padding: 0 0.3rem; font-size: 0.76rem; }
-  .nm { font-size: 0.76rem; color: #cfd4db; }
+  .sub-head .sk { color: var(--ok); background: var(--bg-0); padding: 0 0.3rem; font-size: 0.76rem; }
+  .nm { font-size: 0.76rem; color: var(--text-1); }
   .spacer { flex: 1; }
-  .modblock { border: 1px solid #232a33; padding: 0.25rem; }
+  .modblock { border: 1px solid var(--bg-1); padding: 0.25rem; }
   .mb-head { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.2rem; }
-  .mb-head code { color: #9aecc0; background: #16191f; padding: 0 0.3rem; font-size: 0.74rem; }
-  .tag-abs, .tag-raw { font-size: 0.65rem; text-transform: uppercase; color: #8a919c; }
-  .tag-raw { color: #d0a24a; }
+  .mb-head code { color: var(--ok); background: var(--bg-0); padding: 0 0.3rem; font-size: 0.74rem; }
+  .tag-abs, .tag-raw { font-size: 0.65rem; text-transform: uppercase; color: var(--text-2); }
+  .tag-raw { color: var(--warn); }
   .rawrow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; }
-  .idchip { color: #b9bec7; background: #16191f; padding: 0.05rem 0.3rem; font-size: 0.72rem; }
-  .idchip.raw { color: #9ca3af; font-style: italic; }
-  .mini { border: 1px solid #4b5563; background: #2b323d; color: #cfd4db; font-family: inherit; font-size: 0.72rem; padding: 0.05rem 0.4rem; cursor: pointer; }
-  .mini:hover { border-color: #4a6da7; background: #4a6da7; color: #fff; }
-  .mini.danger { color: #fca5a5; border-color: #6b3630; }
-  .dim { color: #9ca3af; }
+  .idchip { color: var(--text-1); background: var(--bg-0); padding: 0.05rem 0.3rem; font-size: 0.72rem; }
+  .idchip.raw { color: var(--text-2); font-style: italic; }
+  .mini { border: 1px solid var(--border-strong); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 0.72rem; padding: 0.05rem 0.4rem; cursor: pointer; }
+  .mini:hover { border-color: var(--accent); background: var(--accent); color: var(--text-inverse); }
+  .mini.danger { color: var(--err); border-color: var(--danger-bg); }
+  .dim { color: var(--text-2); }
   .small { font-size: 0.74rem; }
 </style>

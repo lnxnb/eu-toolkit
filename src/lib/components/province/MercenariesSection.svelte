@@ -10,7 +10,7 @@
 <script lang="ts">
   import { untrack } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
-  import type { DropdownItem, KnownModifier } from "$lib/components/ui";
+  import { LoadingState, type DropdownItem, type KnownModifier } from "$lib/components/ui";
   import type { KnownKey } from "$lib/components/script";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
   import {
@@ -146,7 +146,7 @@
   {#if error}
     <p class="err">{error}</p>
   {:else if !data}
-    <p class="dim">Loading…</p>
+    <LoadingState label="Loading mercenary companies…" />
   {:else}
     {#if companies.length === 0}
       <p class="dim">No mercenary company homed in this province.</p>
@@ -196,27 +196,27 @@
 
 <style>
   section { margin-bottom: 1rem; }
-  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; }
-  .dim { color: #8a919c; font-size: 0.8rem; margin: 0 0 0.4rem; }
-  .err { color: #fca5a5; font-size: 0.78rem; margin: 0.2rem 0; }
+  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2); }
+  .dim { color: var(--text-2); font-size: 0.8rem; margin: 0 0 0.4rem; }
+  .err { color: var(--err); font-size: 0.78rem; margin: 0.2rem 0; }
   .list { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.4rem; }
-  .row { border: 1px solid #232a33; }
+  .row { border: 1px solid var(--bg-1); }
   .row-head {
     display: flex; align-items: center; gap: 0.4rem; width: 100%; text-align: left;
-    border: none; background: #21262e; color: #cfd4db; font-family: inherit;
+    border: none; background: var(--bg-1); color: var(--text-1); font-family: inherit;
     font-size: 0.82rem; padding: 0.25rem 0.4rem; cursor: pointer;
   }
-  .caret { color: #8a919c; width: 0.8rem; flex: none; }
+  .caret { color: var(--text-2); width: 0.8rem; flex: none; }
   .rname { flex: 1; }
-  .badge { font-size: 0.6rem; text-transform: uppercase; background: #2f3b2f; color: #9ece9e; padding: 0.02rem 0.3rem; }
-  .add-btn { border: 1px solid #1f242c; background: #3f4855; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.6rem; cursor: pointer; }
-  .add-btn:hover { background: #4a6da7; color: #fff; }
-  .add-form { border: 1px solid #232a33; padding: 0.4rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  .badge { font-size: 0.6rem; text-transform: uppercase; background: var(--bg-1); color: var(--ok); padding: 0.02rem 0.3rem; }
+  .add-btn { border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.6rem; cursor: pointer; }
+  .add-btn:hover { background: var(--accent); color: var(--text-inverse); }
+  .add-form { border: 1px solid var(--bg-1); padding: 0.4rem; display: flex; flex-direction: column; gap: 0.35rem; }
   .af-row { display: flex; align-items: center; gap: 0.5rem; }
-  .lbl { width: 5rem; flex: none; font-size: 0.76rem; color: #9ca3af; }
-  .txt { flex: 1; min-width: 0; background: #14181d; border: 1px solid #4b5563; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.35rem; }
+  .lbl { width: 5rem; flex: none; font-size: 0.76rem; color: var(--text-2); }
+  .txt { flex: 1; min-width: 0; background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.35rem; }
   .af-actions { display: flex; gap: 0.4rem; }
-  .btn { border: 1px solid #4b5563; background: #2b323d; color: #cfd4db; font-family: inherit; font-size: 0.78rem; padding: 0.2rem 0.6rem; cursor: pointer; }
-  .btn.primary { background: #4a6da7; border-color: #4a6da7; color: #fff; }
-  .btn:hover { border-color: #4a6da7; }
+  .btn { border: 1px solid var(--border-strong); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 0.78rem; padding: 0.2rem 0.6rem; cursor: pointer; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--text-inverse); }
+  .btn:hover { border-color: var(--accent); }
 </style>

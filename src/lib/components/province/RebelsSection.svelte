@@ -18,7 +18,7 @@
   import FieldRow from "$lib/components/country/FieldRow.svelte";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
   import type { ProvinceDetails } from "./types";
-  import { isLaterDate, pushAtDate, type DateCtx } from "./fields";
+  import { writesDatedBlock, pushAtDate, type DateCtx } from "./fields";
   import { parseRevolt, revoltEmpty, revoltBody, type Revolt } from "$lib/rebels";
   import { compareDates } from "$lib/calendar";
 
@@ -95,13 +95,14 @@
   });
 
   const present = $derived(effective != null);
-  const later = $derived(isLaterDate(dateCtx));
+  /** Display-only: does a revolt write at this date go into a dated block? */
+  const later = $derived(writesDatedBlock(dateCtx, ["revolt = {}"]));
 
   // --- Writers ---
   function writeRevolt(next: Revolt) {
     const inner = revoltBody(next).replace(/^\{\s*/, "").replace(/\s*\}$/, "");
     const full = `revolt = { ${inner} }`;
-    if (later) {
+    if (writesDatedBlock(dateCtx, [full])) {
       pushAtDate(queue, dateCtx, `Set revolt of #${id}`, [{ kind: "insertStatement", file, blockPath: [], statement: full }], [full]);
       return;
     }
@@ -121,7 +122,7 @@
   }
 
   function clearRevolt() {
-    if (later) {
+    if (writesDatedBlock(dateCtx, ["revolt = {}"])) {
       // Dated clear = an empty `revolt = {}` entry that ends the revolt at this date.
       pushAtDate(queue, dateCtx, `Clear revolt of #${id}`, [{ kind: "insertStatement", file, blockPath: [], statement: "revolt = {}" }], ["revolt = {}"]);
       return;
@@ -164,14 +165,14 @@
 
 <style>
   section { margin-bottom: 1rem; }
-  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; }
-  .dim { color: #8a919c; font-size: 0.8rem; margin: 0 0 0.4rem; }
+  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2); }
+  .dim { color: var(--text-2); font-size: 0.8rem; margin: 0 0 0.4rem; }
   .note { margin-top: 0.4rem; }
-  code { color: #9aecc0; background: #16191f; padding: 0 0.25rem; font-size: 0.76rem; }
-  .num { width: 4rem; background: #21262e; border: 1px solid #1f242c; color: #cfd4db; font-family: inherit; font-size: 0.85rem; padding: 0.25rem 0.4rem; }
-  .txt { width: 14rem; max-width: 100%; background: #21262e; border: 1px solid #1f242c; color: #cfd4db; font-family: inherit; font-size: 0.85rem; padding: 0.25rem 0.4rem; }
-  .add-btn { border: 1px solid #1f242c; background: #3f4855; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.6rem; cursor: pointer; }
-  .add-btn:hover { background: #4a6da7; color: #fff; }
-  .clr-btn { margin-top: 0.4rem; border: 1px solid #6b3630; background: transparent; color: #fca5a5; font-family: inherit; font-size: 0.78rem; padding: 0.2rem 0.6rem; cursor: pointer; }
-  .clr-btn:hover { background: #7a2820; color: #fff; }
+  code { color: var(--ok); background: var(--bg-0); padding: 0 0.25rem; font-size: 0.76rem; }
+  .num { width: 4rem; background: var(--bg-1); border: 1px solid var(--border); color: var(--text-1); font-family: inherit; font-size: 0.85rem; padding: 0.25rem 0.4rem; }
+  .txt { width: 14rem; max-width: 100%; background: var(--bg-1); border: 1px solid var(--border); color: var(--text-1); font-family: inherit; font-size: 0.85rem; padding: 0.25rem 0.4rem; }
+  .add-btn { border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.6rem; cursor: pointer; }
+  .add-btn:hover { background: var(--accent); color: var(--text-inverse); }
+  .clr-btn { margin-top: 0.4rem; border: 1px solid var(--danger-bg); background: transparent; color: var(--err); font-family: inherit; font-size: 0.78rem; padding: 0.2rem 0.6rem; cursor: pointer; }
+  .clr-btn:hover { background: var(--danger-bg); color: var(--text-inverse); }
 </style>

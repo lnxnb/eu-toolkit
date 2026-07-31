@@ -10,6 +10,13 @@ const host = process.env.TAURI_DEV_HOST;
 // @ts-expect-error process is a nodejs global
 const noWatch = !!process.env.EU_TOOLKIT_NO_WATCH;
 
+// UI-debug mode (run-uidebug.bat): run the dev server on its own port so an
+// agent-driven instance never collides with another Tauri project's vite on
+// 1420 (the toolkit webview would silently load THAT app instead). Must match
+// build.devUrl in src-tauri/tauri.uidebug.conf.json.
+// @ts-expect-error process is a nodejs global
+const port = Number(process.env.EU_TOOLKIT_UI_PORT) || 1420;
+
 // https://vite.dev/config/
 export default defineConfig(async () => ({
   plugins: [sveltekit()],
@@ -27,6 +34,7 @@ export default defineConfig(async () => ({
     include: [
       "@tauri-apps/api/core",
       "@tauri-apps/api/event",
+      "@tauri-apps/api/window",
       "@tauri-apps/plugin-dialog",
     ],
   },
@@ -37,9 +45,17 @@ export default defineConfig(async () => ({
   clearScreen: false,
   // 2. tauri expects a fixed port, fail if that port is not available
   server: {
-    port: 1420,
+    port,
     strictPort: true,
     host: host || false,
+    // Start transforming the heavy MapView module graph (~230 files) as soon
+    // as the dev server boots, instead of on the webview's first request for
+    // it. This overlaps the compile with the Rust build/launch phase, so the
+    // dynamically-imported editor chunk (+page.svelte) is warm by the time a
+    // project is opened.
+    warmup: {
+      clientFiles: ["./src/lib/components/MapView.svelte"],
+    },
     hmr: noWatch
       ? false
       : host

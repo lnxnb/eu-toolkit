@@ -147,30 +147,30 @@
 </div>
 
 <style>
-  .tier { border: 1px solid #232a33; margin-top: 0.3rem; }
+  .tier { border: 1px solid var(--bg-1); margin-top: 0.3rem; }
   .tier-head {
     display: flex; align-items: center; gap: 0.4rem; width: 100%; text-align: left;
-    border: none; background: #21262e; color: #cfd4db; font-family: inherit;
+    border: none; background: var(--bg-1); color: var(--text-1); font-family: inherit;
     font-size: 0.8rem; padding: 0.2rem 0.35rem; cursor: pointer;
   }
-  .caret { color: #8a919c; width: 0.8rem; flex: none; }
-  .absent { font-size: 0.65rem; text-transform: uppercase; color: #8a919c; }
+  .caret { color: var(--text-2); width: 0.8rem; flex: none; }
+  .absent { font-size: 0.65rem; text-transform: uppercase; color: var(--text-2); }
   .tier-body { padding: 0.35rem; display: flex; flex-direction: column; gap: 0.35rem; }
   .scalars { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; }
   .scalar { display: flex; align-items: center; gap: 0.4rem; }
-  .sk { font-size: 0.74rem; color: #cfd4db; }
+  .sk { font-size: 0.74rem; color: var(--text-1); }
   .num {
-    width: 5rem; background: #14181d; border: 1px solid #4b5563; color: #cfd4db;
+    width: 5rem; background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1);
     font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.35rem;
   }
-  .modblock { border: 1px solid #232a33; padding: 0.3rem; }
+  .modblock { border: 1px solid var(--bg-1); padding: 0.3rem; }
   .mb-head { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.25rem; }
-  .mb-head code { color: #9aecc0; background: #16191f; padding: 0 0.3rem; font-size: 0.76rem; }
-  .tag-abs, .tag-raw { font-size: 0.65rem; text-transform: uppercase; color: #8a919c; }
-  .tag-raw { color: #d0a24a; }
+  .mb-head code { color: var(--ok); background: var(--bg-0); padding: 0 0.3rem; font-size: 0.76rem; }
+  .tag-abs, .tag-raw { font-size: 0.65rem; text-transform: uppercase; color: var(--text-2); }
+  .tag-raw { color: var(--warn); }
   .raw-extra { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; }
-  .lbl { font-size: 0.72rem; color: #9ca3af; }
-  .idchip { color: #b9bec7; background: #16191f; padding: 0.05rem 0.3rem; font-size: 0.72rem; }
-  .dim { color: #9ca3af; }
+  .lbl { font-size: 0.72rem; color: var(--text-2); }
+  .idchip { color: var(--text-1); background: var(--bg-0); padding: 0.05rem 0.3rem; font-size: 0.72rem; }
+  .dim { color: var(--text-2); }
   .small { font-size: 0.74rem; }
 </style>

@@ -42,14 +42,14 @@
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .edited {
     text-transform: none;
     letter-spacing: 0;
     background: rgba(234, 179, 8, 0.22);
-    color: #fde68a;
+    color: var(--warn);
     font-size: 0.68rem;
     padding: 0.02rem 0.4rem;
     border: 1px solid rgba(234, 179, 8, 0.35);

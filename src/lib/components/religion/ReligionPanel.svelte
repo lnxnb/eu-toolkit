@@ -1,6 +1,6 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { SidePanel, ColorPicker, DatePicker, SearchDropdown, NewGroupModal, IconImportButton, NEW_GROUP_KEY } from "$lib/components/ui";
+  import { SidePanel, ColorPicker, DatePicker, SearchDropdown, NewGroupModal, IconImportButton, AtlasIcon, LoadingState, NEW_GROUP_KEY } from "$lib/components/ui";
   import type { DropdownItem, KnownModifier, ModifierRow, GroupScaffold, NewGroupResult } from "$lib/components/ui";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
   import FieldRow from "../country/FieldRow.svelte";
@@ -337,6 +337,7 @@
 <SidePanel title={titleName} {onclose}>
   {#snippet header()}
     <div class="head">
+      {#if details?.icon}<AtlasIcon {installPath} {modPath} kind="religions" frame={Math.max(0, details.icon - 1)} size={32} label={`${titleName} icon`} />{/if}
       <span class="swatch" style="background: {css(effectiveColor)}"></span>
       <span class="key-chip">{religionKey}{group ? ` · ${group}` : ""}</span>
     </div>
@@ -345,7 +346,7 @@
   {#if error}
     <p class="error">{error}</p>
   {:else if !details}
-    <p class="dim">Loading…</p>
+    <LoadingState label="Loading religion…" />
   {:else}
     <section>
       <h3>Identity</h3>
@@ -518,22 +519,22 @@
     width: 1rem;
     height: 1rem;
     display: inline-block;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
   .key-chip {
     font-size: 0.8rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   section {
     padding: 0.4rem 0 0.6rem;
-    border-bottom: 1px solid #232a33;
+    border-bottom: 1px solid var(--bg-1);
   }
   h3 {
     margin: 0 0 0.4rem;
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .text,
   .mono {
@@ -541,15 +542,15 @@
   }
   .text {
     width: 100%;
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: inherit;
     padding: 0.2rem 0.4rem;
   }
   .mono {
     font-family: ui-monospace, monospace;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .row {
     display: flex;
@@ -557,16 +558,16 @@
     gap: 0.5rem;
   }
   .btn {
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.2rem 0.6rem;
     cursor: pointer;
   }
   .btn:hover {
-    border-color: #9ca3af;
+    border-color: var(--text-2);
   }
   .mechlinks {
     display: flex;
@@ -574,22 +575,22 @@
     gap: 0.3rem;
   }
   .mechlink {
-    border: 1px solid #2f3946;
-    background: #1b2027;
-    color: #b9bec7;
+    border: 1px solid var(--bg-3);
+    background: var(--bg-1);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.74rem;
     padding: 0.12rem 0.4rem;
     cursor: pointer;
   }
   .mechlink:hover {
-    border-color: #4a6da7;
-    background: #303844;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--bg-3);
+    color: var(--text-inverse);
   }
   .mechlink.used {
-    border-color: #3f8a6d;
-    color: #9aecc0;
+    border-color: var(--ok);
+    color: var(--ok);
   }
   .features {
     display: grid;
@@ -601,14 +602,14 @@
     align-items: center;
     gap: 0.3rem;
     font-size: 0.8rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .raw {
     list-style: none;
     margin: 0;
     padding: 0;
     font-size: 0.8rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .raw li {
     padding: 0.1rem 0;
@@ -620,17 +621,17 @@
     margin: 0.2rem 0 0.4rem;
   }
   .link {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #9cc7ea;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--accent-text);
     font-family: inherit;
     font-size: 0.75rem;
     padding: 0.1rem 0.4rem;
     cursor: pointer;
   }
   .link:hover {
-    border-color: #4a6da7;
-    color: #ffffff;
+    border-color: var(--accent);
+    color: var(--text-inverse);
   }
   .icon-row {
     display: flex;
@@ -639,12 +640,12 @@
     flex-wrap: wrap;
   }
   .dim {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .small {
     font-size: 0.75rem;
   }
   .error {
-    color: #fca5a5;
+    color: var(--err);
   }
 </style>

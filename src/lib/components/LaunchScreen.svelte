@@ -361,16 +361,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    padding: var(--sp-4);
+    background: var(--bg-0);
   }
 
   .card {
     width: 100%;
     max-width: 38rem;
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+    background: var(--bg-2);
+    color: var(--text-1);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-2);
+    padding: var(--sp-6);
+    box-shadow: var(--shadow-window);
     text-align: center;
   }
 
@@ -380,7 +383,7 @@
 
   .subtitle {
     margin: 0 0 1.5rem;
-    color: #6b7280;
+    color: var(--text-3);
   }
 
   .actions {
@@ -396,9 +399,10 @@
     flex-direction: column;
     gap: 0.3rem;
     padding: 1rem;
-    border-radius: 10px;
-    border: 1px solid #d1d5db;
-    background: #f9fafb;
+    border-radius: var(--r-2);
+    border: 1px solid var(--border);
+    background: var(--bg-1);
+    color: inherit;
     font-family: inherit;
     cursor: pointer;
     text-align: left;
@@ -406,7 +410,7 @@
   }
 
   .action:hover {
-    border-color: #396cd8;
+    border-color: var(--accent-text);
   }
 
   .action-title {
@@ -416,7 +420,7 @@
 
   .action-sub {
     font-size: 0.8rem;
-    color: #6b7280;
+    color: var(--text-3);
   }
 
   h2 {
@@ -424,12 +428,12 @@
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #6b7280;
+    color: var(--text-3);
     text-align: left;
   }
 
   .hint {
-    color: #6b7280;
+    color: var(--text-3);
     font-size: 0.9rem;
     text-align: left;
   }
@@ -450,9 +454,10 @@
     gap: 0.65rem;
     text-align: left;
     padding: 0.6rem 0.85rem;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    background: #f9fafb;
+    border-radius: var(--r-2);
+    border: 1px solid var(--border);
+    background: var(--bg-1);
+    color: inherit;
     font-family: inherit;
     font-size: 0.95rem;
     cursor: pointer;
@@ -460,11 +465,11 @@
   }
 
   .install:hover {
-    border-color: #396cd8;
+    border-color: var(--accent-text);
   }
 
   .install.selected {
-    border-color: #396cd8;
+    border-color: var(--accent-text);
     background: rgba(57, 108, 216, 0.08);
   }
 
@@ -473,13 +478,13 @@
     width: 0.9rem;
     height: 0.9rem;
     border-radius: 50%;
-    border: 2px solid #9ca3af;
+    border: 2px solid var(--text-2);
   }
 
   .install.selected .radio {
-    border-color: #396cd8;
-    background: #396cd8;
-    box-shadow: inset 0 0 0 2.5px #f9fafb;
+    border-color: var(--accent-text);
+    background: var(--accent-text);
+    box-shadow: inset 0 0 0 2.5px var(--text-inverse);
   }
 
   .install-text {
@@ -495,7 +500,7 @@
 
   .install-text .source {
     font-size: 0.8rem;
-    color: #6b7280;
+    color: var(--text-3);
   }
 
   .browse {
@@ -505,18 +510,19 @@
     font-size: 0.95em;
     font-weight: 500;
     font-family: inherit;
-    background: #ffffff;
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+    background: var(--bg-1);
+    color: var(--text-1);
+    box-shadow: var(--shadow-popover);
     cursor: pointer;
     transition: border-color 0.25s;
   }
 
   .browse:hover {
-    border-color: #396cd8;
+    border-color: var(--accent-text);
   }
 
   .error {
-    color: #b91c1c;
+    color: var(--err);
     font-size: 0.9rem;
   }
 
@@ -535,15 +541,15 @@
     gap: 0.5rem;
     text-align: left;
     padding: 0.5rem 0.7rem;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    background: #f9fafb;
+    border-radius: var(--r-2);
+    border: 1px solid var(--border);
+    background: var(--bg-1);
     cursor: pointer;
     transition: border-color 0.15s;
   }
 
   .recent:hover:not(.missing) {
-    border-color: #396cd8;
+    border-color: var(--accent-text);
   }
 
   .recent.missing {
@@ -575,15 +581,15 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #b91c1c;
-    border: 1px solid #b91c1c;
+    color: var(--err);
+    border: 1px solid var(--err);
     border-radius: 4px;
     padding: 0 0.3rem;
   }
 
   .recent-path {
     font-size: 0.78rem;
-    color: #6b7280;
+    color: var(--text-3);
     white-space: nowrap;
   }
 
@@ -594,9 +600,9 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 0.72rem;
-    color: #4b5563;
-    background: #eef1f6;
-    border: 1px solid #d1d5db;
+    color: var(--text-2);
+    background: var(--bg-2);
+    border: 1px solid var(--border-strong);
     border-radius: 999px;
     padding: 0.1rem 0.55rem;
   }
@@ -611,7 +617,7 @@
     border-radius: 6px;
     border: 1px solid transparent;
     background: transparent;
-    color: #6b7280;
+    color: var(--text-3);
     font-family: inherit;
     font-size: 0.95rem;
     line-height: 1;
@@ -621,56 +627,57 @@
 
   .recent-btn:hover {
     background: rgba(57, 108, 216, 0.12);
-    color: #396cd8;
+    color: var(--accent-text);
   }
 
   .recent-btn.pin.pinned {
-    color: #d9a400;
+    color: var(--warn);
   }
 
   .recent-btn.remove:hover {
     background: rgba(185, 29, 29, 0.12);
-    color: #b91c1c;
+    color: var(--err);
   }
 
   @media (prefers-color-scheme: dark) {
     .card {
-      background: #262626;
+      background: var(--bg-1);
+      color: var(--text-1);
     }
 
     .action,
     .install,
     .recent {
-      background: #1f1f1f;
-      border-color: #404040;
+      background: var(--bg-0);
+      border-color: var(--bg-3);
       color: inherit;
     }
 
     .recent:hover:not(.missing) {
-      border-color: #5b8def;
+      border-color: var(--accent-text);
     }
 
     .badge {
-      background: #2a2a2a;
-      border-color: #404040;
-      color: #cbd0d8;
+      background: var(--bg-1);
+      border-color: var(--bg-3);
+      color: var(--text-1);
     }
 
     .recent-path {
-      color: #9ca3af;
+      color: var(--text-2);
     }
 
     .install.selected {
-      border-color: #5b8def;
+      border-color: var(--accent-text);
       background: rgba(91, 141, 239, 0.12);
     }
 
     .install.selected .radio {
-      box-shadow: inset 0 0 0 2.5px #1f1f1f;
+      box-shadow: inset 0 0 0 2.5px var(--bg-0);
     }
 
     .browse {
-      background: #0f0f0f98;
+      background: var(--bg-0);
       color: inherit;
     }
 
@@ -678,7 +685,7 @@
     .hint,
     .action-sub,
     .install-text .source {
-      color: #9ca3af;
+      color: var(--text-2);
     }
   }
 </style>

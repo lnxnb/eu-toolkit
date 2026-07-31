@@ -6,7 +6,7 @@
   // existing typed-edit vocabulary and are byte-surgical.
   import { SpritePicker } from "$lib/components/script";
   import type { KnownKey } from "$lib/components/script";
-  import type { DropdownItem, KnownModifier, ModifierRow } from "$lib/components/ui";
+  import { AtlasIcon, SpriteIcon, type DropdownItem, type KnownModifier, type ModifierRow } from "$lib/components/ui";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
   import { modBlockValue, type EstateObject, type ModifierBlock, type Scalar } from "$lib/estates";
   import EstateModifierBlock from "./EstateModifierBlock.svelte";
@@ -168,6 +168,7 @@
   {#if obj.iconKind === "index"}
     <div class="field">
       <label for={`est-icon-${key}`}>Icon (strip index)</label>
+      <AtlasIcon {installPath} {modPath} kind="estates" frame={Math.max(0, Number(liveIcon))} size={32} label={`${liveName} icon`} />
       <input
         id={`est-icon-${key}`}
         class="num"
@@ -180,6 +181,7 @@
     <div class="field">
       <span class="lbl">Icon (sprite)</span>
       <div class="iconrow">
+        {#if liveIcon}<SpriteIcon {installPath} {modPath} name={liveIcon} size={32} label={`${liveName} icon`} />{/if}
         <code class="iconval">{liveIcon || "(none)"}</code>
         <button class="mini" onclick={() => (pickIcon = !pickIcon)}>{pickIcon ? "close" : "change…"}</button>
       </div>
@@ -353,23 +355,23 @@
     width: 9rem;
     flex: none;
     font-size: 0.78rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .txt {
     flex: 1;
     min-width: 0;
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.15rem 0.35rem;
   }
   .num {
     width: 5rem;
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.15rem 0.35rem;
@@ -381,15 +383,15 @@
     gap: 0.4rem;
   }
   .iconval {
-    color: #9aecc0;
-    background: #16191f;
+    color: var(--ok);
+    background: var(--bg-0);
     padding: 0.05rem 0.3rem;
     font-size: 0.76rem;
   }
   .swatch {
     width: 1.1rem;
     height: 1.1rem;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     flex: none;
   }
   .picker {
@@ -401,8 +403,8 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: #9ca3af;
-    border-bottom: 1px solid #232a33;
+    color: var(--text-2);
+    border-bottom: 1px solid var(--bg-1);
     padding-bottom: 0.15rem;
   }
   .scalars {
@@ -417,24 +419,24 @@
   }
   .sk {
     font-size: 0.76rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .toggle {
     width: 3rem;
-    border: 1px solid #1f242c;
-    background: #21262e;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.15rem 0;
     cursor: pointer;
   }
   .toggle.on {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .modblock {
-    border: 1px solid #232a33;
+    border: 1px solid var(--bg-1);
     padding: 0.3rem;
   }
   .mb-head {
@@ -444,8 +446,8 @@
     margin-bottom: 0.25rem;
   }
   .mb-head code {
-    color: #9aecc0;
-    background: #16191f;
+    color: var(--ok);
+    background: var(--bg-0);
     padding: 0 0.3rem;
     font-size: 0.76rem;
   }
@@ -453,10 +455,10 @@
   .tag-raw {
     font-size: 0.65rem;
     text-transform: uppercase;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .tag-raw {
-    color: #d0a24a;
+    color: var(--warn);
   }
   .idlist {
     display: flex;
@@ -464,31 +466,31 @@
     gap: 0.25rem;
   }
   .idchip {
-    color: #b9bec7;
-    background: #16191f;
+    color: var(--text-1);
+    background: var(--bg-0);
     padding: 0.05rem 0.3rem;
     font-size: 0.72rem;
   }
   .idchip.raw {
-    color: #9ca3af;
+    color: var(--text-2);
     font-style: italic;
   }
   .mini {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.72rem;
     padding: 0.05rem 0.4rem;
     cursor: pointer;
   }
   .mini:hover {
-    border-color: #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .dim {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .small {
     font-size: 0.74rem;
@@ -497,21 +499,21 @@
     margin-top: 0.5rem;
   }
   .btn {
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.2rem 0.6rem;
     cursor: pointer;
   }
   .btn.danger {
-    color: #fca5a5;
-    border-color: #6b3630;
+    color: var(--err);
+    border-color: var(--danger-bg);
   }
   .btn.danger:hover {
-    background: #7a2820;
-    border-color: #9a3226;
-    color: #fff;
+    background: var(--danger-bg);
+    border-color: var(--danger-bg);
+    color: var(--text-inverse);
   }
 </style>

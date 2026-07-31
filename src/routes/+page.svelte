@@ -2,8 +2,19 @@
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import LaunchScreen from "$lib/components/LaunchScreen.svelte";
-  import MapView from "$lib/components/MapView.svelte";
   import type { Session } from "$lib/session";
+
+  // MapView transitively imports essentially the entire component graph
+  // (~230 modules). A static import here makes the FIRST PAINT wait for the
+  // dev server to transform all of it — a long blank white window before the
+  // launch screen ever shows. Importing it dynamically lets the tiny
+  // launch-screen graph paint immediately; the import is kicked off right
+  // away (not on first use) so the heavy graph streams in while the user is
+  // still on the launch screen and is normally ready before a project opens.
+  let MapView = $state<
+    typeof import("$lib/components/MapView.svelte").default | null
+  >(null);
+  import("$lib/components/MapView.svelte").then((m) => (MapView = m.default));
 
   let session = $state<Session | null>(null);
   // Bumped when the map view must fully reload (different project/base);
@@ -126,7 +137,7 @@
 
 {#if session === null}
   <LaunchScreen onopen={openSession} />
-{:else}
+{:else if MapView}
   {#key sessionKey}
     <MapView
       installPath={session.installPath}
@@ -136,23 +147,38 @@
       onhome={goHome}
     />
   {/key}
+{:else}
+  <!-- Session restored (or opened) before the MapView chunk finished loading:
+       show a lightweight placeholder instead of a blank window. -->
+  <div class="app-loading">Loading editor…</div>
 {/if}
 
 <style>
+  .app-loading {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-0);
+    color: var(--text-2);
+    font-size: 14px;
+  }
+
   /* Windows-classic error banner, above everything (modals top out ~100+). */
   .error-banner {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1000;
+    z-index: calc(var(--z-modal-content) + 1);
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 6px 10px;
-    background: #7a1f1f;
-    border-bottom: 1px solid #2b323d;
-    color: #f2d6d6;
+    background: var(--danger-bg);
+    border-bottom: 1px solid var(--bg-2);
+    color: var(--text-1);
     font-size: 13px;
   }
   .error-text {
@@ -167,13 +193,13 @@
     height: 22px;
     line-height: 20px;
     padding: 0;
-    background: #3f4855;
-    border: 1px solid #2b323d;
-    color: #cfd4db;
+    background: var(--bg-3);
+    border: 1px solid var(--bg-2);
+    color: var(--text-1);
     cursor: pointer;
     font-size: 16px;
   }
   .error-dismiss:hover {
-    background: #4a6da7;
+    background: var(--accent);
   }
 </style>

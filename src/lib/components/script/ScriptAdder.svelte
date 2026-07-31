@@ -76,9 +76,9 @@
 
   .add-btn,
   .combo-btn {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.76rem;
     padding: 0.18rem 0.5rem;
@@ -87,8 +87,8 @@
 
   .add-btn:hover,
   .combo-btn:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .picker {
@@ -115,7 +115,7 @@
     flex: none;
     border: none;
     background: transparent;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 1rem;
     line-height: 1;
     cursor: pointer;
@@ -123,6 +123,6 @@
   }
 
   .cancel:hover {
-    color: #fca5a5;
+    color: var(--err);
   }
 </style>

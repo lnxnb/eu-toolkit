@@ -170,28 +170,28 @@
 <style>
   .editor { padding: 0.35rem 0.1rem; display: flex; flex-direction: column; gap: 0.35rem; }
   .field { display: flex; align-items: center; gap: 0.5rem; }
-  .field label { width: 5rem; flex: none; font-size: 0.76rem; color: #9ca3af; }
-  .txt { flex: 1; min-width: 0; background: #14181d; border: 1px solid #4b5563; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.35rem; }
+  .field label { width: 5rem; flex: none; font-size: 0.76rem; color: var(--text-2); }
+  .txt { flex: 1; min-width: 0; background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.35rem; }
   .txt.sm { width: 12rem; flex: none; }
-  .num { width: 5rem; background: #14181d; border: 1px solid #4b5563; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.35rem; }
-  .section-title { margin-top: 0.4rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; color: #9ca3af; border-bottom: 1px solid #232a33; padding-bottom: 0.15rem; }
+  .num { width: 5rem; background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.15rem 0.35rem; }
+  .section-title { margin-top: 0.4rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-2); border-bottom: 1px solid var(--bg-1); padding-bottom: 0.15rem; }
   .scalars { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; }
   .scalar { display: flex; align-items: center; gap: 0.4rem; }
-  .sk { font-size: 0.74rem; color: #cfd4db; }
-  .toggle { width: 3rem; border: 1px solid #1f242c; background: #21262e; color: #cfd4db; font-family: inherit; font-size: 0.78rem; padding: 0.15rem 0; cursor: pointer; }
-  .toggle.on { background: #4a6da7; color: #fff; }
-  .modblock { border: 1px solid #232a33; padding: 0.3rem; }
+  .sk { font-size: 0.74rem; color: var(--text-1); }
+  .toggle { width: 3rem; border: 1px solid var(--border); background: var(--bg-1); color: var(--text-1); font-family: inherit; font-size: 0.78rem; padding: 0.15rem 0; cursor: pointer; }
+  .toggle.on { background: var(--accent); color: var(--text-inverse); }
+  .modblock { border: 1px solid var(--bg-1); padding: 0.3rem; }
   .mb-head { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.25rem; }
-  .mb-head code { color: #9aecc0; background: #16191f; padding: 0 0.3rem; font-size: 0.76rem; }
-  .tag-abs, .tag-raw { font-size: 0.65rem; text-transform: uppercase; color: #8a919c; }
-  .tag-raw { color: #d0a24a; }
+  .mb-head code { color: var(--ok); background: var(--bg-0); padding: 0 0.3rem; font-size: 0.76rem; }
+  .tag-abs, .tag-raw { font-size: 0.65rem; text-transform: uppercase; color: var(--text-2); }
+  .tag-raw { color: var(--warn); }
   .idlist { display: flex; flex-wrap: wrap; gap: 0.25rem; }
-  .idchip { color: #b9bec7; background: #16191f; padding: 0.05rem 0.3rem; font-size: 0.72rem; }
-  .idchip.raw { color: #9ca3af; font-style: italic; }
-  .dim { color: #9ca3af; }
+  .idchip { color: var(--text-1); background: var(--bg-0); padding: 0.05rem 0.3rem; font-size: 0.72rem; }
+  .idchip.raw { color: var(--text-2); font-style: italic; }
+  .dim { color: var(--text-2); }
   .small { font-size: 0.74rem; }
   .danger-zone { margin-top: 0.5rem; }
-  .btn { border: 1px solid #4b5563; background: transparent; color: #cfd4db; font-family: inherit; font-size: 0.78rem; padding: 0.2rem 0.6rem; cursor: pointer; }
-  .btn.danger { color: #fca5a5; border-color: #6b3630; }
-  .btn.danger:hover { background: #7a2820; border-color: #9a3226; color: #fff; }
+  .btn { border: 1px solid var(--border-strong); background: transparent; color: var(--text-1); font-family: inherit; font-size: 0.78rem; padding: 0.2rem 0.6rem; cursor: pointer; }
+  .btn.danger { color: var(--err); border-color: var(--danger-bg); }
+  .btn.danger:hover { background: var(--danger-bg); border-color: var(--danger-bg); color: var(--text-inverse); }
 </style>

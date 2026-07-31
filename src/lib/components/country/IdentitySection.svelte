@@ -281,14 +281,14 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .text,
   .num {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.25rem 0.4rem;
@@ -312,12 +312,12 @@
 
   .hint {
     font-size: 0.68rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .hex {
     font-size: 0.75rem;
-    color: #8a919c;
+    color: var(--text-2);
     font-variant-numeric: tabular-nums;
   }
 
@@ -331,11 +331,11 @@
     width: 2.5rem;
     height: 2.5rem;
     object-fit: cover;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
 
   .btn {
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     background: transparent;
     color: inherit;
     font-family: inherit;
@@ -345,9 +345,9 @@
   }
 
   .btn:hover:not(:disabled) {
-    border-color: #9ca3af;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--text-2);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .btn:disabled {
@@ -356,7 +356,7 @@
   }
 
   .err {
-    color: #fca5a5;
+    color: var(--err);
     font-size: 0.78rem;
   }
 </style>

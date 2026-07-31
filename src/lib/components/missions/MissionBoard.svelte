@@ -199,6 +199,7 @@
       <svg class="arrows" width={boardW} height={boardH} aria-hidden="true">
         <defs>
           <marker id="mreqhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <!-- Authored mission-tree connector artwork; these are diagram data colors. -->
             <path d="M0,0 L8,4 L0,8 Z" fill="#c8a24a" />
           </marker>
         </defs>
@@ -301,32 +302,32 @@
     gap: 0.6rem;
     flex: none;
     padding: 0.35rem 0.5rem;
-    background: #262d37;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border);
   }
 
   .tool {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.22rem 0.6rem;
     cursor: pointer;
   }
-  .tool:hover { background: #4a6da7; color: #fff; }
-  .tool.on { background: #b8863b; color: #fff; }
+  .tool:hover { background: var(--accent); color: var(--text-inverse); }
+  .tool.on { background: var(--warn); color: var(--text-inverse); }
 
-  .linkhint { font-size: 0.76rem; color: #c8a24a; }
-  .linkhint code { color: #9aecc0; }
+  .linkhint { font-size: 0.76rem; color: var(--warn); }
+  .linkhint code { color: var(--ok); }
   .spacer { flex: 1; }
-  .hint { font-size: 0.72rem; color: #6d7683; }
+  .hint { font-size: 0.72rem; color: var(--text-3); }
 
   .scroller {
     flex: 1;
     min-height: 0;
     overflow: auto;
-    background: #171b21;
+    background: var(--bg-0);
   }
 
   .board {
@@ -336,7 +337,7 @@
   .slotcol {
     position: absolute;
     top: 8px;
-    border: 1px dashed #262d37;
+    border: 1px dashed var(--bg-2);
     background: rgba(255, 255, 255, 0.008);
     pointer-events: none;
   }
@@ -345,7 +346,7 @@
     top: 2px;
     left: 4px;
     font-size: 0.64rem;
-    color: #4a5563;
+    color: var(--bg-3);
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
@@ -359,7 +360,7 @@
 
   .divider {
     position: absolute;
-    border-top: 2px dashed #3a4657;
+    border-top: 2px dashed var(--bg-3);
     height: 0;
     pointer-events: none;
   }
@@ -369,9 +370,9 @@
     display: flex;
     align-items: center;
     gap: 0.3rem;
-    border: 1px solid #2b3442;
-    background: #232a34;
-    color: #9aecc0;
+    border: 1px solid var(--bg-3);
+    background: var(--bg-1);
+    color: var(--ok);
     font-family: inherit;
     font-size: 0.66rem;
     padding: 0 0.35rem;
@@ -379,14 +380,14 @@
     overflow: hidden;
     white-space: nowrap;
   }
-  .series-header:hover { border-color: #4a6da7; background: #2b3442; }
-  .series-header.sel { border-color: #4a6da7; background: #2b3a4f; color: #cfe6ff; }
-  .series-header.approx { border-color: #7a6a3f; color: #d8c07a; }
+  .series-header:hover { border-color: var(--accent); background: var(--bg-3); }
+  .series-header.sel { border-color: var(--accent); background: var(--accent); color: var(--accent-text); }
+  .series-header.approx { border-color: var(--warn); color: var(--warn); }
   .sh-key { overflow: hidden; text-overflow: ellipsis; }
   .approx-mark {
     font-size: 0.56rem;
-    background: #7a6a3f;
-    color: #fff;
+    background: var(--warn);
+    color: var(--text-inverse);
     padding: 0 0.2rem;
     letter-spacing: 0.04em;
     flex: none;
@@ -394,9 +395,9 @@
 
   .empty-cell {
     position: absolute;
-    border: 1px dashed #33507a;
+    border: 1px dashed var(--accent);
     background: rgba(74, 109, 167, 0.05);
-    color: #4a6da7;
+    color: var(--accent);
     font-size: 1.4rem;
     cursor: pointer;
     opacity: 0.35;
@@ -409,17 +410,17 @@
     flex-direction: column;
     align-items: center;
     gap: 0.2rem;
-    border: 2px solid #33507a;
-    background: #232a34;
-    color: #cfd4db;
+    border: 2px solid var(--accent);
+    background: var(--bg-1);
+    color: var(--text-1);
     padding: 0.3rem;
     cursor: grab;
     user-select: none;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   }
-  .node:hover { border-color: #4a6da7; }
-  .node.selected { border-color: #4a6da7; background: #2b3a4f; }
-  .node.linkfrom { border-color: #b8863b; }
+  .node:hover { border-color: var(--accent); }
+  .node.selected { border-color: var(--accent); background: var(--accent); }
+  .node.linkfrom { border-color: var(--warn); }
   .node.dragging { cursor: grabbing; opacity: 0.85; z-index: 5; }
 
   .node-icon {
@@ -428,12 +429,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #14181d;
+    background: var(--bg-0);
     overflow: hidden;
     flex: none;
   }
   .node-icon img { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
-  .icon-ph { color: #4a5563; font-size: 1.4rem; }
+  .icon-ph { color: var(--bg-3); font-size: 1.4rem; }
 
   .node-body {
     display: flex;
@@ -455,15 +456,15 @@
   .mini-badge {
     font-size: 0.6rem;
     text-transform: uppercase;
-    background: #b8863b;
-    color: #fff;
+    background: var(--warn);
+    color: var(--text-inverse);
     padding: 0 0.25rem;
   }
   .ext-badge {
     font-size: 0.58rem;
-    background: #4a3f2b;
-    color: #d8c07a;
-    border: 1px solid #7a6a3f;
+    background: var(--warn);
+    color: var(--warn);
+    border: 1px solid var(--warn);
     padding: 0 0.2rem;
     max-width: 100%;
     overflow: hidden;

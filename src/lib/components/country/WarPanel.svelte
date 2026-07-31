@@ -324,8 +324,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    border: 1px solid #1f242c;
-    background: #262c35;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
     padding: 0.5rem;
   }
   .head {
@@ -335,9 +335,9 @@
   }
   .war-name {
     flex: 1;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #e6e9ee;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.9rem;
     font-weight: 600;
@@ -345,29 +345,29 @@
     outline: none;
   }
   .x {
-    border: 1px solid #1f242c;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text-1);
     cursor: pointer;
     font-size: 0.75rem;
     padding: 0.15rem 0.4rem;
   }
   .x:hover {
-    background: #c0392b;
-    color: #fff;
+    background: var(--err);
+    color: var(--text-inverse);
   }
   h4 {
     margin: 0 0 0.3rem;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #8a919c;
+    color: var(--text-2);
   }
   h4.atk {
-    color: #e08b80;
+    color: var(--err);
   }
   h4.def {
-    color: #86a9d6;
+    color: var(--accent-text);
   }
   .grid {
     display: grid;
@@ -384,16 +384,16 @@
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .target {
     margin-top: 0.4rem;
   }
   select,
   .prov {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.25rem 0.3rem;
@@ -402,7 +402,7 @@
   .note {
     margin: 0.3rem 0 0;
     font-size: 0.72rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .cols {
     display: grid;
@@ -410,12 +410,12 @@
     gap: 0.5rem;
   }
   .col {
-    border: 1px solid #1f242c;
-    background: #21262e;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
     padding: 0.4rem;
   }
   .part {
-    border-bottom: 1px solid #1f242c;
+    border-bottom: 1px solid var(--border);
     padding: 0.2rem 0;
   }
   .who {
@@ -424,7 +424,7 @@
     gap: 0.35rem;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     cursor: pointer;
@@ -432,18 +432,18 @@
     min-width: 0;
   }
   .who:hover {
-    color: #fff;
+    color: var(--text-inverse);
   }
   .flag {
     width: 1.1rem;
     height: 1.1rem;
     object-fit: cover;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     flex: none;
   }
   .flag.ph {
     display: inline-block;
-    background: #3a4150;
+    background: var(--bg-3);
   }
   .pn {
     overflow: hidden;
@@ -462,45 +462,45 @@
     align-items: center;
     gap: 0.25rem;
     font-size: 0.68rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .leave {
     flex-wrap: wrap;
   }
   .still {
     font-size: 0.72rem;
-    color: #7fae7f;
+    color: var(--ok);
   }
   .mini {
-    border: 1px solid #1f242c;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text-1);
     cursor: pointer;
     font-size: 0.7rem;
     padding: 0.05rem 0.3rem;
   }
   .mini:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .mini.danger:hover {
-    background: #c0392b;
+    background: var(--err);
   }
   .add {
     display: block;
     width: 100%;
     margin-top: 0.3rem;
-    border: 1px dashed #3a4150;
+    border: 1px dashed var(--bg-3);
     background: transparent;
-    color: #9ca3af;
+    color: var(--text-2);
     font-family: inherit;
     font-size: 0.75rem;
     padding: 0.2rem;
     cursor: pointer;
   }
   .add:hover {
-    background: #2b323d;
-    color: #fff;
+    background: var(--bg-2);
+    color: var(--text-inverse);
   }
   .addbox {
     display: flex;
@@ -508,15 +508,15 @@
     gap: 0.3rem;
     margin-top: 0.3rem;
     padding: 0.3rem;
-    border: 1px solid #1f242c;
-    background: #262c35;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
   }
   .jd {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
     font-size: 0.68rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .addactions {
     display: flex;
@@ -524,25 +524,25 @@
   }
   .confirm,
   .cancel {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.76rem;
     padding: 0.2rem 0.6rem;
     cursor: pointer;
   }
   .confirm:hover:not(:disabled) {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .confirm:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
   .cancel:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .foot {
     display: flex;
@@ -552,14 +552,14 @@
   }
   .battles {
     font-size: 0.72rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .spacer {
     flex: 1;
   }
   .delnote {
     font-size: 0.68rem;
-    color: #fca5a5;
+    color: var(--err);
     max-width: 16rem;
   }
 </style>

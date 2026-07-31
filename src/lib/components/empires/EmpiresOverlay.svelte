@@ -19,6 +19,7 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
   import { OverlaySurface } from "$lib/components/script";
+  import { TabStrip } from "$lib/components/workspace";
   import type { KnownKey } from "$lib/components/script";
   import type { DropdownItem, KnownModifier } from "$lib/components/ui";
   import { SearchDropdown } from "$lib/components/ui";
@@ -65,6 +66,7 @@
   interface CountryBrief { tag: string; name: string; color: [number, number, number] | null }
 
   let tab = $state<"hre" | "mandate">("hre");
+  let sectionTab = $state<"overview" | "reforms" | "incidents">("overview");
   let known = $state<KnownModifier[]>([]);
   let triggers = $state<KnownKey[]>([]);
   let effects = $state<KnownKey[]>([]);
@@ -169,21 +171,29 @@
 
 <OverlaySurface bind:open title="Empires">
   {#snippet toolbar()}
-    <div class="tabs">
-      <button class:active={tab === "hre"} onclick={() => (tab = "hre")}>Holy Roman Empire</button>
-      <button class:active={tab === "mandate"} onclick={() => (tab = "mandate")}>Mandate of Heaven</button>
-    </div>
+    <TabStrip tier="content" tabs={[{id:"hre",label:"Holy Roman Empire"},{id:"mandate",label:"Mandate of Heaven"}]} activeId={tab} onselect={(id) => tab = id as typeof tab} />
   {/snippet}
 
   <div class="body">
     {#if error}<p class="err">{error}</p>{/if}
 
+    <TabStrip
+      tier="content"
+      tabs={tab === "hre"
+        ? [{id:"overview",label:"Timeline & members"},{id:"reforms",label:"Reforms"},{id:"incidents",label:"Incidents"}]
+        : [{id:"overview",label:"Timeline"},{id:"reforms",label:"Reforms"},{id:"incidents",label:"Decrees"}]}
+      activeId={sectionTab}
+      onselect={(id) => sectionTab = id as typeof sectionTab}
+    />
+
     {#if tab === "hre"}
+      {#if sectionTab === "overview"}
       <section class="sec">
         <h3>Emperor timeline</h3>
         <EmperorTimelineSection {installPath} {modPath} kind="hre" label="HRE" {queue} {countries} {date} />
       </section>
 
+      {:else if sectionTab === "reforms"}
       <section class="sec">
         <h3>Electors <span class="ct">{electors.length}</span></h3>
         <ul class="chips">
@@ -201,6 +211,7 @@
         </div>
       </section>
 
+      {:else}
       <section class="sec">
         <h3>Members</h3>
         {#if memberData}
@@ -229,12 +240,15 @@
           </MechanicFamilyList>
         {/if}
       </section>
+      {/if}
     {:else}
+      {#if sectionTab === "overview"}
       <section class="sec">
         <h3>Celestial emperor timeline</h3>
         <EmperorTimelineSection {installPath} {modPath} kind="celestial" label="Celestial" {queue} {countries} {date} />
       </section>
 
+      {:else if sectionTab === "reforms"}
       <section class="sec">
         <h3>Imperial reforms (Empire of China)</h3>
         {#if reforms}
@@ -242,6 +256,7 @@
         {/if}
       </section>
 
+      {:else}
       <section class="sec">
         <h3>Decrees</h3>
         {#if decrees}
@@ -254,34 +269,32 @@
         <p class="note">Confucian harmony and Buddhist karma religion mechanics are edited in the religion panel.</p>
         {#if onopenreligion}<button class="add" onclick={onopenreligion}>Open religion mechanics ↗</button>{/if}
       </section>
+      {/if}
     {/if}
   </div>
 </OverlaySurface>
 
 <style>
-  .tabs { display: flex; gap: 0.25rem; }
-  .tabs button { border: 1px solid #1f242c; background: #21262e; color: #cfd4db; font-family: inherit; font-size: 0.82rem; padding: 0.25rem 0.7rem; cursor: pointer; }
-  .tabs button.active { background: #4a6da7; color: #fff; }
   .body { display: flex; flex-direction: column; gap: 1rem; }
   .sec { display: flex; flex-direction: column; gap: 0.4rem; }
-  .sec h3 { margin: 0; font-size: 0.9rem; color: #e3e7ec; border-bottom: 1px solid #1f242c; padding-bottom: 0.25rem; }
-  .ct { color: #8a919c; font-weight: normal; font-size: 0.8rem; }
+  .sec h3 { margin: 0; font-size: 0.9rem; color: var(--text-1); border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; }
+  .ct { color: var(--text-2); font-weight: normal; font-size: 0.8rem; }
   .chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
-  .chip { display: flex; align-items: center; gap: 0.3rem; border: 1px solid #1f242c; background: #21262e; padding: 0.12rem 0.35rem; font-size: 0.8rem; }
-  .chip code { color: #9aecc0; background: #16191f; padding: 0 0.25rem; font-size: 0.72rem; }
-  .chip .x { border: none; background: none; color: #8a919c; cursor: pointer; font-size: 0.75rem; }
-  .chip .x:hover { color: #d9756b; }
-  .none { color: #8a919c; font-size: 0.82rem; }
+  .chip { display: flex; align-items: center; gap: 0.3rem; border: 1px solid var(--border); background: var(--bg-1); padding: 0.12rem 0.35rem; font-size: 0.8rem; }
+  .chip code { color: var(--ok); background: var(--bg-0); padding: 0 0.25rem; font-size: 0.72rem; }
+  .chip .x { border: none; background: none; color: var(--text-2); cursor: pointer; font-size: 0.75rem; }
+  .chip .x:hover { color: var(--err); }
+  .none { color: var(--text-2); font-size: 0.82rem; }
   .addrow { display: flex; align-items: center; gap: 0.5rem; }
   .pick { width: 16rem; }
-  .add { border: 1px solid #1f242c; background: #3f4855; color: #cfd4db; font-family: inherit; font-size: 0.82rem; padding: 0.28rem 0.7rem; cursor: pointer; }
-  .add:hover:not(:disabled) { background: #4a6da7; color: #fff; }
+  .add { border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 0.82rem; padding: 0.28rem 0.7rem; cursor: pointer; }
+  .add:hover:not(:disabled) { background: var(--accent); color: var(--text-inverse); }
   .add:disabled { opacity: 0.5; cursor: default; }
-  .members { font-size: 0.88rem; color: #cfd4db; margin: 0; }
-  .hl { border: 1px solid #1f242c; background: #3f4855; color: #cfd4db; font-family: inherit; font-size: 0.82rem; padding: 0.3rem 0.8rem; cursor: pointer; align-self: flex-start; }
-  .hl:hover { background: #4a6da7; color: #fff; }
-  .hl.on { background: #4a6da7; color: #fff; }
-  .note { font-size: 0.78rem; color: #6d7683; margin: 0.1rem 0 0; }
+  .members { font-size: 0.88rem; color: var(--text-1); margin: 0; }
+  .hl { border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 0.82rem; padding: 0.3rem 0.8rem; cursor: pointer; align-self: flex-start; }
+  .hl:hover { background: var(--accent); color: var(--text-inverse); }
+  .hl.on { background: var(--accent); color: var(--text-inverse); }
+  .note { font-size: 0.78rem; color: var(--text-3); margin: 0.1rem 0 0; }
   .xlink { opacity: 0.95; }
-  .err { color: #d9756b; font-size: 0.85rem; }
+  .err { color: var(--err); font-size: 0.85rem; }
 </style>

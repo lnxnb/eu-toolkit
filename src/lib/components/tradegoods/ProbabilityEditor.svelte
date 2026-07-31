@@ -145,8 +145,8 @@
     flex-direction: column;
     gap: 0.4rem;
     padding: 0.5rem;
-    background: #21262e;
-    border-top: 1px solid #1f242c;
+    background: var(--bg-1);
+    border-top: 1px solid var(--border);
   }
 
   .prob-head {
@@ -158,7 +158,7 @@
   .title {
     font-size: 0.78rem;
     font-weight: 600;
-    color: #cfd4db;
+    color: var(--text-1);
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
@@ -167,17 +167,17 @@
     margin-left: auto;
     font-size: 0.78rem;
     font-variant-numeric: tabular-nums;
-    color: #86efac;
+    color: var(--ok);
   }
 
   .sum.off {
-    color: #fca5a5;
+    color: var(--err);
   }
 
   .hint {
     margin: 0;
     font-size: 0.73rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .rows {
@@ -196,9 +196,9 @@
 
   .lock {
     flex: none;
-    border: 1px solid #1f242c;
-    background: #14181d;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-0);
+    color: var(--text-1);
     font-size: 0.7rem;
     line-height: 1;
     padding: 0.15rem 0.25rem;
@@ -206,14 +206,14 @@
   }
 
   .lock.on {
-    background: #4a6da7;
+    background: var(--accent);
   }
 
   .name {
     flex: 1;
     min-width: 0;
     font-size: 0.82rem;
-    color: #cfd4db;
+    color: var(--text-1);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -221,16 +221,16 @@
 
   .cond {
     flex: none;
-    color: #f0b429;
+    color: var(--warn);
     font-size: 0.8rem;
   }
 
   .pct {
     flex: none;
     width: 4rem;
-    background: #14181d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     text-align: right;
@@ -241,7 +241,7 @@
   .pct-sign {
     flex: none;
     font-size: 0.78rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .apply-row {
@@ -252,9 +252,9 @@
   }
 
   .apply {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.3rem 0.9rem;
@@ -262,8 +262,8 @@
   }
 
   .apply:hover:not(:disabled) {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .apply:disabled {
@@ -273,6 +273,6 @@
 
   .pending {
     font-size: 0.75rem;
-    color: #f0b429;
+    color: var(--warn);
   }
 </style>

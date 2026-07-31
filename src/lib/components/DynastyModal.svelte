@@ -273,9 +273,9 @@
 
   .new-dynasty input {
     width: 9rem;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.28rem 0.4rem;
@@ -283,9 +283,9 @@
   }
 
   .dm-btn {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.3rem 0.7rem;
@@ -293,8 +293,8 @@
   }
 
   .dm-btn:hover:not(:disabled) {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .dm-btn:disabled {
@@ -303,13 +303,13 @@
   }
 
   .dm-btn.danger {
-    background: #7a2e2e;
-    color: #f2dede;
+    background: var(--danger-bg);
+    color: var(--text-1);
   }
 
   .dm-btn.danger:hover:not(:disabled) {
-    background: #a13636;
-    color: #ffffff;
+    background: var(--err);
+    color: var(--text-inverse);
   }
 
   .dm-status {
@@ -317,24 +317,24 @@
     top: 1rem;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 105;
-    background: #3f4855;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    z-index: var(--z-modal);
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     padding: 0.35rem 0.7rem;
     font-size: 0.8rem;
   }
 
   .dm-status.err {
-    background: #7a2e2e;
-    color: #f2dede;
+    background: var(--danger-bg);
+    color: var(--text-1);
     max-width: 32rem;
   }
 
   .confirm-root {
     position: fixed;
     inset: 0;
-    z-index: 110;
+    z-index: var(--z-modal-content);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -350,19 +350,19 @@
 
   .confirm-box {
     position: relative;
-    z-index: 111;
+    z-index: calc(var(--z-modal-content) + 1);
     width: 24rem;
     max-width: calc(100vw - 2rem);
-    background: #2b323d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
   }
 
   .confirm-box header {
     padding: 0.5rem 0.7rem;
-    background: #3f4855;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
     font-weight: 700;
   }
 
@@ -376,7 +376,7 @@
   }
 
   .confirm-body code {
-    background: #21262e;
+    background: var(--bg-1);
     padding: 0 0.2rem;
   }
 
@@ -390,15 +390,15 @@
   }
 
   .tag {
-    background: #21262e;
-    border: 1px solid #1f242c;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
     padding: 0.1rem 0.35rem;
     font-size: 0.78rem;
     font-variant-numeric: tabular-nums;
   }
 
   .muted {
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .small {
@@ -410,7 +410,7 @@
     justify-content: flex-end;
     gap: 0.4rem;
     padding: 0.5rem 0.7rem;
-    background: #262c35;
-    border-top: 1px solid #1f242c;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
   }
 </style>

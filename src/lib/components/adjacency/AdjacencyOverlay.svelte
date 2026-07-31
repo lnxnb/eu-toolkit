@@ -1,10 +1,11 @@
 <!--
   AdjacencyOverlay — Sprint 25 straits/adjacencies overlay for the Provinces map
   mode. A transparent, pointer-events:none canvas layered over the map (like
-  TradeNetworkOverlay), drawing one line per adjacency between the endpoint
-  provinces' centroids, styled by type (sea dashed, canal solid, land dotted,
-  lake dash-dot). Wrap-aware (antimeridian links go the short way). The hovered
-  and selected adjacency are emphasized, with endpoint markers on both.
+  TradeNetworkOverlay), drawing one line per adjacency along its precomputed
+  segment (edge-to-edge across the crossing, see adjnet's trimSegment), styled
+  by type (sea dashed, canal solid, land dotted, lake dash-dot). Wrap-aware
+  (antimeridian links go the short way). The hovered and selected adjacency are
+  emphasized, with endpoint markers on both.
 
   Rendering only — MapView owns hit-testing and pointer handling and passes the
   hovered/selected row index down. Repaints via a $effect on any input change.
@@ -15,13 +16,13 @@
     adjLinePieces,
     dashForType,
     colorForType,
-    endpoints,
     type AdjRowInput,
+    type AdjSegment,
   } from "$lib/adjnet";
 
   interface Props {
     rows: AdjRowInput[];
-    centroids: Map<number, Point>;
+    segments: (AdjSegment | null)[];
     view: Viewport;
     cssWidth: number;
     cssHeight: number;
@@ -32,7 +33,7 @@
 
   let {
     rows,
-    centroids,
+    segments,
     view,
     cssWidth,
     cssHeight,
@@ -70,7 +71,7 @@
 
   function drawLine(ctx: CanvasRenderingContext2D, i: number, emph: boolean) {
     const r = rows[i];
-    const ep = endpoints(r, centroids);
+    const ep = segments[i];
     if (!ep) return;
     const pieces = adjLinePieces(ep[0], ep[1], mapW).map((piece) =>
       piece.map((p) => project({ x: p[0], y: p[1] }, view)),
@@ -85,6 +86,7 @@
 
     // Typed dashed/solid/dotted line.
     ctx.setLineDash(dashForType(r.kind));
+    // Canvas map-data emphasis colors are rendered geometry, not UI chrome tokens.
     ctx.strokeStyle = emph ? "#ffe08a" : colorForType(r.kind);
     ctx.lineWidth = emph ? 2.8 : 1.7;
     for (const piece of pieces) stroke(ctx, piece);
@@ -118,7 +120,7 @@
     void view.offsetX;
     void view.offsetY;
     void rows;
-    void centroids;
+    void segments;
     void hoverIndex;
     void selectedIndex;
     void cssWidth;

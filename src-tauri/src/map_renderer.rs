@@ -49,7 +49,9 @@ pub const MAP_MODES: &[(&str, &str)] = &[
 /// Modes that are just images of a shipped bitmap: no editing tools, no side
 /// panel (Sprint 11.3 badges them "View Only"). Exposed to the frontend via
 /// `list_map_modes` so the mode list can render the badge.
-pub const VIEW_ONLY_MODES: &[&str] = &["terrain", "heightmap", "province_colors"];
+// province_colors is now editable (add/expand/dissolve provinces via
+// province_edit), so it is NOT view-only; only the pure raster images are.
+pub const VIEW_ONLY_MODES: &[&str] = &["terrain", "heightmap"];
 
 struct BaseMap {
     width: u32,
@@ -1144,10 +1146,10 @@ lakes = { 10 11 }
         let ids: Vec<&str> = MAP_MODES.iter().map(|(id, _)| *id).collect();
         assert!(ids.contains(&"simple_terrain"));
         assert!(ids.contains(&"winter"));
-        // View-only flags: exactly the three raster modes.
+        // View-only flags: the pure raster images (province_colors is now editable).
         assert!(VIEW_ONLY_MODES.contains(&"terrain"));
         assert!(VIEW_ONLY_MODES.contains(&"heightmap"));
-        assert!(VIEW_ONLY_MODES.contains(&"province_colors"));
+        assert!(!VIEW_ONLY_MODES.contains(&"province_colors"));
         assert!(!VIEW_ONLY_MODES.contains(&"simple_terrain"));
         assert!(!VIEW_ONLY_MODES.contains(&"political"));
     }

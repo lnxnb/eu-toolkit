@@ -13,7 +13,7 @@
   filter only disambiguates scalars) — fine for the ~always-unique province case.
 -->
 <script lang="ts">
-  import { SearchDropdown } from "$lib/components/ui";
+  import { SearchDropdown, AtlasIcon } from "$lib/components/ui";
   import type { DropdownItem } from "$lib/components/ui";
   import FieldRow from "$lib/components/country/FieldRow.svelte";
   import type { EditQueue } from "$lib/edits.svelte";
@@ -30,6 +30,8 @@
     triggeredModifiers,
     dateCtx,
     onopenmechanics,
+    installPath,
+    modPath,
   }: {
     details: ProvinceDetails;
     effective: ProvinceSnapshot;
@@ -43,6 +45,8 @@
     /** Open the Mechanics editor (Sprint 27 W4) at the centers_of_trade tier
      *  definitions from the Centre-of-Trade control. */
     onopenmechanics?: (family: string, key?: string) => void;
+    installPath: string;
+    modPath: string | null;
   } = $props();
 
   const ops = $derived(fieldOps(queue, file, dateCtx));
@@ -168,6 +172,7 @@
   </div>
 
   <FieldRow label="Trade Good" edited={ops.edited("trade_goods", effective.trade_goods)}>
+    {#if goodVal}<AtlasIcon {installPath} {modPath} kind="trade_goods" frame={Math.max(0, goods.findIndex((g) => g.key === goodVal))} size={24} label={goods.find((g) => g.key === goodVal)?.label ?? goodVal} />{/if}
     <SearchDropdown items={goods} value={goodVal} placeholder="Trade good…" onselect={(k) => ops.set("trade_goods", top.trade_goods != null, k, `Set trade good of #${details.id}`)} />
   </FieldRow>
 
@@ -177,6 +182,7 @@
   </FieldRow>
 
   <FieldRow label="Centre of Trade" edited={ops.edited("center_of_trade", effective.center_of_trade != null ? String(effective.center_of_trade) : null)}>
+    {#if Number(cotVal) > 0}<AtlasIcon {installPath} {modPath} kind="trade_details" frame={Math.max(0, Number(cotVal) - 1)} size={24} label={`Centre of Trade tier ${cotVal}`} />{/if}
     <SearchDropdown items={COT} value={cotVal} onselect={(k) => ops.set("center_of_trade", top.center_of_trade != null, k, `Set CoT of #${details.id}`)} />
     {#if onopenmechanics}<button class="mini" title="Edit centre-of-trade tier definitions (level, cost, modifiers)" onclick={() => onopenmechanics?.("centers_of_trade")}>tiers…</button>{/if}
   </FieldRow>
@@ -223,29 +229,29 @@
 
 <style>
   section { margin-bottom: 1rem; }
-  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; }
+  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2); }
   .dev { display: flex; align-items: flex-end; gap: 0.5rem; margin-bottom: 0.6rem; }
   .dev-stepper { display: flex; flex-direction: column; gap: 0.15rem; }
-  .dev-lbl { font-size: 0.68rem; text-transform: uppercase; color: #8a919c; }
-  .dev-lbl.adm { color: #7fbf6f; }
-  .dev-lbl.dip { color: #7f9fd0; }
-  .dev-lbl.mil { color: #d07f7f; }
+  .dev-lbl { font-size: 0.68rem; text-transform: uppercase; color: var(--text-2); }
+  .dev-lbl.adm { color: var(--ok); }
+  .dev-lbl.dip { color: var(--accent-text); }
+  .dev-lbl.mil { color: var(--err); }
   .dev-total { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .num { width: 4rem; background: #21262e; border: 1px solid #1f242c; color: #cfd4db; font-family: inherit; font-size: 0.85rem; padding: 0.25rem 0.4rem; outline: none; }
-  .sel { background: #21262e; border: 1px solid #1f242c; color: #cfd4db; font-family: inherit; font-size: 0.82rem; padding: 0.2rem; }
+  .num { width: 4rem; background: var(--bg-1); border: 1px solid var(--border); color: var(--text-1); font-family: inherit; font-size: 0.85rem; padding: 0.25rem 0.4rem; outline: none; }
+  .sel { background: var(--bg-1); border: 1px solid var(--border); color: var(--text-1); font-family: inherit; font-size: 0.82rem; padding: 0.2rem; }
   .list-field { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.7rem; }
-  .list-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; color: #8a919c; }
-  .chip { display: inline-flex; align-items: center; gap: 0.3rem; align-self: flex-start; background: #21262e; border: 1px solid #1f242c; color: #cfd4db; font-size: 0.8rem; padding: 0.12rem 0.2rem 0.12rem 0.35rem; }
-  .mtype { background: #3a5a86; color: #fff; font-size: 0.62rem; padding: 0.05rem 0.28rem; }
-  .mtype.trig { background: #6b46c1; }
-  .dim { color: #8a919c; }
-  .x { border: none; background: transparent; color: #9ca3af; cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 0 0.2rem; }
-  .x:hover { color: #fca5a5; }
+  .list-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-2); }
+  .chip { display: inline-flex; align-items: center; gap: 0.3rem; align-self: flex-start; background: var(--bg-1); border: 1px solid var(--border); color: var(--text-1); font-size: 0.8rem; padding: 0.12rem 0.2rem 0.12rem 0.35rem; }
+  .mtype { background: var(--accent); color: var(--text-inverse); font-size: 0.62rem; padding: 0.05rem 0.28rem; }
+  .mtype.trig { background: var(--accent-text); }
+  .dim { color: var(--text-2); }
+  .x { border: none; background: transparent; color: var(--text-2); cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 0 0.2rem; }
+  .x:hover { color: var(--err); }
   .add-mod { display: flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; }
-  .add-btn { align-self: flex-start; border: 1px solid #1f242c; background: #3f4855; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.5rem; cursor: pointer; }
-  .add-btn:hover { background: #4a6da7; color: #fff; }
-  .mini { border: 1px solid #1f242c; background: #2b323d; color: #cfd4db; cursor: pointer; font-size: 0.8rem; padding: 0.2rem 0.4rem; }
-  .mini:hover { background: #4a6da7; color: #fff; }
-  .mini.ok { background: #3a5a86; }
+  .add-btn { align-self: flex-start; border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.5rem; cursor: pointer; }
+  .add-btn:hover { background: var(--accent); color: var(--text-inverse); }
+  .mini { border: 1px solid var(--border); background: var(--bg-2); color: var(--text-1); cursor: pointer; font-size: 0.8rem; padding: 0.2rem 0.4rem; }
+  .mini:hover { background: var(--accent); color: var(--text-inverse); }
+  .mini.ok { background: var(--accent); }
   .mini:disabled { opacity: 0.5; cursor: default; }
 </style>

@@ -56,9 +56,9 @@
   .pm {
     width: 1.35rem;
     height: 1.35rem;
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-size: 0.9rem;
     line-height: 1;
     cursor: pointer;
@@ -66,8 +66,8 @@
   }
 
   .pm:hover:not(:disabled) {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .pm:disabled {
@@ -78,9 +78,9 @@
   .val {
     width: 2.6rem;
     text-align: center;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.2rem 0.2rem;

@@ -29,6 +29,7 @@
 
   // Glyph fallback (letter + color) when the dev icon atlas is unavailable —
   // matches the province panel's Tax/Prod/Man accents.
+  // Semantic map-data channel colors (tax/production/manpower), not chrome.
   const GLYPH = [
     { letter: "T", color: "#7fbf6f" },
     { letter: "P", color: "#7f9fd0" },
@@ -102,7 +103,7 @@
     padding: 0.6rem 0.7rem 0.8rem;
     border-radius: 10px;
     background: rgba(20, 24, 29, 0.85);
-    color: #e5e7eb;
+    color: var(--text-1);
     backdrop-filter: blur(4px);
   }
 
@@ -111,7 +112,7 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   /* Spread the three slider columns evenly so the icon row lines up under them. */

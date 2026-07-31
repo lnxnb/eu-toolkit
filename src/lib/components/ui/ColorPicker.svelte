@@ -167,7 +167,7 @@
 
   .field-label {
     font-size: 0.8rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .swatch-row {
@@ -178,13 +178,13 @@
   .swatch-btn {
     width: 1.6rem;
     height: 1.6rem;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     cursor: pointer;
     padding: 0;
   }
 
   .swatch-btn.active {
-    outline: 2px solid #4a6da7;
+    outline: 2px solid var(--accent);
     outline-offset: 1px;
   }
 
@@ -204,14 +204,14 @@
     left: 0;
     width: 15rem;
     padding: 0.6rem;
-    background: #3f4855;
-    border: 1px solid #1f242c;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
     box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.45);
   }
 
   .preview {
     height: 1.75rem;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     margin-bottom: 0.5rem;
   }
 
@@ -226,13 +226,13 @@
   .ch-name {
     width: 1.6rem;
     font-size: 0.78rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
 
   .slider-row input[type="range"] {
     flex: 1;
     min-width: 0;
-    accent-color: #4a6da7;
+    accent-color: var(--accent);
   }
 
   .ch-num {
@@ -246,9 +246,9 @@
 
   .ch-num,
   .hex-input {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.2rem 0.35rem;

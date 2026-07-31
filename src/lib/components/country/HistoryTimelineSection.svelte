@@ -20,7 +20,7 @@
 -->
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { SearchDropdown, DatePicker } from "$lib/components/ui";
+  import { SearchDropdown, DatePicker, SpriteIcon } from "$lib/components/ui";
   import type { DropdownItem } from "$lib/components/ui";
   import type { EditQueue } from "$lib/edits.svelte";
   import type { Calendar } from "$lib/calendar";
@@ -276,6 +276,7 @@
         <input class="text" bind:value={newName} placeholder="Advisor name" />
         <div class="frow">
           <span class="lbl">Type</span>
+          {#if newType}<SpriteIcon {installPath} {modPath} name={`GFX_advisor_${newType}`} size={24} label={advisorTypes.find((a) => a.key === newType)?.label ?? newType} />{/if}
           <SearchDropdown items={advisorTypes} value={newType} placeholder="Advisor type…" onselect={(k) => (newType = k)} />
           {#if onopenmechanics}
             {#if newType}
@@ -320,6 +321,7 @@
         </div>
         <div class="frow">
           <span class="lbl">Type</span>
+          {#if advTypeVal(r)}<SpriteIcon {installPath} {modPath} name={`GFX_advisor_${advTypeVal(r)}`} size={24} label={advisorTypes.find((a) => a.key === advTypeVal(r))?.label ?? advTypeVal(r)!} />{/if}
           <SearchDropdown
             items={advisorTypes}
             value={advTypeVal(r)}
@@ -390,7 +392,7 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .sub {
     margin-bottom: 0.8rem;
@@ -402,21 +404,21 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #8a919c;
+    color: var(--text-2);
     margin-bottom: 0.35rem;
-    border-bottom: 1px solid #1f242c;
+    border-bottom: 1px solid var(--border);
     padding-bottom: 0.2rem;
   }
   .empty {
     margin: 0.2rem 0;
-    color: #8a919c;
+    color: var(--text-2);
     font-style: italic;
     font-size: 0.8rem;
   }
   .advisor,
   .holder {
-    border: 1px solid #1f242c;
-    background: #21262e;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
     padding: 0.4rem 0.5rem;
     margin-bottom: 0.35rem;
     display: flex;
@@ -431,12 +433,12 @@
   .date {
     font-variant-numeric: tabular-nums;
     font-weight: 600;
-    color: #dfe4ea;
+    color: var(--text-1);
     font-size: 0.82rem;
   }
   .badge.post {
-    background: #a1662f;
-    color: #fff;
+    background: var(--warn);
+    color: var(--text-inverse);
     font-size: 0.62rem;
     padding: 0.05rem 0.3rem;
     text-transform: uppercase;
@@ -450,20 +452,20 @@
     font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .text {
-    background: #191d23;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.2rem 0.4rem;
     outline: none;
   }
   .add-form {
-    border: 1px solid #1f242c;
-    background: #21262e;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
@@ -475,29 +477,29 @@
     gap: 0.35rem;
   }
   .btn {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.25rem 0.6rem;
     cursor: pointer;
   }
   .btn:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .btn.ok {
-    background: #3a5a86;
+    background: var(--accent);
   }
   .btn:disabled {
     opacity: 0.5;
     cursor: default;
   }
   .mini {
-    border: 1px solid #1f242c;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.76rem;
     line-height: 1;
@@ -505,14 +507,14 @@
     cursor: pointer;
   }
   .mini:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .mini.danger {
     margin-left: auto;
   }
   .mini.danger:hover {
-    background: #7a3f3f;
+    background: var(--danger-bg);
   }
   .holder-head {
     display: flex;
@@ -521,7 +523,7 @@
     width: 100%;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     cursor: pointer;
@@ -529,24 +531,24 @@
     padding: 0;
   }
   .holder-head:hover {
-    color: #fff;
+    color: var(--text-inverse);
   }
   .chev {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .role {
     font-size: 0.66rem;
     text-transform: uppercase;
-    background: #303844;
-    color: #9ab0d0;
+    background: var(--bg-3);
+    color: var(--accent-text);
     padding: 0.03rem 0.35rem;
   }
   .who {
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .holder-body {
     margin-top: 0.4rem;
     padding-top: 0.4rem;
-    border-top: 1px solid #1f242c;
+    border-top: 1px solid var(--border);
   }
 </style>

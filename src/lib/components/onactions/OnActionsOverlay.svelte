@@ -11,6 +11,7 @@
   import { OverlaySurface, ScriptTreeEditor } from "$lib/components/script";
   import type { KnownKey, ScriptBlock } from "$lib/components/script";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
+  import { LoadingState } from "$lib/components/ui";
 
   interface WeightedEvent { weight: string; id: string }
   interface OnActionHook {
@@ -279,7 +280,7 @@
             onedit={onTreeEdit}
           />
         {:else}
-          <p class="dim">Loading…</p>
+          <LoadingState label="Loading on-actions…" />
         {/if}
       {:else}
         <p class="dim center">Select an engine hook to edit its effect body and event lists.</p>
@@ -290,50 +291,50 @@
 
 <style>
   .wrap { display: flex; gap: 0.6rem; height: 100%; min-height: 0; }
-  .list { flex: none; width: 20rem; display: flex; flex-direction: column; min-height: 0; border: 1px solid #1f242c; background: #21262e; }
-  .list-head { display: flex; flex-wrap: wrap; gap: 0.3rem; padding: 0.35rem; border-bottom: 1px solid #1f242c; align-items: center; }
-  .search { flex: 1; min-width: 8rem; background: #16191f; border: 1px solid #1f242c; color: #cfd4db; padding: 0.25rem 0.4rem; font-family: inherit; font-size: 0.8rem; }
-  .new-btn { border: 1px solid #3a434f; background: #2b323d; color: #cfd4db; font-family: inherit; font-size: 0.72rem; padding: 0.1rem 0.45rem; cursor: pointer; }
-  .new-btn:hover { background: #4a6da7; color: #fff; }
-  .count { flex: 1 0 100%; font-size: 0.68rem; color: #8a919c; }
+  .list { flex: none; width: 20rem; display: flex; flex-direction: column; min-height: 0; border: 1px solid var(--border); background: var(--bg-1); }
+  .list-head { display: flex; flex-wrap: wrap; gap: 0.3rem; padding: 0.35rem; border-bottom: 1px solid var(--border); align-items: center; }
+  .search { flex: 1; min-width: 8rem; background: var(--bg-0); border: 1px solid var(--border); color: var(--text-1); padding: 0.25rem 0.4rem; font-family: inherit; font-size: 0.8rem; }
+  .new-btn { border: 1px solid var(--bg-3); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 0.72rem; padding: 0.1rem 0.45rem; cursor: pointer; }
+  .new-btn:hover { background: var(--accent); color: var(--text-inverse); }
+  .count { flex: 1 0 100%; font-size: 0.68rem; color: var(--text-2); }
   .hooks { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; min-height: 0; }
-  .hook { display: flex; align-items: center; gap: 0.35rem; width: 100%; text-align: left; border: none; background: transparent; color: #cfd4db; font-family: inherit; font-size: 0.78rem; padding: 0.2rem 0.4rem; cursor: pointer; }
-  .hook:hover { background: #262c35; }
-  .hook.sel { background: #4a6da7; color: #fff; }
+  .hook { display: flex; align-items: center; gap: 0.35rem; width: 100%; text-align: left; border: none; background: transparent; color: var(--text-1); font-family: inherit; font-size: 0.78rem; padding: 0.2rem 0.4rem; cursor: pointer; }
+  .hook:hover { background: var(--bg-2); }
+  .hook.sel { background: var(--accent); color: var(--text-inverse); }
   .hname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-  .mod { flex: none; font-size: 0.6rem; color: #9aecc0; border: 1px solid #2f5f48; padding: 0 0.2rem; }
+  .mod { flex: none; font-size: 0.6rem; color: var(--ok); border: 1px solid var(--ok); padding: 0 0.2rem; }
   .tag { flex: none; font-size: 0.62rem; padding: 0 0.22rem; }
-  .tag.ev { background: #2f4a6b; color: #bcd; }
-  .tag.rev { background: #4a3b2f; color: #d8b45a; }
-  .empty, .dim { color: #8a919c; font-size: 0.78rem; padding: 0.3rem; }
+  .tag.ev { background: var(--accent); color: var(--accent-text); }
+  .tag.rev { background: var(--bg-3); color: var(--warn); }
+  .empty, .dim { color: var(--text-2); font-size: 0.78rem; padding: 0.3rem; }
   .editor { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; }
   .ed-head { display: flex; align-items: center; gap: 0.5rem; padding: 0.1rem 0 0.4rem; }
-  .ed-head code { color: #9aecc0; background: #16191f; padding: 0.05rem 0.35rem; font-size: 0.9rem; }
-  .file { font-size: 0.7rem; color: #8a919c; margin-left: auto; }
-  h4 { margin: 0.6rem 0 0.2rem; font-size: 0.82rem; color: #cfd4db; }
-  .hint { font-weight: 400; font-size: 0.7rem; color: #8a919c; }
-  .fires { border: 1px solid #232a33; padding: 0.3rem 0.4rem; margin-bottom: 0.3rem; }
+  .ed-head code { color: var(--ok); background: var(--bg-0); padding: 0.05rem 0.35rem; font-size: 0.9rem; }
+  .file { font-size: 0.7rem; color: var(--text-2); margin-left: auto; }
+  h4 { margin: 0.6rem 0 0.2rem; font-size: 0.82rem; color: var(--text-1); }
+  .hint { font-weight: 400; font-size: 0.7rem; color: var(--text-2); }
+  .fires { border: 1px solid var(--bg-1); padding: 0.3rem 0.4rem; margin-bottom: 0.3rem; }
   .fires h4 { margin-top: 0; }
   .idlist { list-style: none; margin: 0.2rem 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
   .idlist li { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; }
-  .idlist code { color: #cfd4db; background: #16191f; padding: 0 0.3rem; }
-  .w { flex: none; color: #d8b45a; font-variant-numeric: tabular-nums; width: 2.5rem; text-align: right; }
-  .x { border: none; background: transparent; color: #8a919c; cursor: pointer; font-size: 0.95rem; padding: 0 0.2rem; }
-  .x:hover { color: #fca5a5; }
+  .idlist code { color: var(--text-1); background: var(--bg-0); padding: 0 0.3rem; }
+  .w { flex: none; color: var(--warn); font-variant-numeric: tabular-nums; width: 2.5rem; text-align: right; }
+  .x { border: none; background: transparent; color: var(--text-2); cursor: pointer; font-size: 0.95rem; padding: 0 0.2rem; }
+  .x:hover { color: var(--err); }
   .addrow { display: flex; gap: 0.3rem; margin-top: 0.25rem; }
-  .addrow input { background: #16191f; border: 1px solid #1f242c; color: #cfd4db; padding: 0.2rem 0.35rem; font-family: inherit; font-size: 0.78rem; }
+  .addrow input { background: var(--bg-0); border: 1px solid var(--border); color: var(--text-1); padding: 0.2rem 0.35rem; font-family: inherit; font-size: 0.78rem; }
   .addrow input:not(.wt) { flex: 1; }
   .wt { width: 4.5rem; }
-  .mini { border: 1px solid #3a434f; background: #2b323d; color: #cfd4db; font-family: inherit; font-size: 0.72rem; padding: 0.1rem 0.5rem; cursor: pointer; flex: none; }
-  .mini:hover:not(:disabled) { background: #4a6da7; color: #fff; }
+  .mini { border: 1px solid var(--bg-3); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 0.72rem; padding: 0.1rem 0.5rem; cursor: pointer; flex: none; }
+  .mini:hover:not(:disabled) { background: var(--accent); color: var(--text-inverse); }
   .mini:disabled { opacity: 0.5; cursor: default; }
-  .err { color: #fca5a5; font-size: 0.78rem; }
+  .err { color: var(--err); font-size: 0.78rem; }
   .center { text-align: center; padding: 2rem; }
   .create { max-width: 22rem; }
   .create h3 { margin: 0 0 0.5rem; font-size: 0.95rem; }
-  .cname { width: 100%; background: #16191f; border: 1px solid #1f242c; color: #cfd4db; padding: 0.3rem 0.4rem; font-family: inherit; font-size: 0.85rem; }
+  .cname { width: 100%; background: var(--bg-0); border: 1px solid var(--border); color: var(--text-1); padding: 0.3rem 0.4rem; font-family: inherit; font-size: 0.85rem; }
   .cbtns { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
-  .ok { background: #4a6da7; border: 1px solid #4a6da7; color: #fff; font-family: inherit; padding: 0.25rem 0.8rem; cursor: pointer; }
+  .ok { background: var(--accent); border: 1px solid var(--accent); color: var(--text-inverse); font-family: inherit; padding: 0.25rem 0.8rem; cursor: pointer; }
   .ok:disabled { opacity: 0.5; cursor: default; }
-  .cancel { background: #2b323d; border: 1px solid #3a434f; color: #cfd4db; font-family: inherit; padding: 0.25rem 0.8rem; cursor: pointer; }
+  .cancel { background: var(--bg-2); border: 1px solid var(--bg-3); color: var(--text-1); font-family: inherit; padding: 0.25rem 0.8rem; cursor: pointer; }
 </style>

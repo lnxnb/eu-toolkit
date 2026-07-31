@@ -12,6 +12,7 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
   import type { KnownModifier, ModifierRow } from "$lib/components/ui";
+  import { AtlasIcon } from "$lib/components/ui";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
   import IdeaBlockEditor from "./IdeaBlockEditor.svelte";
   import type { CountryDetails } from "./types";
@@ -39,6 +40,11 @@
 
   function blockValue(rows: ModifierRow[]): string {
     return rows.map((r) => `${r.key} = ${r.value}`).join(" ");
+  }
+  function iconFrame(rows: ModifierRow[]): number {
+    const key = rows[0]?.key ?? "idea"; let hash = 2166136261;
+    for (let i = 0; i < key.length; i++) hash = Math.imul(hash ^ key.charCodeAt(i), 16777619);
+    return (hash >>> 0) % 18;
   }
   function commitBlock(path: string[], rows: ModifierRow[], label: string) {
     if (!ideas) return;
@@ -99,14 +105,14 @@
 
     <!-- Traditions -->
     <div class="idea">
-      <div class="field">
+      <div class="idea-head"><AtlasIcon {installPath} {modPath} kind="idea_modifiers" frame={iconFrame(ideas.traditions)} size={34} label="Traditions icon" /><div class="field">
         <span class="lbl">Traditions</span>
         <input
           class="text"
           value={locName(`${ideas.name}_start`) ?? ideas.traditions_name}
           onchange={(e) => commitLoc(`${ideas.name}_start`, e.currentTarget.value, `Rename traditions of ${tag}`)}
         />
-      </div>
+      </div></div>
       <IdeaBlockEditor
         base={ideas.traditions}
         {known}
@@ -117,14 +123,14 @@
     <!-- The 7 ideas -->
     {#each ideas.ideas as idea, i (idea.name)}
       <div class="idea">
-        <div class="field">
+        <div class="idea-head"><AtlasIcon {installPath} {modPath} kind="idea_modifiers" frame={iconFrame(idea.effects)} size={34} label={`${idea.localized_name} icon`} /><div class="field">
           <span class="lbl">{i + 1}. Idea</span>
           <input
             class="text"
             value={locName(idea.name) ?? idea.localized_name}
             onchange={(e) => commitLoc(idea.name, e.currentTarget.value, `Rename idea ${idea.name}`)}
           />
-        </div>
+        </div></div>
         <div class="field">
           <span class="lbl">Description</span>
           <textarea
@@ -143,14 +149,14 @@
 
     <!-- Ambition -->
     <div class="idea">
-      <div class="field">
+      <div class="idea-head"><AtlasIcon {installPath} {modPath} kind="idea_modifiers" frame={iconFrame(ideas.ambition)} size={34} label="Ambition icon" /><div class="field">
         <span class="lbl">Ambition</span>
         <input
           class="text"
           value={locName(`${ideas.name}_bonus`) ?? ideas.ambition_name}
           onchange={(e) => commitLoc(`${ideas.name}_bonus`, e.currentTarget.value, `Rename ambition of ${tag}`)}
         />
-      </div>
+      </div></div>
       <IdeaBlockEditor
         base={ideas.ambition}
         {known}
@@ -175,13 +181,13 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .idea {
     margin-bottom: 0.7rem;
     padding-bottom: 0.6rem;
-    border-bottom: 1px solid #222831;
+    border-bottom: 1px solid var(--bg-1);
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
@@ -192,18 +198,20 @@
     flex-direction: column;
     gap: 0.2rem;
   }
+  .idea-head { display:flex; align-items:center; gap:var(--sp-3); }
+  .idea-head .field { flex:1; min-width:0; }
 
   .lbl {
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .text {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.25rem 0.4rem;
@@ -217,18 +225,18 @@
   }
 
   .dim {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.83rem;
     margin: 0 0 0.4rem;
   }
 
   .ok {
-    color: #86c58a;
+    color: var(--ok);
     font-size: 0.83rem;
   }
 
   .btn {
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     background: transparent;
     color: inherit;
     font-family: inherit;
@@ -238,8 +246,8 @@
   }
 
   .btn:hover {
-    border-color: #9ca3af;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--text-2);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 </style>

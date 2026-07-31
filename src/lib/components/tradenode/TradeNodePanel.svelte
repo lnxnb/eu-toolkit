@@ -367,34 +367,34 @@
     width: 1rem;
     height: 1rem;
     display: inline-block;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
   .key-chip {
     font-size: 0.8rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .badge {
     font-size: 0.68rem;
     padding: 0.05rem 0.35rem;
-    border: 1px solid #1f242c;
-    color: #fff;
+    border: 1px solid var(--border);
+    color: var(--text-inverse);
   }
   .badge.end {
-    background: #4a6da7;
+    background: var(--accent);
   }
   .badge.inland {
-    background: #8b5a2b;
+    background: var(--warn);
   }
   .strip-wrap {
     margin: -0.2rem 0 0.4rem;
   }
   section {
     padding: 0.4rem 0 0.6rem;
-    border-bottom: 1px solid #232a33;
+    border-bottom: 1px solid var(--bg-1);
   }
   section.editor {
     background: rgba(74, 109, 167, 0.08);
-    border-left: 2px solid #4a6da7;
+    border-left: 2px solid var(--accent);
     padding-left: 0.5rem;
   }
   h3 {
@@ -402,7 +402,7 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .sec-head {
     display: flex;
@@ -412,16 +412,16 @@
   }
   .text {
     width: 100%;
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.2rem 0.4rem;
   }
   .mono {
     font-family: ui-monospace, monospace;
-    color: #9ca3af;
+    color: var(--text-2);
     font-size: 0.82rem;
   }
   .chk {
@@ -429,7 +429,7 @@
     align-items: center;
     gap: 0.3rem;
     font-size: 0.82rem;
-    color: #cfd4db;
+    color: var(--text-1);
     margin-right: 0.7rem;
   }
   .routes {
@@ -461,9 +461,9 @@
     align-items: center;
     gap: 0.25rem;
     font-size: 0.72rem;
-    color: #cfd4db;
-    background: #262c35;
-    border: 1px solid #1f242c;
+    color: var(--text-1);
+    background: var(--bg-2);
+    border: 1px solid var(--border);
     padding: 0.1rem 0.3rem;
   }
   .editor-actions {
@@ -473,16 +473,16 @@
     margin-top: 0.4rem;
   }
   .btn {
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.2rem 0.6rem;
     cursor: pointer;
   }
   .btn:hover {
-    border-color: #9ca3af;
+    border-color: var(--text-2);
   }
   .btn.small {
     font-size: 0.76rem;
@@ -496,44 +496,44 @@
     width: 100%;
   }
   .btn.danger {
-    color: #fca5a5;
-    border-color: #6b3630;
+    color: var(--err);
+    border-color: var(--danger-bg);
   }
   .btn.danger:hover {
-    background: #7a2820;
-    border-color: #9a3226;
-    color: #fff;
+    background: var(--danger-bg);
+    border-color: var(--danger-bg);
+    color: var(--text-inverse);
   }
   .btn:disabled {
     opacity: 0.4;
     cursor: default;
   }
   .link {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #9cc7ea;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--accent-text);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.1rem 0.4rem;
     cursor: pointer;
   }
   .link:hover {
-    border-color: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    color: var(--text-inverse);
   }
   .tag {
     font-size: 0.7rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .raw {
     list-style: none;
     margin: 0;
     padding: 0;
     font-size: 0.8rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .dim {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .small {
     font-size: 0.76rem;

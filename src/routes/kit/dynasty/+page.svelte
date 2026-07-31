@@ -208,8 +208,8 @@
 <style>
   .bench {
     padding: 1.5rem;
-    color: #cfd4db;
-    background: #2b323d;
+    color: var(--text-1);
+    background: var(--bg-2);
     min-height: 100vh;
     font-family:
       system-ui,
@@ -225,37 +225,37 @@
   h2 {
     font-size: 1rem;
     margin: 1.4rem 0 0.5rem;
-    border-bottom: 1px solid #3f4855;
+    border-bottom: 1px solid var(--bg-3);
     padding-bottom: 0.25rem;
   }
 
   h3 {
     font-size: 0.85rem;
     margin: 0.8rem 0 0.3rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .source {
-    color: #9fd0a0;
+    color: var(--ok);
     font-size: 0.85rem;
     margin: 0 0 0.25rem;
   }
 
   .meta {
     font-size: 0.82rem;
-    color: #8a919c;
+    color: var(--text-2);
     margin: 0 0 0.5rem;
   }
 
   code {
-    background: #21262e;
+    background: var(--bg-1);
     padding: 0 0.25rem;
   }
 
   button {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.35rem 0.8rem;
@@ -264,8 +264,8 @@
   }
 
   button:hover:not(:disabled) {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   button:disabled {
@@ -275,18 +275,18 @@
 
   .picked {
     font-size: 0.85rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .hint {
     font-size: 0.8rem;
-    color: #8a919c;
+    color: var(--text-2);
     margin: 0.4rem 0 0;
   }
 
   pre {
-    background: #21262e;
-    border: 1px solid #1f242c;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
     padding: 0.6rem;
     font-size: 0.78rem;
     overflow-x: auto;

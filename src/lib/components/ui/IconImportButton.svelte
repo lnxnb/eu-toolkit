@@ -130,30 +130,30 @@
   .preview {
     display: block;
     flex: none;
-    border: 1px solid #1f242c;
-    background: #14181d;
+    border: 1px solid var(--border);
+    background: var(--bg-0);
     image-rendering: auto;
   }
   .btn {
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.2rem 0.6rem;
     cursor: pointer;
   }
   .btn:hover:not(:disabled) {
-    border-color: #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .btn:disabled {
     opacity: 0.5;
     cursor: default;
   }
   .err {
-    color: #fca5a5;
+    color: var(--err);
     font-weight: 700;
     cursor: help;
   }

@@ -317,7 +317,7 @@
   .overlay {
     position: fixed;
     inset: 0;
-    z-index: 200;
+    z-index: var(--z-modal);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -328,9 +328,9 @@
   .modal {
     width: 100%;
     max-width: 30rem;
-    background: #2b323d;
-    border: 1px solid #1c2129;
-    color: #cfd4db;
+    background: var(--bg-2);
+    border: 1px solid var(--bg-1);
+    color: var(--text-1);
     padding: 1.1rem 1.25rem 1.25rem;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     max-height: 85vh;
@@ -362,9 +362,9 @@
   .path,
   .dest {
     font-size: 0.78rem;
-    color: #9aa4b2;
-    background: #222831;
-    border: 1px solid #1c2129;
+    color: var(--text-2);
+    background: var(--bg-1);
+    border: 1px solid var(--bg-1);
     padding: 0.35rem 0.5rem;
     word-break: break-all;
     margin: 0 0 0.75rem;
@@ -372,18 +372,18 @@
 
   .note {
     font-size: 0.8rem;
-    color: #c7a95b;
+    color: var(--warn);
     margin: 0 0 0.75rem;
   }
 
   .hint {
     font-size: 0.88rem;
-    color: #9aa4b2;
+    color: var(--text-2);
   }
 
   .error {
     font-size: 0.85rem;
-    color: #e08585;
+    color: var(--err);
     margin: 0 0 0.6rem;
   }
 
@@ -404,14 +404,14 @@
     font-size: 0.9rem;
     padding: 0.5rem 0.9rem;
     border-radius: 0;
-    border: 1px solid #1c2129;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--bg-1);
+    background: var(--bg-3);
+    color: var(--text-1);
     cursor: pointer;
   }
 
   button:hover:not(:disabled) {
-    background: #4a6da7;
+    background: var(--accent);
   }
 
   button:disabled {
@@ -420,12 +420,12 @@
   }
 
   button.primary {
-    background: #4a6da7;
-    border-color: #33507d;
+    background: var(--accent);
+    border-color: var(--accent);
   }
 
   button.primary:hover:not(:disabled) {
-    background: #5a7fbd;
+    background: var(--accent-text);
   }
 
   button.ghost {
@@ -464,8 +464,8 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.45rem 0.55rem;
-    background: #222831;
-    border: 1px solid #1c2129;
+    background: var(--bg-1);
+    border: 1px solid var(--bg-1);
   }
 
   .mod-text {
@@ -485,7 +485,7 @@
 
   .mod-meta {
     font-size: 0.74rem;
-    color: #9aa4b2;
+    color: var(--text-2);
   }
 
   .field {
@@ -494,16 +494,16 @@
     gap: 0.2rem;
     margin-bottom: 0.6rem;
     font-size: 0.82rem;
-    color: #9aa4b2;
+    color: var(--text-2);
   }
 
   .field input {
     font-family: inherit;
     font-size: 0.9rem;
     padding: 0.4rem 0.5rem;
-    background: #222831;
-    border: 1px solid #1c2129;
-    color: #e6e9ee;
+    background: var(--bg-1);
+    border: 1px solid var(--bg-1);
+    color: var(--text-1);
   }
 
   .checkbox {
@@ -516,26 +516,26 @@
 
   .checkbox code {
     font-size: 0.9em;
-    color: #c7a95b;
+    color: var(--warn);
   }
 
   .sizes {
     font-size: 0.82rem;
-    color: #9aa4b2;
+    color: var(--text-2);
     margin: 0 0 0.6rem;
   }
 
   .bar {
     height: 0.75rem;
-    background: #222831;
-    border: 1px solid #1c2129;
+    background: var(--bg-1);
+    border: 1px solid var(--bg-1);
     margin: 0.4rem 0;
     overflow: hidden;
   }
 
   .fill {
     height: 100%;
-    background: #4a6da7;
+    background: var(--accent);
     transition: width 0.1s linear;
   }
 
@@ -546,7 +546,7 @@
 
   .cur {
     font-size: 0.76rem;
-    color: #9aa4b2;
+    color: var(--text-2);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

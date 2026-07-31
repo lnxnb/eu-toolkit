@@ -943,148 +943,148 @@
 
   .tabs { display: flex; gap: 0; }
   .tabs button {
-    border: 1px solid #1f242c; background: #21262e; color: #cfd4db;
+    border: 1px solid var(--border); background: var(--bg-1); color: var(--text-1);
     font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.7rem; cursor: pointer;
   }
-  .tabs button.on { background: #4a6da7; color: #fff; }
+  .tabs button.on { background: var(--accent); color: var(--text-inverse); }
 
   .search {
-    background: #21262e; border: 1px solid #1f242c; color: #cfd4db;
+    background: var(--bg-1); border: 1px solid var(--border); color: var(--text-1);
     font-family: inherit; font-size: 0.83rem; padding: 0.25rem 0.4rem; width: 16rem;
   }
-  .counter, .fcount { font-size: 0.78rem; color: #8a919c; }
+  .counter, .fcount { font-size: 0.78rem; color: var(--text-2); }
   .linkbtn {
-    border: 1px solid #1f242c; background: #3f4855; color: #cfd4db;
+    border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1);
     font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.6rem; cursor: pointer;
   }
-  .linkbtn:hover { background: #4a6da7; color: #fff; }
-  .wtitle { color: #9aecc0; background: #16191f; padding: 0.05rem 0.4rem; font-size: 0.82rem; }
+  .linkbtn:hover { background: var(--accent); color: var(--text-inverse); }
+  .wtitle { color: var(--ok); background: var(--bg-0); padding: 0.05rem 0.4rem; font-size: 0.82rem; }
 
-  .msg { font-size: 0.85rem; color: #8a919c; margin: 0.4rem 0; }
-  .msg.err { color: #d9756b; }
-  .msg.dim { color: #6d7683; }
+  .msg { font-size: 0.85rem; color: var(--text-2); margin: 0.4rem 0; }
+  .msg.err { color: var(--err); }
+  .msg.dim { color: var(--text-3); }
 
   /* --- Country view --- */
   .countryview { display: flex; gap: 0.8rem; min-height: 0; height: 100%; }
   .country-col { display: flex; flex-direction: column; gap: 0.4rem; width: 20rem; flex: none; min-height: 0; }
   .country-col.wide { width: 28rem; max-width: 100%; }
-  .country-list { overflow-y: auto; border: 1px solid #1f242c; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .country-list { overflow-y: auto; border: 1px solid var(--border); display: flex; flex-direction: column; flex: 1; min-height: 0; }
   .country-row {
-    display: flex; align-items: center; gap: 0.5rem; border: none; border-bottom: 1px solid #1f242c;
-    background: transparent; color: #cfd4db; font-family: inherit; font-size: 0.82rem;
+    display: flex; align-items: center; gap: 0.5rem; border: none; border-bottom: 1px solid var(--border);
+    background: transparent; color: var(--text-1); font-family: inherit; font-size: 0.82rem;
     padding: 0.25rem 0.4rem; cursor: pointer; text-align: left;
   }
-  .country-row:hover { background: #303844; }
-  .country-row.sel { background: #4a6da7; color: #fff; }
+  .country-row:hover { background: var(--bg-3); }
+  .country-row.sel { background: var(--accent); color: var(--text-inverse); }
   .flag { width: 22px; height: 15px; flex: none; display: flex; align-items: center; justify-content: center; }
   .flag img { max-width: 22px; max-height: 15px; }
-  .sw { width: 16px; height: 12px; border: 1px solid #00000055; }
+  .sw { width: 16px; height: 12px; border: 1px solid var(--bg-0); }
   .cname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .ctag { color: #9aa2ad; font-size: 0.72rem; }
-  .listhint { font-size: 0.74rem; color: #6d7683; margin: 0; }
+  .ctag { color: var(--text-2); font-size: 0.72rem; }
+  .listhint { font-size: 0.74rem; color: var(--text-3); margin: 0; }
 
-  .approx { color: #c8a24a; }
+  .approx { color: var(--warn); }
 
   .serieslist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.25rem; }
   .series-card {
     display: flex; align-items: center; gap: 0.6rem; width: 100%; text-align: left;
-    border: 1px solid #1f242c; background: #21262e; color: #cfd4db;
+    border: 1px solid var(--border); background: var(--bg-1); color: var(--text-1);
     font-family: inherit; font-size: 0.83rem; padding: 0.3rem 0.5rem; cursor: pointer;
   }
-  .series-card:hover { background: #303844; border-color: #4a6da7; }
-  .skey { font-weight: 600; color: #cfd4db; }
-  .smeta { color: #8a919c; font-size: 0.75rem; }
-  .addhint { margin-left: auto; color: #7f9bc7; font-size: 0.72rem; }
+  .series-card:hover { background: var(--bg-3); border-color: var(--accent); }
+  .skey { font-weight: 600; color: var(--text-1); }
+  .smeta { color: var(--text-2); font-size: 0.75rem; }
+  .addhint { margin-left: auto; color: var(--accent-text); font-size: 0.72rem; }
 
   /* --- All view --- */
   .allview { overflow-y: auto; display: flex; flex-direction: column; gap: 0.4rem; }
-  .filegroup { border: 1px solid #1f242c; }
+  .filegroup { border: 1px solid var(--border); }
   .filehead {
-    display: flex; justify-content: space-between; background: #262d37; color: #9aecc0;
+    display: flex; justify-content: space-between; background: var(--bg-2); color: var(--ok);
     font-size: 0.8rem; padding: 0.3rem 0.5rem;
   }
 
   .newbtn {
-    align-self: flex-start; border: 1px solid #1f242c; background: #3f4855; color: #cfd4db;
+    align-self: flex-start; border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1);
     font-family: inherit; font-size: 0.8rem; padding: 0.28rem 0.7rem; cursor: pointer;
   }
-  .newbtn:hover { background: #4a6da7; color: #fff; }
+  .newbtn:hover { background: var(--accent); color: var(--text-inverse); }
 
   /* --- Board view --- */
   .boardview { display: flex; gap: 0.6rem; min-height: 0; height: 100%; }
   .boardmain { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
   .boardside {
-    width: 25rem; flex: none; overflow-y: auto; border-left: 1px solid #1f242c;
+    width: 25rem; flex: none; overflow-y: auto; border-left: 1px solid var(--border);
     padding-left: 0.6rem;
   }
-  .sidehint { font-size: 0.82rem; color: #8a919c; }
+  .sidehint { font-size: 0.82rem; color: var(--text-2); }
 
   .empty-board {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 1rem; height: 100%; text-align: center;
   }
-  .emptymsg { font-size: 0.9rem; color: #9aa2ad; margin: 0; }
+  .emptymsg { font-size: 0.9rem; color: var(--text-2); margin: 0; }
   .cta {
-    border: 1px solid #4a6da7; background: #4a6da7; color: #fff;
+    border: 1px solid var(--accent); background: var(--accent); color: var(--text-inverse);
     font-family: inherit; font-size: 0.95rem; padding: 0.5rem 1.2rem; cursor: pointer;
   }
-  .cta:hover { background: #5a7fbf; }
+  .cta:hover { background: var(--accent-text); }
 
-  .seriescfg { border: 1px solid #1f242c; margin-bottom: 0.4rem; flex: none; }
-  .seriescfg summary { cursor: pointer; padding: 0.3rem 0.5rem; background: #262d37; font-size: 0.82rem; }
-  .cfgkey { color: #9aecc0; background: #16191f; padding: 0 0.3rem; font-size: 0.78rem; }
+  .seriescfg { border: 1px solid var(--border); margin-bottom: 0.4rem; flex: none; }
+  .seriescfg summary { cursor: pointer; padding: 0.3rem 0.5rem; background: var(--bg-2); font-size: 0.82rem; }
+  .cfgkey { color: var(--ok); background: var(--bg-0); padding: 0 0.3rem; font-size: 0.78rem; }
   .cfgrow { display: flex; flex-wrap: wrap; gap: 0.8rem; padding: 0.4rem 0.5rem; align-items: center; }
-  .cfg { display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; color: #9aa2ad; }
+  .cfg { display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; color: var(--text-2); }
   .cfg select, .cfld select {
-    background: #21262e; border: 1px solid #1f242c; color: #cfd4db; font-family: inherit; padding: 0.1rem 0.3rem;
+    background: var(--bg-1); border: 1px solid var(--border); color: var(--text-1); font-family: inherit; padding: 0.1rem 0.3rem;
   }
-  .cfgchk { display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; color: #cfd4db; }
-  .cfghint { font-size: 0.72rem; color: #6d7683; }
-  .cfgpot { padding: 0.2rem 0.5rem 0.5rem; border-top: 1px solid #1f242c; }
-  .cfgpot h5 { margin: 0.3rem 0; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; color: #9aa2ad; }
-  .adv { text-transform: none; letter-spacing: 0; color: #6d7683; font-size: 0.7rem; }
+  .cfgchk { display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; color: var(--text-1); }
+  .cfghint { font-size: 0.72rem; color: var(--text-3); }
+  .cfgpot { padding: 0.2rem 0.5rem 0.5rem; border-top: 1px solid var(--border); }
+  .cfgpot h5 { margin: 0.3rem 0; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-2); }
+  .adv { text-transform: none; letter-spacing: 0; color: var(--text-3); font-size: 0.7rem; }
 
-  .approxsec { border: 1px solid #1f242c; margin-top: 0.4rem; flex: none; }
-  .approxsec summary { cursor: pointer; padding: 0.3rem 0.5rem; background: #262d37; font-size: 0.8rem; }
-  .approxnote { font-size: 0.74rem; color: #8a919c; margin: 0.3rem 0.5rem; }
+  .approxsec { border: 1px solid var(--border); margin-top: 0.4rem; flex: none; }
+  .approxsec summary { cursor: pointer; padding: 0.3rem 0.5rem; background: var(--bg-2); font-size: 0.8rem; }
+  .approxnote { font-size: 0.74rem; color: var(--text-2); margin: 0.3rem 0.5rem; }
   .approxsec .serieslist { padding: 0 0.5rem 0.5rem; }
 
-  .boardmsg { margin: 0.2rem 0; font-size: 0.8rem; color: #c8a24a; }
+  .boardmsg { margin: 0.2rem 0; font-size: 0.8rem; color: var(--warn); }
 
   .add-block {
-    align-self: flex-start; border: 1px solid #1f242c; background: #3f4855; color: #cfd4db;
+    align-self: flex-start; border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1);
     font-family: inherit; font-size: 0.78rem; padding: 0.25rem 0.6rem; cursor: pointer;
   }
-  .add-block:hover { background: #4a6da7; color: #fff; }
+  .add-block:hover { background: var(--accent); color: var(--text-inverse); }
 
   .addprompt, .createform { display: flex; flex-direction: column; gap: 0.4rem; }
   .createform {
     position: absolute; top: 3rem; left: 50%; transform: translateX(-50%); z-index: 5;
-    background: #2b323d; border: 1px solid #4a6da7; padding: 0.8rem; width: 22rem;
+    background: var(--bg-2); border: 1px solid var(--accent); padding: 0.8rem; width: 22rem;
     box-shadow: 0 8px 30px rgba(0,0,0,0.6);
   }
   .addprompt h4, .createform h4 { margin: 0; font-size: 0.85rem; }
   .addinput, .cfld input {
-    background: #21262e; border: 1px solid #1f242c; color: #cfd4db;
+    background: var(--bg-1); border: 1px solid var(--border); color: var(--text-1);
     font-family: inherit; font-size: 0.84rem; padding: 0.25rem 0.35rem;
   }
-  .cfld { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.78rem; color: #9aa2ad; }
-  .cnote { font-size: 0.74rem; color: #8a919c; margin: 0; }
+  .cfld { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.78rem; color: var(--text-2); }
+  .cnote { font-size: 0.74rem; color: var(--text-2); margin: 0; }
   .addbtns { display: flex; gap: 0.4rem; }
   .addbtns button, .createform button {
-    border: 1px solid #1f242c; background: #3f4855; color: #cfd4db;
+    border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1);
     font-family: inherit; font-size: 0.8rem; padding: 0.22rem 0.7rem; cursor: pointer;
   }
-  .addbtns button.primary { background: #4a6da7; color: #fff; }
-  .addbtns button:hover { background: #4a6da7; color: #fff; }
-  .err { color: #d9756b; font-size: 0.76rem; margin: 0; }
+  .addbtns button.primary { background: var(--accent); color: var(--text-inverse); }
+  .addbtns button:hover { background: var(--accent); color: var(--text-inverse); }
+  .err { color: var(--err); font-size: 0.76rem; margin: 0; }
 
   .badge {
     font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.03em;
-    padding: 0.05rem 0.35rem; border: 1px solid #1f242c;
+    padding: 0.05rem 0.35rem; border: 1px solid var(--border);
   }
-  .badge.origin.base { background: #3f4855; color: #cfd4db; }
-  .badge.origin.mod { background: #3f8a6d; color: #fff; }
-  .badge.pending { background: #b8863b; color: #fff; }
-  .badge.approxb { background: #7a6a3f; color: #fff; }
+  .badge.origin.base { background: var(--bg-3); color: var(--text-1); }
+  .badge.origin.mod { background: var(--ok); color: var(--text-inverse); }
+  .badge.pending { background: var(--warn); color: var(--text-inverse); }
+  .badge.approxb { background: var(--warn); color: var(--text-inverse); }
 </style>

@@ -44,8 +44,8 @@
   .list-section {
     display: flex;
     flex-direction: column;
-    border: 1px solid #1f242c;
-    background: #262c35;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
     margin-bottom: 0.6rem;
   }
 
@@ -54,15 +54,15 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.3rem 0.5rem;
-    background: #3f4855;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
   }
 
   .title {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #cfd4db;
+    color: var(--text-1);
     font-weight: 600;
   }
 
@@ -70,8 +70,8 @@
     font-size: 0.72rem;
     line-height: 1;
     padding: 0.12rem 0.4rem;
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
     font-variant-numeric: tabular-nums;
   }
 

@@ -14,7 +14,7 @@
 -->
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { SidePanel } from "$lib/components/ui";
+  import { SidePanel, LoadingState, EditableHeading } from "$lib/components/ui";
   import type { DropdownItem } from "$lib/components/ui";
   import Timeline from "$lib/components/Timeline.svelte";
   import type { TimelineBlock, TimelineIntent } from "$lib/components/timeline";
@@ -34,7 +34,7 @@
   import RebelsSection from "./RebelsSection.svelte";
   import MonumentsSection from "./MonumentsSection.svelte";
   import MercenariesSection from "./MercenariesSection.svelte";
-  import ProvinceNamesReverseSection from "./ProvinceNamesReverseSection.svelte";
+  import ProvinceNamesSubtitle from "./ProvinceNamesSubtitle.svelte";
 
   let {
     installPath,
@@ -49,6 +49,8 @@
     onopenculture,
     onopenmechanics,
     scrollTo,
+    embedded = false,
+    contentTab,
   }: {
     installPath: string;
     modPath: string | null;
@@ -71,7 +73,17 @@
     /** Section anchor to scroll into view on open (e.g. "development" → the
      * Economy section, opened from Development map mode's click-to-edit, 9.1b). */
     scrollTo?: string;
+    embedded?: boolean;
+    contentTab?: "overview" | "economy" | "military" | "monuments" | "history" | "advanced";
   } = $props();
+
+  let activeTab = $state("overview");
+  const contentTabs = [
+    { id: "overview", label: "Overview" }, { id: "economy", label: "Economy" },
+    { id: "military", label: "Military & Unrest" }, { id: "monuments", label: "Monuments" },
+    { id: "history", label: "History" }, { id: "advanced", label: "Advanced" },
+  ];
+  $effect(() => { if (contentTab) activeTab = contentTab; });
 
   let devAnchor: HTMLDivElement | null = $state(null);
   // Scroll the requested section into view once details (and thus the section)
@@ -218,32 +230,26 @@
   let locKey = $derived(`PROV${id}`);
   let pendingName = $derived(queue.pendingLocOverride(locKey));
   let titleName = $derived(pendingName ?? details?.localized_name ?? `Province ${id}`);
-  let editingName = $state(false);
-  let nameDraft = $state("");
-  function startName() { nameDraft = titleName; editingName = true; }
-  function applyName() {
-    const v = nameDraft.trim();
-    if (v && v !== (details?.localized_name ?? "")) queue.push({ label: `Rename province #${id}`, edits: [{ kind: "locOverride", key: locKey, value: v }] });
-    editingName = false;
+  function commitName(v: string) {
+    if (v === (details?.localized_name ?? "")) return;
+    queue.push({
+      label: `Rename province #${id}`,
+      edits: [{ kind: "locOverride", key: locKey, value: v }],
+      coalesceKey: `prov-name:${id}`,
+    });
   }
 
   let capField = $derived(queue.pendingField(file, "capital"));
   let capitalCity = $derived(capField !== undefined ? (capField.value ?? "") : (details?.top_level.capital ?? ""));
-  let editingCap = $state(false);
-  let capDraft = $state("");
-  function startCap() { capDraft = capitalCity; editingCap = true; }
-  function applyCap() {
-    const v = capDraft.trim();
-    if (details && v !== (details.top_level.capital ?? "")) {
-      pushAtDate(
-        queue,
-        dateCtx,
-        `Set capital city of #${id}`,
-        [scalarEdit(file, "capital", v, details.top_level.capital != null, true)],
-        [`capital = "${v}"`],
-      );
-    }
-    editingCap = false;
+  function commitCap(v: string) {
+    if (!details || v === (details.top_level.capital ?? "")) return;
+    pushAtDate(
+      queue,
+      dateCtx,
+      `Set capital city of #${id}`,
+      [scalarEdit(file, "capital", v, details.top_level.capital != null, true)],
+      [`capital = "${v}"`],
+    );
   }
 
   let ownerTag = $derived(effective?.owner ?? null);
@@ -307,34 +313,47 @@
   let showAdvanced = $state(false);
 </script>
 
-<SidePanel title={titleName} {onclose}>
+<SidePanel title={titleName} tabs={water ? [] : contentTabs} bind:activeTab {onclose} {embedded}>
   {#snippet header()}
     <div class="head">
-      <div class="name-row">
-        {#if editingName}
-          <input class="hin" bind:value={nameDraft} onkeydown={(e) => e.key === "Enter" && applyName()} />
-          <button class="mini" onclick={applyName}>✓</button>
-          <button class="mini" onclick={() => (editingName = false)}>×</button>
-        {:else}
-          <span class="pid">#{id}</span>
-          <button class="edit-btn" title="Rename province" onclick={startName}>✎</button>
-          {#if pendingName}<span class="edited">edited</span>{/if}
+      <!-- Headline is the capital CITY (the settlement you'd name on a map);
+           water has no capital, so it falls back to the province name. -->
+      {#if water}
+        <EditableHeading
+          value={titleName}
+          label="Province name"
+          edited={pendingName !== undefined}
+          oncommit={commitName}
+        />
+      {:else}
+        <EditableHeading
+          value={capitalCity}
+          placeholder="Unnamed"
+          label="Capital city"
+          edited={capField !== undefined}
+          oncommit={commitCap}
+        />
+      {/if}
+      <ProvinceNamesSubtitle
+        {installPath}
+        {modPath}
+        {id}
+        onjumpculture={onopenculture}
+        onjumpcountry={onopencountry}
+      />
+      <div class="ids">
+        <span class="pid">#{id}</span>
+        {#if !water}
+          <span class="sep">·</span>
+          <EditableHeading
+            value={titleName}
+            label="Province name"
+            size="md"
+            edited={pendingName !== undefined}
+            oncommit={commitName}
+          />
         {/if}
       </div>
-      {#if !water}
-        <div class="cap-row">
-          <span class="lbl">Capital city:</span>
-          {#if editingCap}
-            <input class="hin" bind:value={capDraft} onkeydown={(e) => e.key === "Enter" && applyCap()} />
-            <button class="mini" onclick={applyCap}>✓</button>
-            <button class="mini" onclick={() => (editingCap = false)}>×</button>
-          {:else}
-            <span class="capname">{capitalCity || "—"}</span>
-            <button class="edit-btn" title="Edit capital city name" onclick={startCap}>✎</button>
-            {#if capField !== undefined}<span class="edited">edited</span>{/if}
-          {/if}
-        </div>
-      {/if}
       {#if ownerTag}
         <button class="owner" onclick={() => onopencountry?.(ownerTag!)} title="Open in political mode">
           <span class="swatch" style="background: {ownerColor(ownerTag) ?? 'transparent'}"></span>
@@ -349,7 +368,7 @@
   {#if error}
     <p class="error">{error}</p>
   {:else if !details || !effective}
-    <p class="dim">Loading…</p>
+    <LoadingState label="Loading province…" />
   {:else}
     <!-- Geography breadcrumb -->
     <div class="crumb">
@@ -361,50 +380,39 @@
       {#if details.geography.impassable}<span class="wtag">wasteland</span>{/if}
     </div>
 
-    <ProvinceNamesReverseSection
-      {installPath}
-      {modPath}
-      {id}
-      onjumpculture={onopenculture}
-      onjumpcountry={onopencountry}
-    />
-
     {#if water}
       <p class="dim water-note">Water province — most history fields don't apply. Trade-node membership and geography are editable below.</p>
       <GeographySection {installPath} {modPath} {details} {queue} {geo} />
     {:else}
+      {#if activeTab === "overview"}
       <PoliticalSection {details} {effective} {file} {queue} {countries} {dateCtx} />
+      <CultureReligionSection {installPath} {modPath} {details} {effective} {file} {queue} {cultures} {religions} {dateCtx} />
+      <GeographySection {installPath} {modPath} {details} {queue} {geo} />
+      {#if estateAssignment}<section class="estate-assign"><h3>Estate</h3><p class="dim">Assigned to <code>{estateAssignment}</code> (legacy, read-only).</p></section>{/if}
+      {:else if activeTab === "economy"}
       <!-- Development lives at the top of the Economy section (base tax/prod/man
            steppers); 9.1b scrolls here from the Development map mode. -->
       <div bind:this={devAnchor} id="prov-development-anchor">
-        <EconomySection {details} {effective} {file} {queue} {goods} {eventModifiers} {triggeredModifiers} {dateCtx} {onopenmechanics} />
+        <EconomySection {installPath} {modPath} {details} {effective} {file} {queue} {goods} {eventModifiers} {triggeredModifiers} {dateCtx} {onopenmechanics} />
       </div>
-      <CultureReligionSection {details} {effective} {file} {queue} {cultures} {religions} {dateCtx} />
-      <BuildingsSection {details} {effective} {file} {queue} {buildings} {dateCtx} />
+      <BuildingsSection {installPath} {modPath} {details} {effective} {file} {queue} {buildings} {dateCtx} />
+      {:else if activeTab === "military"}
       <DiscoverySection {details} {effective} {file} {queue} {techGroups} {dateCtx} />
       <RebelsSection {details} {file} {queue} factions={rebelFactions} {dateCtx} />
-      <MonumentsSection {installPath} {modPath} {id} {queue} {countries} />
       <MercenariesSection {installPath} {modPath} {id} {queue} {countries} />
-      <GeographySection {installPath} {modPath} {details} {queue} {geo} />
-      {#if estateAssignment}
-        <section class="estate-assign">
-          <h3>Estate</h3>
-          <p class="dim">
-            Assigned to <code>{estateAssignment}</code> (legacy province-side
-            <code>estate =</code> key, read-only).
-          </p>
-        </section>
+      {:else if activeTab === "monuments"}
+      <MonumentsSection {installPath} {modPath} {id} {queue} {countries} />
       {/if}
     {/if}
 
     <!-- Dated history timeline (Sprint 2.3) -->
-    <section>
+    {#if water || activeTab === "history"}<section>
       <h3>History Timeline</h3>
       <Timeline blocks={timelineBlocks} {calendar} onchange={onTimeline} />
-    </section>
+    </section>{/if}
 
     <!-- Preserve-unknown: unmodeled statements, read-only -->
-    {#if details.raw_remainder.length > 0}
+    {#if details.raw_remainder.length > 0 && (water || activeTab === "advanced")}
       <section>
         <button class="adv-toggle" onclick={() => (showAdvanced = !showAdvanced)}>
           {showAdvanced ? "▾" : "▸"} Advanced ({details.raw_remainder.length} unmodeled)
@@ -419,29 +427,24 @@
 </SidePanel>
 
 <style>
-  .head { display: flex; flex-direction: column; gap: 0.35rem; }
-  .name-row, .cap-row { display: flex; align-items: center; gap: 0.4rem; }
-  .pid { font-size: 0.8rem; color: #9ca3af; }
-  .lbl { font-size: 0.72rem; text-transform: uppercase; color: #8a919c; }
-  .capname { font-size: 0.85rem; }
-  .hin { flex: 1; min-width: 0; background: #21262e; border: 1px solid #1f242c; color: #cfd4db; font-family: inherit; font-size: 0.85rem; padding: 0.15rem 0.4rem; outline: none; }
-  .edit-btn { border: none; background: transparent; color: #9ca3af; cursor: pointer; font-size: 0.85rem; padding: 0 0.15rem; }
-  .edit-btn:hover { color: #fff; }
-  .mini { border: 1px solid #1f242c; background: #2b323d; color: #cfd4db; cursor: pointer; font-size: 0.8rem; padding: 0.1rem 0.35rem; }
-  .mini:hover { background: #4a6da7; color: #fff; }
-  .edited { background: rgba(234, 179, 8, 0.22); color: #fde68a; font-size: 0.66rem; padding: 0.02rem 0.4rem; }
-  .owner { display: inline-flex; align-items: center; gap: 0.35rem; align-self: flex-start; border: 1px solid #1f242c; background: #21262e; color: #cfd4db; font-family: inherit; font-size: 0.82rem; padding: 0.15rem 0.5rem; cursor: pointer; }
-  .owner:hover { background: #4a6da7; color: #fff; }
-  .swatch { width: 0.8rem; height: 0.8rem; border: 1px solid #1f242c; display: inline-block; }
-  .uncol { font-size: 0.8rem; color: #8a919c; }
-  .crumb { font-size: 0.75rem; color: #9ca3af; margin-bottom: 0.7rem; line-height: 1.4; }
-  .wtag { background: #3a5a86; color: #fff; font-size: 0.62rem; padding: 0.05rem 0.3rem; margin-left: 0.25rem; }
+  .head { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+  /* Identifiers sit UNDER the headline: the capital city names the place, the
+     province id and PROV<id> loc name are how the files address it. */
+  .ids { display: flex; align-items: baseline; gap: 0.35rem; min-width: 0; }
+  .pid { font-size: var(--fs-xs); color: var(--text-3); }
+  .ids .sep { color: var(--text-3); }
+  .owner { display: inline-flex; align-items: center; gap: 0.35rem; align-self: flex-start; border: 1px solid var(--border); background: var(--bg-1); color: var(--text-1); font-family: inherit; font-size: 0.82rem; padding: 0.15rem 0.5rem; cursor: pointer; }
+  .owner:hover { background: var(--accent); color: var(--text-inverse); }
+  .swatch { width: 0.8rem; height: 0.8rem; border: 1px solid var(--border); display: inline-block; }
+  .uncol { font-size: 0.8rem; color: var(--text-2); }
+  .crumb { font-size: 0.75rem; color: var(--text-2); margin-bottom: 0.7rem; line-height: 1.4; }
+  .wtag { background: var(--accent); color: var(--text-inverse); font-size: 0.62rem; padding: 0.05rem 0.3rem; margin-left: 0.25rem; }
   .water-note { margin: 0 0 0.6rem; font-size: 0.8rem; }
   section { margin-bottom: 1rem; }
-  h3 { margin: 0 0 0.4rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; }
-  .adv-toggle { border: none; background: transparent; color: #9ca3af; font-family: inherit; font-size: 0.78rem; cursor: pointer; padding: 0.2rem 0; text-transform: uppercase; letter-spacing: 0.03em; }
-  .adv-toggle:hover { color: #cfd4db; }
-  .raw { margin: 0.3rem 0 0; padding: 0.5rem; background: #191d23; border: 1px solid #1f242c; color: #9ab0d0; font-size: 0.72rem; white-space: pre-wrap; word-break: break-word; max-height: 16rem; overflow-y: auto; }
-  .dim { color: #8a919c; }
-  .error { color: #fca5a5; }
+  h3 { margin: 0 0 0.4rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2); }
+  .adv-toggle { border: none; background: transparent; color: var(--text-2); font-family: inherit; font-size: 0.78rem; cursor: pointer; padding: 0.2rem 0; text-transform: uppercase; letter-spacing: 0.03em; }
+  .adv-toggle:hover { color: var(--text-1); }
+  .raw { margin: 0.3rem 0 0; padding: 0.5rem; background: var(--bg-1); border: 1px solid var(--border); color: var(--accent-text); font-size: 0.72rem; white-space: pre-wrap; word-break: break-word; max-height: 16rem; overflow-y: auto; }
+  .dim { color: var(--text-2); }
+  .error { color: var(--err); }
 </style>

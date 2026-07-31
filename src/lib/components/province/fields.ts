@@ -5,7 +5,7 @@
 
 import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
 import type { GeoOption, DatedBlock } from "./types";
-import { editAtDate, type DatedBlockRef } from "$lib/editAtDate";
+import { editAtDate, isShadowed, shadowedKeysFrom, type DatedBlockRef } from "$lib/editAtDate";
 import { compareDates } from "$lib/calendar";
 
 /**
@@ -24,19 +24,42 @@ export interface DateCtx {
   foldStatements: (statements: string[]) => void;
 }
 
-/** True when writes must land in a dated block rather than at the top level. */
+/** True when the selected date is strictly after the mod's effective start. */
 export function isLaterDate(ctx: DateCtx | null | undefined): boolean {
   return !!ctx && ctx.selectedDate != null && compareDates(ctx.selectedDate, ctx.startDate) > 0;
 }
 
+/**
+ * True when writing `statements` at the selected date must land in a dated block
+ * rather than at the top level — either because the date is past the start, or
+ * because the file's own pre-start history already overrides those keys (see
+ * editAtDate.ts). Sections that build differently-shaped top-level vs dated
+ * edits (RebelsSection) branch on this rather than on `isLaterDate` alone.
+ */
+export function writesDatedBlock(
+  ctx: DateCtx | null | undefined,
+  statements: string[],
+): boolean {
+  if (!ctx || ctx.selectedDate == null) return false;
+  if (isLaterDate(ctx)) return true;
+  return isShadowed(statements, shadowedKeysFrom(blockRefs(ctx.blocks), ctx.selectedDate));
+}
+
 function blockRefs(blocks: DatedBlock[]): DatedBlockRef[] {
-  return blocks.map((b) => ({ date: b.date, occurrenceIndex: b.occurrence_index }));
+  return blocks.map((b) => ({
+    date: b.date,
+    occurrenceIndex: b.occurrence_index,
+    keys: b.entries.map((e) => e.key),
+  }));
 }
 
 /**
- * Route a field write through the date rule (Sprint 12.3): at the start date push
- * `startEdits` (top-level, unchanged); at a later date push the dated-block
- * equivalent of `statements` and fold them into the panel's local blocks.
+ * Route a field write through the date rule (Sprint 12.3). The target is decided
+ * by `editAtDate`, NOT by the date comparison alone: a write at the start date
+ * still lands in a dated block when the file's own history already overrides the
+ * written keys before that date (timeline mods — see editAtDate.ts). When the
+ * write does become dated we tag the composite with the date and fold the
+ * statements into the panel's local blocks so the shown effective state follows.
  */
 export function pushAtDate(
   queue: EditQueue,
@@ -46,21 +69,29 @@ export function pushAtDate(
   statements: string[],
   coalesceKey?: string,
 ): void {
-  if (!isLaterDate(ctx)) {
+  if (!ctx || ctx.selectedDate == null) {
     queue.push({ label, edits: startEdits, ...(coalesceKey ? { coalesceKey } : {}) });
     return;
   }
-  const c = ctx as DateCtx;
+  const refs = blockRefs(ctx.blocks);
   const edits = editAtDate({
-    file: c.file,
-    selectedDate: c.selectedDate,
-    startDate: c.startDate,
-    datedBlocks: blockRefs(c.blocks),
+    file: ctx.file,
+    selectedDate: ctx.selectedDate,
+    startDate: ctx.startDate,
+    datedBlocks: refs,
     startEdits,
     statements,
+    shadowedKeys: shadowedKeysFrom(refs, ctx.selectedDate),
   });
-  queue.push({ label, edits, date: c.selectedDate as string, ...(coalesceKey ? { coalesceKey } : {}) });
-  c.foldStatements(statements);
+  // `editAtDate` returns `startEdits` by identity when the top level is the
+  // right target — that write is date-agnostic (it edits the baseline) and must
+  // not be date-tagged or folded into the dated blocks.
+  if (edits === startEdits) {
+    queue.push({ label, edits, ...(coalesceKey ? { coalesceKey } : {}) });
+    return;
+  }
+  queue.push({ label, edits, date: ctx.selectedDate, ...(coalesceKey ? { coalesceKey } : {}) });
+  ctx.foldStatements(statements);
 }
 
 /** Set a top-level scalar: replace in place when present, else insert. */

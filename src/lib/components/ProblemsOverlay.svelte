@@ -160,9 +160,9 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    border: 1px solid #3a434f;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--bg-3);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.74rem;
     padding: 0.15rem 0.5rem;
@@ -173,19 +173,19 @@
     opacity: 0.45;
   }
   .chip.on.sev-error {
-    border-color: #c0392b;
+    border-color: var(--err);
   }
   .chip.on.sev-warning {
-    border-color: #d8a020;
+    border-color: var(--warn);
   }
   .chip.on.sev-info {
-    border-color: #4a6da7;
+    border-color: var(--accent);
   }
 
   .rerun {
-    border: 1px solid #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
     font-family: inherit;
     font-size: 0.76rem;
     padding: 0.18rem 0.7rem;
@@ -203,14 +203,14 @@
   }
 
   .empty {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.85rem;
     padding: 1rem 0.3rem;
   }
 
   .domain {
-    border: 1px solid #1f242c;
-    background: #262c35;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
   }
 
   .domain-head {
@@ -218,20 +218,20 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.3rem 0.5rem;
-    background: #21262e;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-1);
+    border-bottom: 1px solid var(--border);
   }
 
   .domain-name {
     flex: 1;
     font-weight: 700;
-    color: #9aecc0;
+    color: var(--ok);
     font-size: 0.85rem;
   }
 
   .domain-count {
     font-size: 0.72rem;
-    color: #8a919c;
+    color: var(--text-2);
     font-variant-numeric: tabular-nums;
   }
 
@@ -249,9 +249,9 @@
     text-align: left;
     border: none;
     border-left: 3px solid transparent;
-    border-bottom: 1px solid #21262e;
+    border-bottom: 1px solid var(--bg-1);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font: inherit;
     font-size: 0.8rem;
     padding: 0.28rem 0.55rem;
@@ -261,8 +261,8 @@
     cursor: pointer;
   }
   .issue.jumpable:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .msg {
@@ -280,26 +280,26 @@
     font-size: 0.68rem;
     font-weight: 700;
     line-height: 1;
-    color: #fff;
+    color: var(--text-inverse);
     border-radius: 1px;
   }
   .glyph.sev-error {
-    background: #c0392b;
+    background: var(--err);
   }
   .glyph.sev-warning {
-    background: #d8a020;
-    color: #1a1d22;
+    background: var(--warn);
+    color: var(--bg-0);
   }
   .glyph.sev-info {
-    background: #4a6da7;
+    background: var(--accent);
   }
   .issue.sev-error {
-    border-left-color: #c0392b;
+    border-left-color: var(--err);
   }
   .issue.sev-warning {
-    border-left-color: #d8a020;
+    border-left-color: var(--warn);
   }
   .issue.sev-info {
-    border-left-color: #4a6da7;
+    border-left-color: var(--accent);
   }
 </style>

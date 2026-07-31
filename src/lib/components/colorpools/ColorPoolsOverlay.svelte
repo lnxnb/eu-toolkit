@@ -23,6 +23,7 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
   import { OverlaySurface } from "$lib/components/script";
+  import { LoadingState } from "$lib/components/ui";
   import { ColorPicker, type RGB } from "$lib/components/ui";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
 
@@ -321,7 +322,7 @@
 
   <div class="body">
     {#if loading}
-      <p class="status">Loading…</p>
+      <LoadingState label="Loading color pools…" />
     {:else if error}
       <p class="status err">{error}</p>
     {:else if selectedGroup}
@@ -413,16 +414,16 @@
     gap: 0.25rem;
   }
   .pool-tabs button {
-    background: #2b323d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font: inherit;
     padding: 0.25rem 0.7rem;
     cursor: pointer;
   }
   .pool-tabs button.active {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .body {
@@ -432,22 +433,22 @@
   }
 
   .status {
-    color: #8a919c;
+    color: var(--text-2);
   }
   .status.err {
-    color: #d97a7a;
+    color: var(--err);
   }
 
   .pool-note {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.82rem;
     margin: 0 0 1rem;
     max-width: 60rem;
   }
 
   .file {
-    border: 1px solid #1f242c;
-    background: #2b323d;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
     padding: 0.75rem 1rem;
     margin-bottom: 1rem;
   }
@@ -459,7 +460,7 @@
     margin-bottom: 0.6rem;
   }
   .file .rel {
-    color: #cfd4db;
+    color: var(--text-1);
     font-size: 0.85rem;
   }
 
@@ -468,19 +469,19 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
     padding: 0.05rem 0.4rem;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    color: var(--text-1);
   }
   .badge.base {
-    background: #3f4855;
+    background: var(--bg-3);
   }
   .badge.mod {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .badge.new {
-    background: #5a7a4a;
-    color: #fff;
+    background: var(--ok);
+    color: var(--text-inverse);
   }
 
   .scalars {
@@ -492,14 +493,14 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    color: #cfd4db;
+    color: var(--text-1);
     font-size: 0.82rem;
   }
   .scalar input {
     width: 5rem;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font: inherit;
     padding: 0.2rem 0.35rem;
   }
@@ -512,15 +513,15 @@
   }
   .section-head h4 {
     margin: 0;
-    color: #cfd4db;
+    color: var(--text-1);
     font-size: 0.85rem;
     font-weight: 600;
   }
   .add,
   .new-file {
-    background: #3f4855;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font: inherit;
     font-size: 0.8rem;
     padding: 0.2rem 0.6rem;
@@ -528,8 +529,8 @@
   }
   .add:hover,
   .new-file:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .new-file {
     display: block;
@@ -554,9 +555,9 @@
     line-height: 0.9rem;
     text-align: center;
     padding: 0;
-    background: #2b323d;
-    border: 1px solid #1f242c;
-    color: #d97a7a;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--err);
     font-size: 0.75rem;
     cursor: pointer;
     opacity: 0;
@@ -567,7 +568,7 @@
   }
 
   .preserved {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.78rem;
     margin: 0.6rem 0 0;
   }

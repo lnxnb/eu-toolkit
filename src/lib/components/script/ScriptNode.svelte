@@ -261,12 +261,12 @@
 
 <style>
   .node {
-    border-left: 2px solid #2b323d;
+    border-left: 2px solid var(--bg-2);
     margin-left: calc(var(--depth) * 0.15rem);
   }
 
   .node.group {
-    border-left-color: #3a434f;
+    border-left-color: var(--bg-3);
   }
 
   .row {
@@ -277,18 +277,18 @@
   }
 
   .row:hover {
-    background: #262c35;
+    background: var(--bg-2);
   }
 
   .group-row {
-    background: #21262e;
+    background: var(--bg-1);
   }
 
   .twist {
     flex: none;
     border: none;
     background: transparent;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.7rem;
     cursor: pointer;
     padding: 0 0.1rem;
@@ -297,7 +297,7 @@
 
   .badge {
     flex: none;
-    color: #fff;
+    color: var(--text-inverse);
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.03em;
@@ -308,7 +308,7 @@
   .child-count {
     flex: none;
     font-size: 0.7rem;
-    color: #8a919c;
+    color: var(--text-2);
     font-variant-numeric: tabular-nums;
   }
 
@@ -328,7 +328,7 @@
     flex: 1;
     min-width: 0;
     font-size: 0.82rem;
-    color: #cfd4db;
+    color: var(--text-1);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -337,7 +337,7 @@
   .raw-key {
     font-family: "Consolas", "Courier New", monospace;
     font-size: 0.78rem;
-    color: #b9bec7;
+    color: var(--text-1);
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -345,8 +345,8 @@
 
   .raw-tag {
     font-size: 0.6rem;
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
     padding: 0 0.22rem;
   }
 
@@ -366,16 +366,16 @@
   }
 
   .cmp {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.85rem;
   }
 
   input[type="number"],
   input[type="text"] {
     width: 7rem;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.18rem 0.35rem;
@@ -390,9 +390,9 @@
     width: 100%;
     min-height: 1.6rem;
     resize: vertical;
-    background: #16191f;
-    border: 1px solid #1f242c;
-    color: #d7dbe0;
+    background: var(--bg-0);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: "Consolas", "Courier New", monospace;
     font-size: 0.78rem;
     padding: 0.2rem 0.35rem;
@@ -407,7 +407,7 @@
 
   .raw-error {
     display: block;
-    color: #fca5a5;
+    color: var(--err);
     font-size: 0.72rem;
     margin-top: 0.15rem;
   }
@@ -416,7 +416,7 @@
     flex: 1;
     font-family: "Consolas", "Courier New", monospace;
     font-size: 0.76rem;
-    color: #9aa2ad;
+    color: var(--text-2);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -425,16 +425,16 @@
   .ro-note {
     flex: none;
     font-size: 0.62rem;
-    color: #8a919c;
-    border: 1px solid #3a434f;
+    color: var(--text-2);
+    border: 1px solid var(--bg-3);
     padding: 0 0.25rem;
   }
 
   .toggle {
     width: 3rem;
-    border: 1px solid #1f242c;
-    background: #21262e;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.18rem 0;
@@ -442,15 +442,15 @@
   }
 
   .toggle.on {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .del {
     flex: none;
     border: none;
     background: transparent;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 1.05rem;
     line-height: 1;
     cursor: pointer;
@@ -458,7 +458,7 @@
   }
 
   .del:hover {
-    color: #fca5a5;
+    color: var(--err);
   }
 
   .scripted-link {
@@ -469,7 +469,7 @@
     gap: 0.35rem;
     border: none;
     background: transparent;
-    color: #7cb0ff;
+    color: var(--accent-text);
     font-family: inherit;
     font-size: 0.82rem;
     cursor: pointer;
@@ -486,14 +486,14 @@
     flex: none;
     font-size: 0.6rem;
     font-weight: 700;
-    background: #3f8a6d;
-    color: #fff;
+    background: var(--ok);
+    color: var(--text-inverse);
     padding: 0 0.28rem;
     line-height: 1.2;
   }
 
   .link-kind.effect {
-    background: #b8863b;
+    background: var(--warn);
   }
 
   .link-name {
@@ -504,7 +504,7 @@
 
   .link-arrow {
     flex: none;
-    color: #5a6b85;
+    color: var(--accent);
     font-size: 0.72rem;
   }
 </style>

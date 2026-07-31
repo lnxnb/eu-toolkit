@@ -108,8 +108,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    background: #14181d;
-    border: 1px solid #4b5563;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
     padding: 0.2rem 0.4rem;
     cursor: pointer;
   }
@@ -118,12 +118,12 @@
     image-rendering: pixelated;
   }
   .none {
-    color: #9ca3af;
+    color: var(--text-2);
     width: 1.2rem;
     text-align: center;
   }
   .caret {
-    color: #9ca3af;
+    color: var(--text-2);
     font-size: 0.7rem;
   }
   .grid {
@@ -138,8 +138,8 @@
     padding: 4px;
     max-height: 12rem;
     overflow-y: auto;
-    background: #3f4855;
-    border: 1px solid #2b323d;
+    background: var(--bg-3);
+    border: 1px solid var(--bg-2);
     box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.35);
   }
   .cell {
@@ -147,14 +147,14 @@
     align-items: center;
     justify-content: center;
     padding: 2px;
-    background: #14181d;
+    background: var(--bg-0);
     border: 1px solid transparent;
     cursor: pointer;
   }
   .cell:hover {
-    border-color: #4a6da7;
+    border-color: var(--accent);
   }
   .cell.sel {
-    border-color: #86efac;
+    border-color: var(--ok);
   }
 </style>

@@ -126,6 +126,15 @@ pub enum TypedEdit {
     /// Write raw bytes to `file` (e.g. a generated flag TGA). Bytes cross IPC as
     /// a JSON number array.
     BinaryAsset { file: String, bytes: Vec<u8> },
+    /// Rewrite `map/provinces.bmp` by replaying color-space pixel ops against the
+    /// copy-on-write base bitmap (Province Colors mode add/expand/dissolve). The
+    /// frontend ships semantic ops, never the 34 MB bitmap; the re-encode happens
+    /// once in [`crate::province_edit::apply_ops`]. Multiple queued groups compose
+    /// on the evolving bitmap like any other file.
+    ProvinceBmp {
+        file: String,
+        ops: Vec<crate::province_edit::BmpOp>,
+    },
     /// Rename the starting ruler (latest dated monarch <= 1444.11.11) of the
     /// country tagged `tag`. Resolved to that country's history file and applied
     /// with [`mod_writer::rename_ruler`]; the frontend need not know the date.
@@ -142,6 +151,8 @@ enum FileOp {
     Binary(Vec<u8>),
     /// Line-surgical CSV rewrite (adjacencies.csv) over the resolved base bytes.
     Csv(Vec<crate::adjacencies::RowInput>),
+    /// Replay color-space pixel ops against the resolved base `provinces.bmp`.
+    Bmp(Vec<crate::province_edit::BmpOp>),
 }
 
 /// Records `op` against `file`, preserving first-seen file order and merging
@@ -326,6 +337,12 @@ pub fn apply_queue(
                 file.clone(),
                 FileOp::Binary(bytes.clone()),
             ),
+            TypedEdit::ProvinceBmp { file, ops } => push_op(
+                &mut order,
+                &mut groups,
+                file.clone(),
+                FileOp::Bmp(ops.clone()),
+            ),
             TypedEdit::RenameRuler { tag, name } => {
                 let (file_name, _) = game_data::country_history_file(vfs, tag)
                     .ok_or_else(|| format!("No country history file found for {tag}"))?;
@@ -363,6 +380,9 @@ pub fn apply_queue(
                 FileOp::Binary(b) => b.clone(),
                 FileOp::Csv(rows) => {
                     crate::adjacencies::rewrite(&bytes, rows).map_err(|e| format!("{rel}: {e}"))?
+                }
+                FileOp::Bmp(ops) => {
+                    crate::province_edit::apply_ops(&bytes, ops).map_err(|e| format!("{rel}: {e}"))?
                 }
             };
         }
@@ -485,6 +505,10 @@ pub fn preview_file(vfs: &Vfs, file: &str, edits: &[TypedEdit]) -> Result<Vec<u8
             }
             TypedEdit::CsvRewrite { file: f, rows } if f == file => {
                 bytes = crate::adjacencies::rewrite(&bytes, rows)
+                    .map_err(|m| format!("{file}: {m}"))?;
+            }
+            TypedEdit::ProvinceBmp { file: f, ops } if f == file => {
+                bytes = crate::province_edit::apply_ops(&bytes, ops)
                     .map_err(|m| format!("{file}: {m}"))?;
             }
             TypedEdit::RenameRuler { tag, name } => {
@@ -684,6 +708,47 @@ mod tests {
         let written = apply_queue(&vfs, &project, &edits).unwrap();
         assert_eq!(written, vec!["gfx/flags/ZZZ.tga".to_string()]);
         assert_eq!(read_project(&project, "gfx/flags/ZZZ.tga"), raw);
+    }
+
+    #[test]
+    fn province_bmp_edit_repaints_and_round_trips() {
+        // A queued ProvinceBmp edit decodes the copy-on-write base bitmap, paints
+        // a pixel, and re-encodes into the project — the base install is never
+        // touched, and the result decodes back to the edited pixels.
+        use std::io::Cursor;
+        let (base, project) = setup("province_bmp");
+        // Build a real 2x2 BMP base (the shared `setup` writes a bogus "x").
+        let mut img = image::RgbImage::new(2, 2);
+        img.put_pixel(0, 0, image::Rgb([10, 10, 10]));
+        img.put_pixel(1, 0, image::Rgb([20, 20, 20]));
+        img.put_pixel(0, 1, image::Rgb([30, 30, 30]));
+        img.put_pixel(1, 1, image::Rgb([40, 40, 40]));
+        let mut bmp = Vec::new();
+        img.write_to(&mut Cursor::new(&mut bmp), image::ImageFormat::Bmp)
+            .unwrap();
+        std::fs::write(base.join("map/provinces.bmp"), &bmp).unwrap();
+
+        let vfs = Vfs::new(base.to_str().unwrap(), None).unwrap();
+        let edits = vec![TypedEdit::ProvinceBmp {
+            file: "map/provinces.bmp".into(),
+            ops: vec![crate::province_edit::BmpOp::Paint {
+                pixels: vec![1], // top-down idx 1 = pixel (1,0)
+                color: [99, 88, 77],
+            }],
+        }];
+        let written = apply_queue(&vfs, &project, &edits).unwrap();
+        assert!(written.contains(&"map/provinces.bmp".to_string()));
+
+        // The base install file is unchanged.
+        assert_eq!(std::fs::read(base.join("map/provinces.bmp")).unwrap(), bmp);
+
+        // The project copy decodes back with the painted pixel and neighbours intact.
+        let out = std::fs::read(project.join("map/provinces.bmp")).unwrap();
+        let back = image::load_from_memory(&out).unwrap().to_rgb8();
+        assert_eq!(back.get_pixel(0, 0).0, [10, 10, 10]);
+        assert_eq!(back.get_pixel(1, 0).0, [99, 88, 77]);
+        assert_eq!(back.get_pixel(0, 1).0, [30, 30, 30]);
+        assert_eq!(back.get_pixel(1, 1).0, [40, 40, 40]);
     }
 
     #[test]
@@ -1350,6 +1415,79 @@ mod tests {
             out,
             "owner = FRA\ncontroller = FRA\nbase_tax = 3\n1450.1.1 = { owner = ENG controller = ENG }\n1460.1.1 = { unrest = 6 }\n"
         );
+    }
+
+    #[test]
+    fn timeline_write_at_start_emits_dated_block_in_date_order() {
+        // The timeline-mod defect: a province whose top level is the file's
+        // BASELINE EPOCH (year 2), not the start state. Writing the owner at the
+        // 1302.9.1 start date must emit a dated block after the last pre-start
+        // block, leaving the epoch baseline untouched — a top-level write would
+        // be overridden by the 1204 block and never reach the player's world.
+        // Modeled on Extended Timeline's "167 - Caux.txt".
+        let (base, project) = setup("timeline_write_at_start");
+        let rel = "history/provinces/167 - Caux.txt";
+        write_base(
+            &base,
+            rel,
+            b"#167 - Caux\n\nowner = ROM\ncontroller = ROM\ncapital = \"Rotomagus\"\n\
+              1066.12.25 = { owner = ENG controller = ENG }\n\
+              1204.6.24 = { owner = FRA controller = FRA }\n\
+              1450.1.1 = { unrest = 3 }\n",
+        );
+        let vfs = Vfs::new(base.to_str().unwrap(), None).unwrap();
+        let edits = vec![TypedEdit::InsertDatedBlock {
+            file: rel.into(),
+            date: "1302.9.1".into(),
+            statement: "1302.9.1 = { owner = ENG controller = ENG add_core = ENG }".into(),
+        }];
+        apply_queue(&vfs, &project, &edits).unwrap();
+        let out = String::from_utf8(read_project(&project, rel)).unwrap();
+        assert_eq!(
+            out,
+            "#167 - Caux\n\nowner = ROM\ncontroller = ROM\ncapital = \"Rotomagus\"\n\
+              1066.12.25 = { owner = ENG controller = ENG }\n\
+              1204.6.24 = { owner = FRA controller = FRA }\n\
+              1302.9.1 = { owner = ENG controller = ENG add_core = ENG }\n\
+              1450.1.1 = { unrest = 3 }\n"
+        );
+        // The baseline epoch is untouched, and the effective owner at the start
+        // date is now the written value rather than the 1204 block's.
+        let block = crate::paradox::parse(&out);
+        assert_eq!(block.get_scalar("owner"), Some("ROM"));
+        let states = crate::game_data::province_history_at(&vfs2(&project), (1302, 9, 1));
+        assert_eq!(states.get(&167).and_then(|s| s.owner.as_deref()), Some("ENG"));
+    }
+
+    #[test]
+    fn timeline_write_at_start_merges_into_existing_block_for_that_date() {
+        // Same shape, but the file already carries a block on the start date:
+        // the write merges into it instead of adding a second block.
+        let (base, project) = setup("timeline_write_merge");
+        let rel = "history/provinces/167 - Caux.txt";
+        write_base(
+            &base,
+            rel,
+            b"owner = ROM\n1204.6.24 = { owner = FRA }\n1302.9.1 = { unrest = 2 }\n",
+        );
+        let vfs = Vfs::new(base.to_str().unwrap(), None).unwrap();
+        let edits = vec![TypedEdit::InsertStatement {
+            file: rel.into(),
+            block_path: vec!["1302.9.1".into()],
+            statement: "owner = ENG".into(),
+        }];
+        apply_queue(&vfs, &project, &edits).unwrap();
+        let out = String::from_utf8(read_project(&project, rel)).unwrap();
+        assert_eq!(
+            out,
+            "owner = ROM\n1204.6.24 = { owner = FRA }\n1302.9.1 = { unrest = 2 owner = ENG }\n"
+        );
+    }
+
+    /// A Vfs rooted at the project folder, for re-deriving state from what was
+    /// actually written.
+    fn vfs2(project: &std::path::Path) -> Vfs {
+        Vfs::new(project.to_str().unwrap(), None).unwrap()
     }
 
     #[test]

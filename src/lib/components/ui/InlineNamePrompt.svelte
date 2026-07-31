@@ -70,22 +70,22 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.3rem 0.4rem;
-    background: #3f4855;
-    border: 1px solid #2b323d;
+    background: var(--bg-3);
+    border: 1px solid var(--bg-2);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
     transform: translate(-50%, 0.5rem);
   }
 
   .label {
     font-size: 0.78rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   input {
     width: 9rem;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.25rem 0.4rem;
@@ -94,9 +94,9 @@
 
   .ok,
   .cancel {
-    border: 1px solid #2b323d;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--bg-2);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-size: 0.9rem;
     line-height: 1;
     padding: 0.25rem 0.4rem;
@@ -104,12 +104,12 @@
   }
 
   .ok:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .cancel:hover {
-    background: #7a3f3f;
-    color: #fff;
+    background: var(--danger-bg);
+    color: var(--text-inverse);
   }
 </style>

@@ -140,7 +140,7 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .pool {
@@ -151,22 +151,22 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: #8a919c;
+    color: var(--text-2);
     margin-bottom: 0.15rem;
   }
 
   .count {
-    color: #6b7280;
+    color: var(--text-3);
   }
 
   .hint {
     margin: 0 0 0.2rem;
     font-size: 0.7rem;
-    color: #6b7280;
+    color: var(--text-3);
   }
 
   .hint code {
-    background: #21262e;
+    background: var(--bg-1);
     padding: 0 0.2rem;
   }
 
@@ -175,9 +175,9 @@
     box-sizing: border-box;
     min-height: 4rem;
     resize: vertical;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: ui-monospace, monospace;
     font-size: 0.75rem;
     padding: 0.3rem 0.4rem;

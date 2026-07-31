@@ -372,18 +372,18 @@
     width: 1rem;
     height: 1rem;
     display: inline-block;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
   .key-chip {
     font-size: 0.8rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .strip-wrap {
     margin: -0.2rem 0 0.4rem;
   }
   section {
     padding: 0.4rem 0 0.6rem;
-    border-bottom: 1px solid #232a33;
+    border-bottom: 1px solid var(--bg-1);
   }
   section.hint {
     border-bottom: none;
@@ -393,41 +393,41 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .text {
     width: 100%;
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.2rem 0.4rem;
   }
   .mono {
     font-family: ui-monospace, monospace;
-    color: #9ca3af;
+    color: var(--text-2);
     font-size: 0.82rem;
   }
   .link {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #9cc7ea;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--accent-text);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.1rem 0.4rem;
     cursor: pointer;
   }
   .link:hover {
-    border-color: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    color: var(--text-inverse);
   }
   .wtable {
     margin-bottom: 0.5rem;
   }
   .wt-head {
     font-size: 0.74rem;
-    color: #cfd4db;
+    color: var(--text-1);
     margin-bottom: 0.2rem;
   }
   .wrow {
@@ -445,9 +445,9 @@
   }
   .wnum {
     width: 4rem;
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.15rem 0.3rem;
@@ -456,14 +456,14 @@
   .wdel {
     border: none;
     background: transparent;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 1.1rem;
     line-height: 1;
     cursor: pointer;
     padding: 0 0.2rem;
   }
   .wdel:hover {
-    color: #fca5a5;
+    color: var(--err);
   }
   .wadd {
     margin-top: 0.2rem;
@@ -473,12 +473,12 @@
     margin: 0;
     padding: 0;
     font-size: 0.8rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .btn {
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.2rem 0.6rem;
@@ -488,16 +488,16 @@
     width: 100%;
   }
   .btn.danger {
-    color: #fca5a5;
-    border-color: #6b3630;
+    color: var(--err);
+    border-color: var(--danger-bg);
   }
   .btn.danger:hover {
-    background: #7a2820;
-    border-color: #9a3226;
-    color: #fff;
+    background: var(--danger-bg);
+    border-color: var(--danger-bg);
+    color: var(--text-inverse);
   }
   .dim {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .small {
     font-size: 0.76rem;

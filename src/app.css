@@ -1,0 +1,81 @@
+:root {
+  --z-map-chrome: 30;
+  --z-workspace-min: 50;
+  --z-workspace-max: 99;
+  --z-modal: 100;
+  --z-modal-content: 101;
+  color-scheme: dark;
+
+  /* Chrome colors: STYLE_GUIDE.md §2 target palette. */
+  --bg-0: #14181d;
+  --bg-1: #20252e;
+  --bg-2: #2b323d;
+  --bg-3: #3d4553;
+  --bg-hover: rgba(255, 255, 255, 0.055);
+  --border: #1f242c;
+  --border-strong: #4d5665;
+  --text-1: #e2e6ec;
+  --text-2: #a6aeb9;
+  --text-3: #79828e;
+  --text-inverse: #ffffff;
+  --accent: #5b83c9;
+  --accent-hover: #6f94d6;
+  --accent-text: #8fb0e8;
+  --sel: rgba(91, 131, 201, 0.16);
+  --ok: #7fd695;
+  --warn: #e0b56b;
+  --err: #e06c75;
+  --danger-bg: #6b3630;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+
+  --r-1: 4px;
+  --r-2: 6px;
+
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-md: 13px;
+  --fs-lg: 15px;
+  --fs-xl: 18px;
+  --fs-2xl: 22px;
+
+  --shadow-window: 0 8px 28px rgba(0, 0, 0, 0.45);
+  --shadow-modal: 0 12px 40px rgba(0, 0, 0, 0.6);
+  --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  --t-fast: 100ms;
+  --t-med: 160ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-1);
+  background-color: var(--bg-0);
+  -webkit-font-smoothing: antialiased;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0ms;
+    --t-med: 0ms;
+  }
+}

@@ -294,7 +294,7 @@
     display: flex;
     flex-direction: column;
     font-size: 0.82rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
 
   .anchor {
@@ -302,16 +302,16 @@
     align-items: flex-start;
     gap: 0.5rem;
     padding: 0.4rem 0.5rem;
-    background: #2b323d;
-    border: 1px solid #1f242c;
-    border-left: 3px solid #4a6da7;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
   }
 
   .anchor-dot {
     width: 0.6rem;
     height: 0.6rem;
     border-radius: 50%;
-    background: #4a6da7;
+    background: var(--accent);
     margin-top: 0.15rem;
     flex: none;
   }
@@ -327,20 +327,20 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9aa2ad;
+    color: var(--text-2);
     font-weight: 600;
   }
 
   .empty {
     margin: 0.4rem 0.5rem;
-    color: #8a919c;
+    color: var(--text-2);
     font-style: italic;
   }
 
   .block {
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     border-top: none;
-    background: #21262e;
+    background: var(--bg-1);
   }
 
   .block.post-start {
@@ -352,31 +352,31 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.25rem 0.5rem;
-    background: #303844;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
   }
 
   .date {
     font-variant-numeric: tabular-nums;
     font-weight: 600;
-    color: #dfe4ea;
+    color: var(--text-1);
   }
 
   .badge {
     font-size: 0.66rem;
     line-height: 1;
     padding: 0.1rem 0.35rem;
-    color: #fff;
+    color: var(--text-inverse);
     text-transform: uppercase;
     letter-spacing: 0.03em;
   }
 
   .badge.post {
-    background: #a1662f;
+    background: var(--warn);
   }
 
   .badge.dup {
-    background: #6b46c1;
+    background: var(--accent-text);
   }
 
   .entries {
@@ -389,7 +389,7 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.2rem 0.5rem;
-    border-top: 1px solid #191d23;
+    border-top: 1px solid var(--bg-1);
   }
 
   .entry:first-child {
@@ -397,20 +397,20 @@
   }
 
   .k {
-    color: #9ab0d0;
+    color: var(--accent-text);
   }
 
   .eq {
-    color: #6c7480;
+    color: var(--text-3);
   }
 
   .v {
-    color: #cfd4db;
+    color: var(--text-1);
     word-break: break-word;
   }
 
   .v.block-val {
-    color: #8a919c;
+    color: var(--text-2);
     font-style: italic;
   }
 
@@ -427,9 +427,9 @@
   }
 
   .mini {
-    border: 1px solid #1f242c;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     line-height: 1;
@@ -438,29 +438,29 @@
   }
 
   .mini:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .mini.danger:hover {
-    background: #7a3f3f;
+    background: var(--danger-bg);
   }
 
   .confirm-text {
-    color: #e0b0b0;
+    color: var(--err);
   }
 
   .confirm-text code {
-    color: #cfd4db;
-    background: #191d23;
+    color: var(--text-1);
+    background: var(--bg-1);
     padding: 0 0.25rem;
   }
 
   .edit-key,
   .edit-val {
-    background: #191d23;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.15rem 0.3rem;
@@ -485,9 +485,9 @@
   }
 
   .add-btn {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.25rem 0.6rem;
@@ -495,12 +495,12 @@
   }
 
   .add-btn:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .add-btn.ok {
-    background: #3a5a86;
+    background: var(--accent);
   }
 
   .add-btn:disabled {
@@ -513,8 +513,8 @@
     flex-direction: column;
     gap: 0.4rem;
     padding: 0.5rem;
-    border: 1px solid #1f242c;
-    background: #21262e;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
   }
 
   .add-row {
@@ -525,7 +525,7 @@
 
   .add-label {
     font-size: 0.72rem;
-    color: #8a919c;
+    color: var(--text-2);
     text-transform: uppercase;
   }
 

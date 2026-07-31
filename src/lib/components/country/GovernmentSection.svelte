@@ -423,14 +423,14 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .num {
     width: 4rem;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.25rem 0.4rem;
@@ -450,12 +450,12 @@
   }
 
   .dim {
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .tool-hint {
     font-size: 0.68rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .list-field {
@@ -472,13 +472,13 @@
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .edit-def {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.68rem;
     text-transform: none;
@@ -487,22 +487,22 @@
     cursor: pointer;
   }
   .edit-def:hover {
-    border-color: #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .def {
     border: none;
     background: transparent;
-    color: #9ca3af;
+    color: var(--text-2);
     cursor: pointer;
     font-size: 0.8rem;
     line-height: 1;
     padding: 0 0.1rem;
   }
   .def:hover {
-    color: #9aecc0;
+    color: var(--ok);
   }
 
   .chip {
@@ -510,9 +510,9 @@
     align-items: center;
     gap: 0.3rem;
     align-self: flex-start;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-size: 0.8rem;
     padding: 0.12rem 0.2rem 0.12rem 0.45rem;
   }
@@ -520,7 +520,7 @@
   .x {
     border: none;
     background: transparent;
-    color: #9ca3af;
+    color: var(--text-2);
     cursor: pointer;
     font-size: 0.95rem;
     line-height: 1;
@@ -528,14 +528,14 @@
   }
 
   .x:hover {
-    color: #fca5a5;
+    color: var(--err);
   }
 
   .naming {
     margin-bottom: 0.7rem;
     padding: 0.35rem 0.45rem;
-    background: #21262e;
-    border: 1px solid #1f242c;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
   }
   .naming-head {
     display: flex;
@@ -547,21 +547,21 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .naming-btn {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.74rem;
     padding: 0.1rem 0.45rem;
     cursor: pointer;
   }
   .naming-btn:hover {
-    border-color: #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .naming-preview {
     margin-top: 0.35rem;
@@ -572,7 +572,7 @@
     font-size: 0.82rem;
   }
   .resolves {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.74rem;
   }
   .scheme-jump {
@@ -581,7 +581,7 @@
     gap: 0.35rem;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0;
@@ -589,28 +589,28 @@
     text-align: left;
   }
   .scheme-jump:hover {
-    color: #fff;
+    color: var(--text-inverse);
   }
   .scheme-jump strong {
-    color: #e5e7eb;
+    color: var(--text-1);
   }
   .ruler {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .scheme-key {
-    color: #9aecc0;
-    background: #16191f;
+    color: var(--ok);
+    background: var(--bg-0);
     padding: 0 0.3rem;
     font-size: 0.72rem;
   }
   .approx {
-    color: #d9b45b;
+    color: var(--warn);
     font-size: 0.7rem;
-    border: 1px solid #6b5a30;
+    border: 1px solid var(--warn);
     padding: 0.02rem 0.3rem;
   }
   .dim {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .small {
     font-size: 0.76rem;

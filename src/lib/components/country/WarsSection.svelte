@@ -279,32 +279,32 @@
     gap: 0.6rem;
   }
   .add {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.25rem 0.6rem;
     cursor: pointer;
   }
   .add:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .toggle {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
     font-size: 0.78rem;
-    color: #9ca3af;
+    color: var(--text-2);
     cursor: pointer;
   }
   .new-form {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
-    border: 1px solid #1f242c;
-    background: #262c35;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
     padding: 0.5rem;
   }
   .field {
@@ -316,13 +316,13 @@
     font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .field input,
   .field select {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.83rem;
     padding: 0.25rem 0.3rem;
@@ -344,17 +344,17 @@
   }
   .def {
     flex: none;
-    border: 1px solid #1f242c;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0 0.35rem;
     cursor: pointer;
   }
   .def:hover:not(:disabled) {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .def:disabled {
     opacity: 0.4;
@@ -363,7 +363,7 @@
   .err {
     margin: 0;
     font-size: 0.75rem;
-    color: #fca5a5;
+    color: var(--err);
   }
   .actions {
     display: flex;
@@ -371,30 +371,30 @@
   }
   .confirm,
   .cancel {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.25rem 0.7rem;
     cursor: pointer;
   }
   .confirm:hover:not(:disabled) {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .confirm:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
   .cancel:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .empty {
     margin: 0;
     padding: 0.25rem 0.3rem;
     font-size: 0.76rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 </style>

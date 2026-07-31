@@ -136,7 +136,7 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .list-field {
@@ -150,11 +150,11 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .count {
-    color: #6b7280;
+    color: var(--text-3);
   }
 
   .ordered {
@@ -167,7 +167,7 @@
   .pos {
     width: 1.2rem;
     text-align: right;
-    color: #6b7280;
+    color: var(--text-3);
     font-variant-numeric: tabular-nums;
   }
 
@@ -180,9 +180,9 @@
   }
 
   .mv {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-size: 0.7rem;
     line-height: 1;
     padding: 0.1rem 0.3rem;
@@ -190,8 +190,8 @@
   }
 
   .mv:hover:not(:disabled) {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .mv:disabled {
@@ -202,7 +202,7 @@
   .x {
     border: none;
     background: transparent;
-    color: #9ca3af;
+    color: var(--text-2);
     cursor: pointer;
     font-size: 0.95rem;
     line-height: 1;
@@ -210,6 +210,6 @@
   }
 
   .x:hover {
-    color: #fca5a5;
+    color: var(--err);
   }
 </style>

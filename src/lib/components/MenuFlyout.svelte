@@ -126,7 +126,7 @@
     border: none;
     border-radius: 0;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.88rem;
     text-align: left;
@@ -137,8 +137,8 @@
 
   .flyout-parent:hover,
   .flyout-parent.open {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .arrow {
@@ -155,8 +155,8 @@
     display: flex;
     flex-direction: column;
     padding: 2px;
-    background: #3f4855;
-    border: 1px solid #2b323d;
+    background: var(--bg-3);
+    border: 1px solid var(--bg-2);
     box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.35);
     z-index: 11;
   }
@@ -167,7 +167,7 @@
     border: none;
     border-radius: 0;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.88rem;
     text-align: left;
@@ -177,12 +177,12 @@
   }
 
   .flyout-panel button:hover:not(:disabled) {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .flyout-panel button:disabled {
-    color: #8a919c;
+    color: var(--text-2);
     cursor: default;
   }
 </style>

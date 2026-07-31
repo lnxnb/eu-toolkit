@@ -140,9 +140,9 @@
     width: 20rem;
     display: flex;
     flex-direction: column;
-    background: #2b323d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-size: 0.9rem;
     box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.4);
   }
@@ -152,8 +152,8 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.4rem 0.6rem;
-    background: #3f4855;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
   }
   .title {
     font-weight: 700;
@@ -161,8 +161,8 @@
   .mode-tag {
     font-size: 0.72rem;
     padding: 0.12rem 0.4rem;
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .scroll {
     flex: 1;
@@ -172,14 +172,14 @@
   }
   section {
     padding: 0.2rem 0 0.4rem;
-    border-bottom: 1px solid #232a33;
+    border-bottom: 1px solid var(--bg-1);
   }
   h4 {
     margin: 0.3rem 0.6rem 0.3rem;
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .winter-head {
     display: flex;
@@ -192,7 +192,7 @@
     gap: 0.3rem;
     margin-right: 0.6rem;
     font-size: 0.74rem;
-    color: #b9bec7;
+    color: var(--text-1);
     cursor: pointer;
   }
   .row {
@@ -214,21 +214,21 @@
   }
   .row.selected {
     background: rgba(74, 109, 167, 0.32);
-    outline: 1px solid #4a6da7;
+    outline: 1px solid var(--accent);
     outline-offset: -1px;
   }
   .row.eraser .name {
     font-style: italic;
-    color: #b9bec7;
+    color: var(--text-1);
   }
   .swatch {
     flex: none;
     width: 1rem;
     height: 1rem;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
   .swatch.none {
-    background-image: linear-gradient(45deg, #444 25%, transparent 25%, transparent 75%, #444 75%);
+    background-image: linear-gradient(45deg, var(--bg-3) 25%, transparent 25%, transparent 75%, var(--bg-3) 75%);
   }
   .name {
     flex: 1;
@@ -241,15 +241,15 @@
     flex: none;
     font-size: 0.74rem;
     font-variant-numeric: tabular-nums;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .nudge {
     margin: 0.1rem 0.6rem 0.3rem;
     padding: 0.3rem 0.4rem;
     font-size: 0.74rem;
-    color: #e8c37a;
+    color: var(--warn);
     background: rgba(216, 160, 32, 0.12);
-    border-left: 3px solid #d8a020;
+    border-left: 3px solid var(--warn);
   }
   .hint {
     margin: 0.5rem 0.6rem 0.2rem;
@@ -257,6 +257,6 @@
     line-height: 1.35;
   }
   .dim {
-    color: #8a919c;
+    color: var(--text-2);
   }
 </style>

@@ -118,8 +118,8 @@
 
 <style>
   .modrow {
-    border: 1px solid #1f242c;
-    background: #191d23;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
     padding: 0.35rem;
     display: flex;
     flex-direction: column;
@@ -136,7 +136,7 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .factor {
@@ -144,14 +144,14 @@
     align-items: center;
     gap: 0.3rem;
     font-size: 0.78rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
 
   .factor input {
     width: 5rem;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.15rem 0.3rem;
@@ -159,9 +159,9 @@
 
   .rm {
     margin-left: auto;
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.15rem 0.45rem;
@@ -169,13 +169,13 @@
   }
 
   .rm:hover {
-    background: #a13636;
-    color: #fff;
+    background: var(--err);
+    color: var(--text-inverse);
   }
 
   .loading {
     margin: 0;
     font-size: 0.78rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 </style>

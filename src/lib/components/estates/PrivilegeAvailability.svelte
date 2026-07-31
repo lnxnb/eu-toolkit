@@ -109,21 +109,21 @@
   .avail {
     margin-top: 0.4rem;
     font-size: 0.8rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .load {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.76rem;
     padding: 0.2rem 0.5rem;
     cursor: pointer;
   }
   .load:hover {
-    border-color: #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .held {
     margin-bottom: 0.3rem;
@@ -135,32 +135,32 @@
     margin-top: 0.25rem;
   }
   .tag {
-    border: 1px solid #2f3946;
-    background: #1b2027;
-    color: #cfd4db;
+    border: 1px solid var(--bg-3);
+    background: var(--bg-1);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.72rem;
     padding: 0.1rem 0.35rem;
     cursor: pointer;
   }
   .tag:hover {
-    border-color: #4a6da7;
-    background: #303844;
+    border-color: var(--accent);
+    background: var(--bg-3);
   }
   .dt {
-    color: #8a919c;
+    color: var(--text-2);
     margin-left: 0.15rem;
   }
   .ev {
-    color: #b9bec7;
+    color: var(--text-1);
   }
   .approx {
-    color: #d0a24a;
+    color: var(--warn);
   }
   .dim {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .err {
-    color: #fca5a5;
+    color: var(--err);
   }
 </style>

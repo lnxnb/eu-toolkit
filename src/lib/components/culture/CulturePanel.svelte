@@ -1,6 +1,6 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { SidePanel, ColorPicker, SearchDropdown, NewGroupModal, NEW_GROUP_KEY } from "$lib/components/ui";
+  import { SidePanel, ColorPicker, SearchDropdown, NewGroupModal, LoadingState, NEW_GROUP_KEY } from "$lib/components/ui";
   import type { DropdownItem, RGB, GroupScaffold, NewGroupResult } from "$lib/components/ui";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
   import FieldRow from "../country/FieldRow.svelte";
@@ -344,7 +344,7 @@
   {#if error}
     <p class="error">{error}</p>
   {:else if !details}
-    <p class="dim">Loading…</p>
+    <LoadingState label="Loading culture…" />
   {:else}
     <section>
       <h3>Identity</h3>
@@ -573,31 +573,31 @@
     width: 1rem;
     height: 1rem;
     display: inline-block;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
   .swatch.auto {
     background: repeating-linear-gradient(
       45deg,
-      #4b5563,
-      #4b5563 3px,
-      #2b323d 3px,
-      #2b323d 6px
+      var(--border-strong),
+      var(--border-strong) 3px,
+      var(--bg-2) 3px,
+      var(--bg-2) 6px
     );
   }
   .key-chip {
     font-size: 0.8rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   section {
     padding: 0.4rem 0 0.6rem;
-    border-bottom: 1px solid #232a33;
+    border-bottom: 1px solid var(--bg-1);
   }
   h3 {
     margin: 0 0 0.4rem;
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -608,7 +608,7 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .sub {
     margin-top: 0.3rem;
@@ -619,15 +619,15 @@
   }
   .text {
     width: 100%;
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: inherit;
     padding: 0.2rem 0.4rem;
   }
   .mono {
     font-family: ui-monospace, monospace;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .row {
     display: flex;
@@ -636,9 +636,9 @@
     flex: 1;
   }
   .btn {
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.2rem 0.6rem;
@@ -646,14 +646,14 @@
     white-space: nowrap;
   }
   .btn:hover {
-    border-color: #9ca3af;
+    border-color: var(--text-2);
   }
   .raw {
     list-style: none;
     margin: 0;
     padding: 0;
     font-size: 0.8rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .raw li {
     padding: 0.1rem 0;
@@ -665,28 +665,28 @@
     margin: 0.2rem 0 0.4rem;
   }
   .link {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #9cc7ea;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--accent-text);
     font-family: inherit;
     font-size: 0.75rem;
     padding: 0.1rem 0.4rem;
     cursor: pointer;
   }
   .link:hover {
-    border-color: #4a6da7;
-    color: #ffffff;
+    border-color: var(--accent);
+    color: var(--text-inverse);
   }
   .browse {
     margin-top: 0.4rem;
   }
   .dim {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .small {
     font-size: 0.75rem;
   }
   .error {
-    color: #fca5a5;
+    color: var(--err);
   }
 </style>

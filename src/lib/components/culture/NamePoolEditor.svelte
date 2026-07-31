@@ -51,9 +51,9 @@
     width: 100%;
     resize: vertical;
     min-height: 4rem;
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: ui-monospace, monospace;
     font-size: 0.8rem;
     padding: 0.3rem 0.4rem;
@@ -61,7 +61,7 @@
   }
   .count {
     font-size: 0.72rem;
-    color: #9ca3af;
+    color: var(--text-2);
     align-self: flex-end;
   }
 </style>

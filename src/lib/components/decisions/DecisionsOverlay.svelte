@@ -253,9 +253,9 @@
 
 <style>
   .search {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.83rem;
     padding: 0.2rem 0.4rem;
@@ -267,12 +267,12 @@
     align-items: center;
     gap: 0.3rem;
     font-size: 0.8rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
 
   .counter {
     font-size: 0.8rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .body {
@@ -289,9 +289,9 @@
   }
 
   .newkey {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.83rem;
     padding: 0.25rem 0.4rem;
@@ -299,9 +299,9 @@
   }
 
   .newbtn {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.28rem 0.7rem;
@@ -309,23 +309,23 @@
   }
 
   .newbtn:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .newerr {
-    color: #d9756b;
+    color: var(--err);
     font-size: 0.78rem;
   }
 
   .msg {
     margin: 0.2rem 0;
     font-size: 0.85rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .msg.err {
-    color: #d9756b;
+    color: var(--err);
   }
 
   .list {
@@ -337,16 +337,16 @@
   }
 
   .row {
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     border-bottom: none;
   }
 
   .row:last-child {
-    border-bottom: 1px solid #1f242c;
+    border-bottom: 1px solid var(--border);
   }
 
   .row.expanded {
-    background: #262d37;
+    background: var(--bg-2);
   }
 
   .rowhead {
@@ -357,7 +357,7 @@
     text-align: left;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.86rem;
     padding: 0.35rem 0.5rem;
@@ -365,11 +365,11 @@
   }
 
   .rowhead:hover {
-    background: #303844;
+    background: var(--bg-3);
   }
 
   .caret {
-    color: #8a919c;
+    color: var(--text-2);
     width: 0.8rem;
     flex: none;
   }
@@ -379,8 +379,8 @@
   }
 
   .key {
-    color: #9aecc0;
-    background: #16191f;
+    color: var(--ok);
+    background: var(--bg-0);
     padding: 0 0.3rem;
     font-size: 0.76rem;
   }
@@ -390,32 +390,32 @@
     text-transform: uppercase;
     letter-spacing: 0.03em;
     padding: 0.05rem 0.35rem;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
 
   .badge.major {
-    background: #6d5aa1;
-    color: #fff;
+    background: var(--accent-text);
+    color: var(--text-inverse);
   }
 
   .badge.origin.base {
-    background: #3f4855;
-    color: #cfd4db;
+    background: var(--bg-3);
+    color: var(--text-1);
   }
 
   .badge.origin.mod {
-    background: #3f8a6d;
-    color: #fff;
+    background: var(--ok);
+    color: var(--text-inverse);
   }
 
   .badge.pending {
-    background: #b8863b;
-    color: #fff;
+    background: var(--warn);
+    color: var(--text-inverse);
   }
 
   .file {
     margin-left: auto;
-    color: #6d7683;
+    color: var(--text-3);
     font-size: 0.72rem;
   }
 

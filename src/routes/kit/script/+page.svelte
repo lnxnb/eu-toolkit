@@ -42,6 +42,7 @@
     { key: "has_country_flag", argKind: "string", displayName: "Has country flag" },
   ];
 
+  // Demonstration entity swatches and canvas ink are intentionally literal data colors.
   const COUNTRIES: DropdownItem[] = [
     { key: "FRA", label: "France", swatch: "#2b6cb0" },
     { key: "ENG", label: "England", swatch: "#c53030" },
@@ -359,8 +360,8 @@
 <style>
   .bench {
     min-height: 100vh;
-    background: #14181d;
-    color: #cfd4db;
+    background: var(--bg-0);
+    color: var(--text-1);
     font-family: Inter, system-ui, sans-serif;
     padding: 1rem 1rem 4rem;
   }
@@ -378,7 +379,7 @@
   }
 
   .note {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.85rem;
   }
 
@@ -389,8 +390,8 @@
   }
 
   .card {
-    background: #2b323d;
-    border: 1px solid #1f242c;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
     padding: 0.75rem;
   }
 
@@ -403,25 +404,25 @@
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .out {
     margin: 0.5rem 0 0;
     font-size: 0.8rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   code {
-    color: #cfd4db;
-    background: #21262e;
+    color: var(--text-1);
+    background: var(--bg-1);
     padding: 0 0.25rem;
   }
 
   .demo-btn {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.83rem;
     padding: 0.3rem 0.7rem;
@@ -429,8 +430,8 @@
   }
 
   .demo-btn:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .log {
@@ -442,22 +443,22 @@
   }
 
   .log-entry {
-    border: 1px solid #1f242c;
-    background: #16191f;
+    border: 1px solid var(--border);
+    background: var(--bg-0);
   }
 
   .log-label {
     padding: 0.25rem 0.5rem;
-    background: #21262e;
+    background: var(--bg-1);
     font-size: 0.78rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
 
   .log-entry pre {
     margin: 0;
     padding: 0.4rem 0.5rem;
     font-size: 0.72rem;
-    color: #9aecc0;
+    color: var(--ok);
     overflow-x: auto;
   }
 
@@ -467,7 +468,7 @@
 
   .ovl-toolbar-note {
     font-size: 0.78rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
 
   .ovl-content {

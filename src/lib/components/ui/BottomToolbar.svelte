@@ -7,7 +7,24 @@
   when armed (e.g. the brush size slider from 1.4b).
 
   z-index: 10 — same docked-chrome layer as the top toolbar.
+
+  While mounted, the toolbar publishes its own height as the global
+  `--bottom-toolbar-h` CSS variable so bottom-anchored map chrome (the country
+  label, the mode chips) can sit above it instead of being covered. It is measured
+  rather than hardcoded because the `extra` snippet (brush sliders …) changes it.
 -->
+<script lang="ts" module>
+  // Several toolbars can be mounted at once; the tallest wins, and the variable
+  // is cleared only when the last one unmounts.
+  const heights = new Map<HTMLElement, number>();
+
+  function publishHeight() {
+    const root = document.documentElement.style;
+    if (heights.size === 0) root.removeProperty("--bottom-toolbar-h");
+    else root.setProperty("--bottom-toolbar-h", `${Math.max(...heights.values())}px`);
+  }
+</script>
+
 <script lang="ts">
   import type { Snippet } from "svelte";
   import type { ToolButton } from "./types";
@@ -41,6 +58,23 @@
     onarm?.(null);
   }
 
+  let bar = $state<HTMLElement | null>(null);
+
+  $effect(() => {
+    const el = bar;
+    if (!el) return;
+    const obs = new ResizeObserver(() => {
+      heights.set(el, el.offsetHeight);
+      publishHeight();
+    });
+    obs.observe(el);
+    return () => {
+      obs.disconnect();
+      heights.delete(el);
+      publishHeight();
+    };
+  });
+
   // Esc disarms the active tool, globally, while this toolbar is mounted.
   $effect(() => {
     function onKey(e: KeyboardEvent) {
@@ -51,7 +85,7 @@
   });
 </script>
 
-<div class="bottom-toolbar">
+<div class="bottom-toolbar" bind:this={bar}>
   {#if children}
     <div class="lead">{@render children()}</div>
   {/if}
@@ -93,9 +127,9 @@
     align-items: center;
     gap: 0.6rem;
     padding: 0.25rem 0.5rem;
-    background: #3f4855;
-    border-top: 1px solid #2b323d;
-    color: #cfd4db;
+    background: var(--bg-3);
+    border-top: 1px solid var(--bg-2);
+    color: var(--text-1);
     font-size: 0.9rem;
   }
 
@@ -103,7 +137,7 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
 
   .tools {
@@ -126,14 +160,14 @@
   }
 
   .tool:hover {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .tool.armed {
-    background: #4a6da7;
-    color: #ffffff;
-    outline: 1px solid #cfd4db;
+    background: var(--accent);
+    color: var(--text-inverse);
+    outline: 1px solid var(--text-1);
     outline-offset: -2px;
   }
 

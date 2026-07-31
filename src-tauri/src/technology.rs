@@ -103,6 +103,11 @@ pub struct TechLevel {
     pub index: usize,
     /// The file this level lives in (for byte-surgical edits).
     pub file: String,
+    /// In-game display name, from `<kind>_tech_cs_<index>_name`. `None` when the
+    /// level has no loc entry (a mod-appended level past vanilla's 0–32).
+    pub name: Option<String>,
+    /// Flavor text, from `<kind>_tech_cs_<index>_desc`.
+    pub desc: Option<String>,
     pub year: Option<String>,
     /// Numeric modifiers gained this level (editable).
     pub modifiers: Vec<TechRow>,
@@ -203,8 +208,32 @@ fn power_kind(power: &str) -> &'static str {
     }
 }
 
+/// A tech level's display name / flavor loc keys. Verified format across all six
+/// (name, desc) × (adm, dip, mil) sets in `localisation/technology_l_english.yml`,
+/// levels 0–32: `adm_tech_cs_5_name`, `mil_tech_cs_0_desc`, … The level index is
+/// the ONLY axis — names do not vary by tech group. A level block itself carries
+/// no name in script (the `#Land Rights` comments are not data, and vanilla's
+/// comment sometimes disagrees with the loc string).
+pub fn level_name_key(kind: &str, index: usize) -> String {
+    format!("{kind}_tech_cs_{index}_name")
+}
+
+pub fn level_desc_key(kind: &str, index: usize) -> String {
+    format!("{kind}_tech_cs_{index}_desc")
+}
+
+/// Display label for a modifier key. Most core modifiers are hardcoded in the
+/// executable and have no loc entry at all; the newer ones use
+/// `MODIFIER_<UPPERCASE_KEY>`. Try that, then the bare key, then prettify.
+fn modifier_label(key: &str, loc: &LocStore) -> String {
+    loc.get(&format!("MODIFIER_{}", key.to_ascii_uppercase()))
+        .or_else(|| loc.get(key))
+        .map(str::to_string)
+        .unwrap_or_else(|| loc::prettify(key))
+}
+
 /// Parses one tech level block into typed rows.
-fn parse_level(index: usize, file: &str, b: &Block, loc: &LocStore) -> TechLevel {
+fn parse_level(kind: &str, index: usize, file: &str, b: &Block, loc: &LocStore) -> TechLevel {
     let mut year = None;
     let mut modifiers = Vec::new();
     let mut unlocks = Vec::new();
@@ -226,7 +255,8 @@ fn parse_level(index: usize, file: &str, b: &Block, loc: &LocStore) -> TechLevel
                     let label = loc.get(k).map(str::to_string).unwrap_or_else(|| loc::prettify(k));
                     unlocks.push(TechRow { key: k.to_string(), value: val, kind: "unlock".into(), label });
                 } else if is_numeric(&val) {
-                    modifiers.push(TechRow { key: k.to_string(), value: val, kind: "modifier".into(), label: k.to_string() });
+                    let label = modifier_label(k, loc);
+                    modifiers.push(TechRow { key: k.to_string(), value: val, kind: "modifier".into(), label });
                 } else {
                     // Non-numeric, non-bool scalar (rare): show as an unlock-style row.
                     let label = loc.get(k).map(str::to_string).unwrap_or_else(|| loc::prettify(k));
@@ -241,7 +271,17 @@ fn parse_level(index: usize, file: &str, b: &Block, loc: &LocStore) -> TechLevel
         }
     }
 
-    TechLevel { index, file: file.to_string(), year, modifiers, unlocks, units, raw_extra }
+    TechLevel {
+        index,
+        file: file.to_string(),
+        name: loc.get(&level_name_key(kind, index)).map(str::to_string),
+        desc: loc.get(&level_desc_key(kind, index)).map(str::to_string),
+        year,
+        modifiers,
+        unlocks,
+        units,
+        raw_extra,
+    }
 }
 
 /// Loads the tech tables (adm/dip/mil), grouping the technologies directory by
@@ -281,7 +321,7 @@ pub fn load_tables(vfs: &Vfs, loc: &LocStore) -> Vec<TechTable> {
             if key != "technology" {
                 continue;
             }
-            table.levels.push(parse_level(occ, &rel, lb, loc));
+            table.levels.push(parse_level(kind, occ, &rel, lb, loc));
             occ += 1;
         }
     }
@@ -741,6 +781,115 @@ technology = {\n\t# Tech 2\n\tyear = 1420\n\tcombat_width = 5\n\tenable = elite_
         assert!(text.contains("enable = western_medieval_infantry"));
     }
 
+    /// Adding and removing a modifier is a per-statement splice: the level's
+    /// preserve-unknown sub-blocks and its sibling levels survive untouched, and
+    /// add-then-edit composes (the later SetScalar finds the inserted key).
+    #[test]
+    fn modifier_add_remove_round_trip() {
+        let added = apply(
+            MIL_SRC.as_bytes(),
+            &Edit::InsertStatement {
+                block_path: vec!["technology#1".into()],
+                statement: "discipline = 0.05".into(),
+            },
+        )
+        .unwrap();
+        // A later value edit lands on the freshly inserted key.
+        let edited = apply(
+            &added,
+            &Edit::SetScalar {
+                path: vec!["technology#1".into(), "discipline".into()],
+                value: "0.25".into(),
+                quoted: false,
+            },
+        )
+        .unwrap();
+        let text = String::from_utf8(edited.clone()).unwrap();
+        assert!(text.contains("discipline = 0.25"));
+        // Level 1's unmodeled sub-block and its enables are intact.
+        assert!(text.contains("expects_institution = {"));
+        assert!(text.contains("feudalism = 0.25"));
+        assert!(text.contains("enable = western_medieval_knights"));
+        // Sibling levels untouched.
+        assert!(text.contains("infantry_fire = 0.25") && text.contains("combat_width = 5"));
+
+        // Removing it restores the original bytes exactly.
+        let removed = apply(
+            &added,
+            &Edit::RemoveStatement {
+                block_path: vec!["technology#1".into()],
+                key: "discipline".into(),
+                value: None,
+            },
+        )
+        .unwrap();
+        assert_eq!(String::from_utf8(removed).unwrap(), MIL_SRC);
+
+        // Removing a disk modifier takes only that row.
+        let gone = apply(
+            MIL_SRC.as_bytes(),
+            &Edit::RemoveStatement {
+                block_path: vec!["technology#0".into()],
+                key: "land_morale".into(),
+                value: None,
+            },
+        )
+        .unwrap();
+        let text = String::from_utf8(gone).unwrap();
+        assert!(!text.contains("land_morale"));
+        assert!(text.contains("infantry_fire = 0.25"));
+        assert!(text.contains("# Tech 0"));
+    }
+
+    /// Deleting a level is an occurrence-addressed root RemoveStatement. The
+    /// levels around it survive byte-for-byte — and the ones after it RENUMBER,
+    /// which is why the UI freezes other level edits until the delete is saved.
+    #[test]
+    fn delete_level_round_trip_and_renumbers() {
+        let out = apply(
+            MIL_SRC.as_bytes(),
+            &Edit::RemoveStatement {
+                block_path: vec![],
+                key: "technology#1".into(),
+                value: None,
+            },
+        )
+        .unwrap();
+        let text = String::from_utf8(out.clone()).unwrap();
+        // The middle level and everything in it is gone.
+        assert!(!text.contains("# Tech 1"));
+        assert!(!text.contains("enable = western_medieval_infantry"));
+        assert!(!text.contains("expects_institution"));
+        // Its neighbours and the file header are untouched.
+        assert!(text.contains("monarch_power = MIL"));
+        assert!(text.contains("ahead_of_time = {"));
+        assert!(text.contains("# Tech 0") && text.contains("land_morale = 2.0"));
+        assert!(text.contains("# Tech 2") && text.contains("enable = elite_infantry"));
+
+        // Two levels remain, and the former level 2 is now addressed as #1.
+        let loc = LocStore::from_pairs(&[]);
+        let b = paradox::parse(&text);
+        let levels: Vec<_> = b
+            .key_blocks()
+            .filter(|(k, _)| *k == "technology")
+            .enumerate()
+            .map(|(i, (_, lb))| parse_level("mil", i, "f", lb, &loc))
+            .collect();
+        assert_eq!(levels.len(), 2);
+        assert_eq!(levels[1].year.as_deref(), Some("1420"));
+        let renamed = apply(
+            &out,
+            &Edit::SetScalar {
+                path: vec!["technology#1".into(), "year".into()],
+                value: "1425".into(),
+                quoted: false,
+            },
+        )
+        .unwrap();
+        let text = String::from_utf8(renamed).unwrap();
+        assert!(text.contains("year = 1425") && text.contains("enable = elite_infantry"));
+    }
+
     #[test]
     fn append_new_level_round_trip() {
         let out = apply(
@@ -920,6 +1069,71 @@ technology = {\n\t# Tech 2\n\tyear = 1420\n\tcombat_width = 5\n\tenable = elite_
         assert!(!carrack.is_land);
         assert_eq!(carrack.arrives_tech.as_deref(), Some("dip"));
         assert!(carrack.pips.iter().any(|p| p.key == "hull_size"));
+    }
+
+    /// Every vanilla level resolves a real name + flavor text, and the strings
+    /// come from loc (not the script comments, which sometimes disagree).
+    #[test]
+    fn vanilla_levels_resolve_name_and_desc() {
+        if !install_present() {
+            return;
+        }
+        let vfs = Vfs::new(INSTALL, None).unwrap();
+        let loc = loc::build(&vfs);
+        let tables = load_tables(&vfs, &loc);
+        for t in &tables {
+            // Vanilla ships loc for levels 0..=32; every shipped level is covered.
+            for lvl in t.levels.iter().take(33) {
+                assert!(
+                    lvl.name.as_deref().is_some_and(|n| !n.is_empty()),
+                    "{} tech {} has no name",
+                    t.kind,
+                    lvl.index
+                );
+                assert!(
+                    lvl.desc.as_deref().is_some_and(|d| !d.is_empty()),
+                    "{} tech {} has no desc",
+                    t.kind,
+                    lvl.index
+                );
+            }
+        }
+        let adm = tables.iter().find(|t| t.kind == "adm").unwrap();
+        assert_eq!(adm.levels[0].name.as_deref(), Some("Tribal Government"));
+        // The script comment on this block reads "#Land Rights"; loc is authoritative.
+        assert_eq!(adm.levels[5].name.as_deref(), Some("National Ideas"));
+        let mil = tables.iter().find(|t| t.kind == "mil").unwrap();
+        assert_eq!(mil.levels[0].name.as_deref(), Some("Pre-Medieval Military"));
+        assert!(mil.levels[0].desc.as_deref().unwrap().contains("citizen soldier"));
+    }
+
+    /// The modifier keys vanilla tech actually grants all resolve to an icon file,
+    /// and a bogus key fails cleanly rather than escaping the icon directory.
+    #[test]
+    fn vanilla_tech_modifier_icons_resolve() {
+        if !install_present() {
+            return;
+        }
+        let vfs = Vfs::new(INSTALL, None).unwrap();
+        let loc = loc::build(&vfs);
+        let tables = load_tables(&vfs, &loc);
+        let mut checked = 0;
+        for t in &tables {
+            for lvl in &t.levels {
+                for m in &lvl.modifiers {
+                    // Not every modifier key has art; assert on the ones that do
+                    // decode, and that decoding never panics.
+                    if let Ok(png) = crate::icons::modifier_icon(&vfs, None, &m.key) {
+                        assert!(png.starts_with(b"\x89PNG"), "{} is not a PNG", m.key);
+                        checked += 1;
+                    }
+                }
+            }
+        }
+        assert!(checked > 0, "no tech modifier resolved an icon");
+        assert!(crate::icons::modifier_icon_rel("../../eu4.exe").is_none());
+        assert!(crate::icons::modifier_icon_rel("land_morale").is_some());
+        assert!(crate::icons::modifier_icon(&vfs, None, "not_a_real_modifier_xyz").is_err());
     }
 
     #[test]

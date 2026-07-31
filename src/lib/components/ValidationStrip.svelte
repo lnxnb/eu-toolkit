@@ -116,9 +116,9 @@
   .strip {
     display: flex;
     flex-direction: column;
-    background: #2b323d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     user-select: none;
@@ -129,10 +129,10 @@
     align-items: center;
     gap: 0.45rem;
     padding: 0.28rem 0.5rem;
-    background: #3f4855;
+    background: var(--bg-3);
     border: none;
-    border-bottom: 1px solid #1f242c;
-    color: #cfd4db;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-1);
     font: inherit;
     text-align: left;
     cursor: pointer;
@@ -143,17 +143,17 @@
   }
 
   .head:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .chevron {
     width: 0.9rem;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .head:hover .chevron {
-    color: #fff;
+    color: var(--text-inverse);
   }
 
   .label {
@@ -177,12 +177,12 @@
     padding: 0.05rem 0.35rem;
     font-size: 0.72rem;
     font-variant-numeric: tabular-nums;
-    color: #fff;
+    color: var(--text-inverse);
     border: 1px solid rgba(0, 0, 0, 0.35);
   }
 
   .ok {
-    color: #86efac;
+    color: var(--ok);
     font-size: 0.74rem;
   }
 
@@ -197,7 +197,7 @@
   }
 
   .empty {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.78rem;
     padding: 0.15rem 0.1rem;
   }
@@ -209,10 +209,10 @@
     flex: 0 0 auto;
     max-width: 26rem;
     padding: 0.22rem 0.5rem;
-    background: #262c35;
-    border: 1px solid #1f242c;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
     border-left-width: 3px;
-    color: #cfd4db;
+    color: var(--text-1);
     font: inherit;
     text-align: left;
     cursor: default;
@@ -223,8 +223,8 @@
   }
 
   .item.jumpable:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .item:disabled {
@@ -248,7 +248,7 @@
     font-size: 0.68rem;
     font-weight: 700;
     line-height: 1;
-    color: #fff;
+    color: var(--text-inverse);
     border-radius: 1px;
   }
 
@@ -256,31 +256,31 @@
   .sev-error > .glyph,
   .glyph.sev-error,
   .pill.sev-error {
-    background: #c0392b;
+    background: var(--err);
   }
 
   .sev-warning > .glyph,
   .glyph.sev-warning,
   .pill.sev-warning {
-    background: #d8a020;
-    color: #1a1d22;
+    background: var(--warn);
+    color: var(--bg-0);
   }
 
   .sev-info > .glyph,
   .glyph.sev-info,
   .pill.sev-info {
-    background: #4a6da7;
+    background: var(--accent);
   }
 
   .item.sev-error {
-    border-left-color: #c0392b;
+    border-left-color: var(--err);
   }
 
   .item.sev-warning {
-    border-left-color: #d8a020;
+    border-left-color: var(--warn);
   }
 
   .item.sev-info {
-    border-left-color: #4a6da7;
+    border-left-color: var(--accent);
   }
 </style>

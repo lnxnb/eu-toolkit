@@ -99,9 +99,9 @@
     gap: 0.35rem;
     width: 100%;
     border: none;
-    border-bottom: 1px solid #1f242c;
+    border-bottom: 1px solid var(--border);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.2rem 0.15rem;
@@ -112,7 +112,7 @@
     border-bottom: none;
   }
   .war:hover {
-    color: #fff;
+    color: var(--text-inverse);
   }
   .war.selected {
     background: rgba(74, 109, 167, 0.22);
@@ -127,16 +127,16 @@
     width: 1.1rem;
     height: 1.1rem;
     object-fit: cover;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     flex: none;
   }
   .flag.ph {
     display: inline-block;
-    background: #3a4150;
+    background: var(--bg-3);
   }
   .vs {
     font-size: 0.62rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .name {
     overflow: hidden;
@@ -149,25 +149,25 @@
   }
   .since {
     font-size: 0.72rem;
-    color: #9ca3af;
+    color: var(--text-2);
     white-space: nowrap;
   }
   .badge {
     font-size: 0.62rem;
     padding: 0.02rem 0.3rem;
     border: 1px solid rgba(0, 0, 0, 0.35);
-    color: #fff;
+    color: var(--text-inverse);
     text-transform: uppercase;
     letter-spacing: 0.03em;
     flex: none;
   }
   .badge.attacker {
-    background: #c0392b;
+    background: var(--err);
   }
   .badge.defender {
-    background: #2f6da7;
+    background: var(--accent-text);
   }
   .badge.inactive {
-    background: #566;
+    background: var(--text-3);
   }
 </style>

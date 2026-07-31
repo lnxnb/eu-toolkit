@@ -138,8 +138,8 @@
 
 <style>
   .opt {
-    border: 1px solid #1f242c;
-    background: #191d23;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
     padding: 0.4rem;
     display: flex;
     flex-direction: column;
@@ -156,21 +156,21 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .namekey {
-    color: #9aecc0;
-    background: #16191f;
+    color: var(--ok);
+    background: var(--bg-0);
     padding: 0 0.3rem;
     font-size: 0.72rem;
   }
 
   .rm {
     margin-left: auto;
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.15rem 0.45rem;
@@ -178,8 +178,8 @@
   }
 
   .rm:hover {
-    background: #a13636;
-    color: #fff;
+    background: var(--err);
+    color: var(--text-inverse);
   }
 
   .fld {
@@ -187,13 +187,13 @@
     flex-direction: column;
     gap: 0.15rem;
     font-size: 0.78rem;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .fld input {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.22rem 0.35rem;
@@ -203,13 +203,13 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .adv {
     text-transform: none;
     letter-spacing: 0;
-    color: #6d7683;
+    color: var(--text-3);
     font-size: 0.72rem;
   }
 
@@ -222,9 +222,9 @@
 
   .raw {
     margin: 0;
-    background: #16191f;
-    border: 1px solid #1f242c;
-    color: #9aecc0;
+    background: var(--bg-0);
+    border: 1px solid var(--border);
+    color: var(--ok);
     font-size: 0.75rem;
     padding: 0.4rem 0.5rem;
     overflow-x: auto;
@@ -233,6 +233,6 @@
   .loading {
     margin: 0;
     font-size: 0.78rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 </style>

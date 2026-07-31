@@ -55,13 +55,13 @@
 {/if}
 
 <style>
-  .count { margin: 0.2rem 0; font-size: 0.8rem; color: #cfd4db; }
+  .count { margin: 0.2rem 0; font-size: 0.8rem; color: var(--text-1); }
   .jumps { display: flex; flex-wrap: wrap; gap: 0.25rem; }
-  .jump { display: inline-flex; align-items: center; gap: 0.3rem; border: 1px solid #1f242c; background: #21262e; color: #cfd4db; font-family: inherit; font-size: 0.76rem; padding: 0.08rem 0.4rem; cursor: pointer; }
-  .jump:hover { background: #4a6da7; color: #fff; border-color: #4a6da7; }
-  .pid { color: #9aecc0; font-size: 0.7rem; }
-  .pd { color: #8a919c; font-size: 0.68rem; }
-  .dim { color: #9ca3af; }
-  .err { color: #fca5a5; }
+  .jump { display: inline-flex; align-items: center; gap: 0.3rem; border: 1px solid var(--border); background: var(--bg-1); color: var(--text-1); font-family: inherit; font-size: 0.76rem; padding: 0.08rem 0.4rem; cursor: pointer; }
+  .jump:hover { background: var(--accent); color: var(--text-inverse); border-color: var(--accent); }
+  .pid { color: var(--ok); font-size: 0.7rem; }
+  .pd { color: var(--text-2); font-size: 0.68rem; }
+  .dim { color: var(--text-2); }
+  .err { color: var(--err); }
   .small { font-size: 0.74rem; }
 </style>

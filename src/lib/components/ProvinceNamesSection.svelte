@@ -6,6 +6,7 @@
   // whole-file CreateFile scaffold for a key with no file yet.
   import { invoke } from "@tauri-apps/api/core";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
+  import { LoadingState } from "$lib/components/ui";
   import {
     entryStatement,
     buildFileText,
@@ -226,7 +227,7 @@
   {#if error}
     <p class="err">{error}</p>
   {:else if !data}
-    <p class="dim small">Loading…</p>
+    <LoadingState label="Loading province names…" />
   {:else}
     <div class="toolbar">
       <input class="search" placeholder="Search id or name…" bind:value={query} />
@@ -274,23 +275,23 @@
 <style>
   section {
     padding: 0.4rem 0 0.6rem;
-    border-bottom: 1px solid #232a33;
+    border-bottom: 1px solid var(--bg-1);
   }
   h3 {
     margin: 0 0 0.3rem;
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
   .cnt {
     font-size: 0.72rem;
-    color: #6b7280;
-    background: #1a1f27;
-    border: 1px solid #2b323d;
+    color: var(--text-3);
+    background: var(--bg-1);
+    border: 1px solid var(--bg-2);
     padding: 0 0.35rem;
     border-radius: 2px;
   }
@@ -303,18 +304,18 @@
     flex: 1;
   }
   input {
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.2rem 0.4rem;
     min-width: 0;
   }
   .btn {
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.2rem 0.5rem;
@@ -322,7 +323,7 @@
     white-space: nowrap;
   }
   .btn:hover {
-    border-color: #9ca3af;
+    border-color: var(--text-2);
   }
   .add {
     display: flex;
@@ -354,27 +355,27 @@
     flex: 1;
   }
   .id {
-    color: #6b7280;
+    color: var(--text-3);
     font-family: ui-monospace, monospace;
     font-size: 0.72rem;
     min-width: 2.6rem;
   }
   .nm-txt {
     flex: 1;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .cap-txt {
-    color: #9cc7ea;
+    color: var(--accent-text);
     font-size: 0.74rem;
   }
   .mono {
     font-family: ui-monospace, monospace;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .mini {
-    border: 1px solid #3a424e;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--bg-3);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.72rem;
     padding: 0.05rem 0.35rem;
@@ -382,19 +383,19 @@
     line-height: 1.4;
   }
   .mini:hover {
-    border-color: #9ca3af;
+    border-color: var(--text-2);
   }
   .mini.ok {
-    color: #86efac;
+    color: var(--ok);
   }
   .dim {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .small {
     font-size: 0.75rem;
   }
   .err {
-    color: #fca5a5;
+    color: var(--err);
     font-size: 0.78rem;
   }
 </style>

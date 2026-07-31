@@ -165,7 +165,7 @@
 
   .empty {
     margin: 0;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.82rem;
   }
 
@@ -179,7 +179,7 @@
     flex: 1;
     min-width: 0;
     font-size: 0.83rem;
-    color: #cfd4db;
+    color: var(--text-1);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -187,14 +187,14 @@
 
   .key.unknown {
     font-style: italic;
-    color: #b9bec7;
+    color: var(--text-1);
   }
 
   .raw-tag {
     font-size: 0.65rem;
     font-style: normal;
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
     padding: 0 0.25rem;
     margin-left: 0.25rem;
   }
@@ -211,15 +211,15 @@
 
   .suffix {
     font-size: 0.78rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   input[type="number"],
   input[type="text"] {
     width: 5rem;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.2rem 0.35rem;
@@ -228,9 +228,9 @@
 
   .toggle {
     width: 3rem;
-    border: 1px solid #1f242c;
-    background: #21262e;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.2rem 0;
@@ -238,15 +238,15 @@
   }
 
   .toggle.on {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .remove {
     flex: none;
     border: none;
     background: transparent;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 1.1rem;
     line-height: 1;
     cursor: pointer;
@@ -254,7 +254,7 @@
   }
 
   .remove:hover {
-    color: #fca5a5;
+    color: var(--err);
   }
 
   .add {
@@ -263,7 +263,7 @@
     gap: 0.35rem;
     margin-top: 0.3rem;
     padding-top: 0.4rem;
-    border-top: 1px solid #1f242c;
+    border-top: 1px solid var(--border);
   }
 
   .add-custom {
@@ -278,9 +278,9 @@
 
   .add-btn {
     flex: none;
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.2rem 0.6rem;
@@ -288,7 +288,7 @@
   }
 
   .add-btn:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 </style>

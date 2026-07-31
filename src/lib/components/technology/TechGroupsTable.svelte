@@ -51,9 +51,9 @@
 
 <style>
   .groups { border-collapse: collapse; width: 100%; font-size: 0.83rem; }
-  th { text-align: left; color: #9ca3af; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.3rem 0.5rem; border-bottom: 1px solid #232a33; }
-  td { padding: 0.25rem 0.5rem; border-bottom: 1px solid #1f242c; color: #cfd4db; }
+  th { text-align: left; color: var(--text-2); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--bg-1); }
+  td { padding: 0.25rem 0.5rem; border-bottom: 1px solid var(--border); color: var(--text-1); }
   .name { font-weight: 600; }
-  .key { color: #9aecc0; background: #16191f; padding: 0 0.3rem; font-size: 0.76rem; }
-  .num { width: 6rem; background: #14181d; border: 1px solid #4b5563; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.13rem 0.35rem; }
+  .key { color: var(--ok); background: var(--bg-0); padding: 0 0.3rem; font-size: 0.76rem; }
+  .num { width: 6rem; background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.13rem 0.35rem; }
 </style>

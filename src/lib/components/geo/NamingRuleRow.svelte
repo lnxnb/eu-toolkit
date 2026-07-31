@@ -174,8 +174,8 @@
 
 <style>
   .rule {
-    border: 1px solid #232a33;
-    background: #171b21;
+    border: 1px solid var(--bg-1);
+    background: var(--bg-0);
     padding: 0.3rem 0.4rem;
     margin-bottom: 0.35rem;
   }
@@ -186,14 +186,14 @@
   }
   .pos {
     font-size: 0.72rem;
-    color: #9ca3af;
+    color: var(--text-2);
     width: 1.6rem;
     flex: none;
   }
   .text {
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.15rem 0.35rem;
@@ -207,9 +207,9 @@
     gap: 0.15rem;
   }
   .ico {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-size: 0.72rem;
     line-height: 1;
     padding: 0.15rem 0.3rem;
@@ -220,17 +220,17 @@
     cursor: default;
   }
   .ico:not(:disabled):hover {
-    border-color: #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .ico.danger {
-    color: #fca5a5;
-    border-color: #6b3630;
+    color: var(--err);
+    border-color: var(--danger-bg);
   }
   .ico.danger:hover {
-    background: #7a2820;
-    color: #fff;
+    background: var(--danger-bg);
+    color: var(--text-inverse);
   }
   .cond {
     display: flex;
@@ -241,7 +241,7 @@
   .cond-toggle {
     border: none;
     background: transparent;
-    color: #9cc7ea;
+    color: var(--accent-text);
     font-family: inherit;
     font-size: 0.76rem;
     cursor: pointer;
@@ -249,34 +249,34 @@
   }
   .always {
     font-size: 0.74rem;
-    color: #8a919c;
+    color: var(--text-2);
     font-style: italic;
   }
   .mini {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.7rem;
     padding: 0.05rem 0.35rem;
     cursor: pointer;
   }
   .mini:hover {
-    border-color: #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .mini.danger {
-    color: #fca5a5;
-    border-color: #6b3630;
+    color: var(--err);
+    border-color: var(--danger-bg);
   }
   .err {
-    color: #fca5a5;
+    color: var(--err);
     font-size: 0.76rem;
     margin: 0.3rem 0 0;
   }
   .dim {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .small {
     font-size: 0.74rem;

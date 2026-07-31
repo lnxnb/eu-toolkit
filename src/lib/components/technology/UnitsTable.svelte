@@ -26,12 +26,18 @@
     installPath,
     modPath = null,
     queue,
+    focusKey = null,
+    onfocused,
   }: {
     baseUnits: Unit[];
     tables: TechTable[];
     installPath: string;
     modPath?: string | null;
     queue: EditQueue;
+    /** Unit key to reveal — set when a tech level's unit chip is clicked. */
+    focusKey?: string | null;
+    /** Fired once the focus request has been consumed, so the host can clear it. */
+    onfocused?: () => void;
   } = $props();
 
   interface Issue {
@@ -89,6 +95,24 @@
   function toggle(k: string) {
     expanded = expanded === k ? null : k;
   }
+
+  // Row elements, so a focus request can scroll its unit into view.
+  let rowEls: Record<string, HTMLElement | undefined> = {};
+
+  // Arriving from a tech level's unit chip: the target may be filtered out of the
+  // current view, so clear the filters before expanding it.
+  $effect(() => {
+    const want = focusKey;
+    if (!want) return;
+    search = "";
+    catFilter = "all";
+    expanded = want;
+    onfocused?.();
+    // Wait for the cleared filters to render the row before scrolling to it.
+    requestAnimationFrame(() => {
+      rowEls[want]?.scrollIntoView({ block: "center" });
+    });
+  });
 
   function arrivalLabel(u: Unit): string {
     if (u.arrivesLevel == null) return "—";
@@ -204,7 +228,7 @@
     </thead>
     <tbody>
       {#each shown as u (u.file + "::" + u.key)}
-        <tr class="row" class:expanded={expanded === u.key} onclick={() => toggle(u.key)}>
+        <tr class="row" class:expanded={expanded === u.key} bind:this={rowEls[u.key]} onclick={() => toggle(u.key)}>
           <td class="caret">{expanded === u.key ? "▾" : "▸"}</td>
           <td class="uname">
             {u.name}
@@ -243,41 +267,41 @@
 
 <style>
   .units { display: flex; flex-direction: column; gap: 0.5rem; }
-  .createbox { border: 1px solid #232a33; background: #1c2129; padding: 0.4rem 0.5rem; }
+  .createbox { border: 1px solid var(--bg-1); background: var(--bg-1); padding: 0.4rem 0.5rem; }
   .crow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
   .filters { display: flex; align-items: center; gap: 0.5rem; }
-  .counter { font-size: 0.8rem; color: #8a919c; }
-  .txt { background: #14181d; border: 1px solid #4b5563; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.16rem 0.35rem; width: 14rem; }
+  .counter { font-size: 0.8rem; color: var(--text-2); }
+  .txt { background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.16rem 0.35rem; width: 14rem; }
   .txt.narrow { width: 10rem; }
-  .sel { background: #14181d; border: 1px solid #4b5563; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.16rem 0.25rem; }
-  .btn { border: 1px solid #1f242c; background: #3f4855; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.7rem; cursor: pointer; }
-  .btn:hover { background: #4a6da7; color: #fff; }
-  .err { color: #d9756b; font-size: 0.78rem; margin-top: 0.3rem; }
-  .valid { display: flex; flex-direction: column; gap: 0.15rem; max-height: 9rem; overflow-y: auto; border: 1px solid #232a33; padding: 0.3rem; }
-  .issue { font-size: 0.76rem; color: #cfd4db; }
-  .issue .sev { display: inline-block; width: 4.5rem; text-transform: uppercase; font-size: 0.66rem; color: #9ca3af; }
-  .issue.warning .sev { color: #e0b050; }
-  .issue.error .sev { color: #d9756b; }
+  .sel { background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.16rem 0.25rem; }
+  .btn { border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.7rem; cursor: pointer; }
+  .btn:hover { background: var(--accent); color: var(--text-inverse); }
+  .err { color: var(--err); font-size: 0.78rem; margin-top: 0.3rem; }
+  .valid { display: flex; flex-direction: column; gap: 0.15rem; max-height: 9rem; overflow-y: auto; border: 1px solid var(--bg-1); padding: 0.3rem; }
+  .issue { font-size: 0.76rem; color: var(--text-1); }
+  .issue .sev { display: inline-block; width: 4.5rem; text-transform: uppercase; font-size: 0.66rem; color: var(--text-2); }
+  .issue.warning .sev { color: var(--warn); }
+  .issue.error .sev { color: var(--err); }
   .tbl { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
-  th { text-align: left; color: #9ca3af; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.3rem 0.5rem; border-bottom: 1px solid #232a33; }
-  td { padding: 0.24rem 0.5rem; border-bottom: 1px solid #1f242c; color: #cfd4db; }
+  th { text-align: left; color: var(--text-2); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--bg-1); }
+  td { padding: 0.24rem 0.5rem; border-bottom: 1px solid var(--border); color: var(--text-1); }
   .row { cursor: pointer; }
-  .row:hover { background: #262d37; }
-  .row.expanded { background: #262d37; }
-  .caret { color: #8a919c; width: 1rem; }
+  .row:hover { background: var(--bg-2); }
+  .row.expanded { background: var(--bg-2); }
+  .caret { color: var(--text-2); width: 1rem; }
   .uname { font-weight: 600; }
-  .dim { color: #8a919c; }
-  .badge { font-size: 0.64rem; text-transform: uppercase; padding: 0.02rem 0.28rem; border: 1px solid #1f242c; margin-left: 0.3rem; }
-  .badge.base { background: #3f4855; color: #cfd4db; }
-  .badge.mod { background: #3f8a6d; color: #fff; }
-  .editrow td { background: #14181d; }
+  .dim { color: var(--text-2); }
+  .badge { font-size: 0.64rem; text-transform: uppercase; padding: 0.02rem 0.28rem; border: 1px solid var(--border); margin-left: 0.3rem; }
+  .badge.base { background: var(--bg-3); color: var(--text-1); }
+  .badge.mod { background: var(--ok); color: var(--text-inverse); }
+  .editrow td { background: var(--bg-0); }
   .editor { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.3rem 0.2rem; }
   .meta { font-size: 0.76rem; }
-  .key { color: #9aecc0; background: #16191f; padding: 0 0.3rem; }
+  .key { color: var(--ok); background: var(--bg-0); padding: 0 0.3rem; }
   .grid { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; }
   .scalar { display: flex; align-items: center; gap: 0.35rem; }
-  .sk { font-size: 0.76rem; color: #9ca3af; width: 8.5rem; }
-  .num { width: 5rem; background: #14181d; border: 1px solid #4b5563; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.13rem 0.35rem; }
-  .raw { font-size: 0.74rem; color: #9ca3af; }
-  .rawchip { color: #9ca3af; background: #16191f; padding: 0 0.3rem; margin: 0 0.15rem; font-style: italic; }
+  .sk { font-size: 0.76rem; color: var(--text-2); width: 8.5rem; }
+  .num { width: 5rem; background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.13rem 0.35rem; }
+  .raw { font-size: 0.74rem; color: var(--text-2); }
+  .rawchip { color: var(--text-2); background: var(--bg-0); padding: 0 0.3rem; margin: 0 0.15rem; font-style: italic; }
 </style>

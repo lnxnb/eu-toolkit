@@ -289,6 +289,27 @@ pub fn read_descriptor(mod_dir: &Path) -> Option<String> {
     None
 }
 
+/// Every `.mod` descriptor at the project root, `descriptor.mod` first. A mod
+/// folder usually holds just `descriptor.mod`, but some also carry a sibling
+/// `<name>.mod` copy — a rename has to keep them in agreement.
+pub fn descriptor_paths(mod_dir: &Path) -> Vec<PathBuf> {
+    let mut out = Vec::new();
+    let canonical = mod_dir.join("descriptor.mod");
+    if canonical.is_file() {
+        out.push(canonical.clone());
+    }
+    let Ok(read) = std::fs::read_dir(mod_dir) else {
+        return out;
+    };
+    for entry in read.flatten() {
+        let path = entry.path();
+        if path.is_file() && path.extension().is_some_and(|e| e == "mod") && path != canonical {
+            out.push(path);
+        }
+    }
+    out
+}
+
 /// A folder counts as a mod project if it has a descriptor or any of the
 /// game's content folders.
 pub fn is_mod_project(dir: &Path) -> bool {

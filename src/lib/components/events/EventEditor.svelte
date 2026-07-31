@@ -449,8 +449,8 @@
   }
 
   .id {
-    color: #9aecc0;
-    background: #16191f;
+    color: var(--ok);
+    background: var(--bg-0);
     padding: 0.05rem 0.35rem;
     font-size: 0.8rem;
   }
@@ -460,14 +460,14 @@
     flex-direction: column;
     gap: 0.15rem;
     font-size: 0.78rem;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .fld input,
   .fld textarea {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.25rem 0.35rem;
@@ -486,16 +486,16 @@
   }
 
   .picname {
-    color: #cfd4db;
-    background: #16191f;
+    color: var(--text-1);
+    background: var(--bg-0);
     padding: 0.05rem 0.35rem;
     font-size: 0.76rem;
   }
 
   .mini {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.76rem;
     padding: 0.12rem 0.5rem;
@@ -503,8 +503,8 @@
   }
 
   .mini:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .picker {
@@ -523,11 +523,11 @@
     align-items: center;
     gap: 0.35rem;
     font-size: 0.82rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
 
   .block {
-    border-top: 1px solid #1f242c;
+    border-top: 1px solid var(--border);
     padding-top: 0.4rem;
   }
 
@@ -536,13 +536,13 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .adv {
     text-transform: none;
     letter-spacing: 0;
-    color: #6d7683;
+    color: var(--text-3);
     font-size: 0.72rem;
   }
 
@@ -560,9 +560,9 @@
 
   .moveend {
     align-self: flex-end;
-    border: 1px solid #1f242c;
-    background: #262d37;
-    color: #9aa2ad;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text-2);
     font-family: inherit;
     font-size: 0.72rem;
     padding: 0.1rem 0.5rem;
@@ -570,16 +570,16 @@
   }
 
   .moveend:hover {
-    background: #3f4855;
-    color: #fff;
+    background: var(--bg-3);
+    color: var(--text-inverse);
   }
 
   .add-block,
   .avail-btn {
     align-self: flex-start;
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.28rem 0.6rem;
@@ -588,8 +588,8 @@
 
   .add-block:hover,
   .avail-btn:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .avail-btn:disabled {
@@ -600,25 +600,25 @@
   .approx {
     margin: 0.4rem 0 0.2rem;
     font-size: 0.76rem;
-    color: #c8a24a;
+    color: var(--warn);
   }
 
   .count {
     margin: 0.3rem 0;
     font-size: 0.8rem;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .note {
     margin: 0.2rem 0;
     font-size: 0.8rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .err {
     margin: 0;
     font-size: 0.8rem;
-    color: #d9756b;
+    color: var(--err);
   }
 
   .reflist {
@@ -631,9 +631,9 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    border: 1px solid #1f242c;
-    background: #21262e;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.76rem;
     padding: 0.15rem 0.4rem;
@@ -645,8 +645,8 @@
   }
 
   .ref.jump:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .tags {
@@ -659,9 +659,9 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    border: 1px solid #1f242c;
-    background: #21262e;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.15rem 0.4rem;
@@ -669,14 +669,14 @@
   }
 
   .tag:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .tag .sw {
     width: 0.7rem;
     height: 0.7rem;
-    border: 1px solid #00000055;
+    border: 1px solid var(--bg-0);
   }
 
   .badge {
@@ -684,31 +684,31 @@
     text-transform: uppercase;
     letter-spacing: 0.03em;
     padding: 0.05rem 0.35rem;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
 
   .badge.kind.country {
-    background: #3f6da7;
-    color: #fff;
+    background: var(--accent-text);
+    color: var(--text-inverse);
   }
 
   .badge.kind.province {
-    background: #6d5aa1;
-    color: #fff;
+    background: var(--accent-text);
+    color: var(--text-inverse);
   }
 
   .badge.origin.base {
-    background: #3f4855;
-    color: #cfd4db;
+    background: var(--bg-3);
+    color: var(--text-1);
   }
 
   .badge.origin.mod {
-    background: #3f8a6d;
-    color: #fff;
+    background: var(--ok);
+    color: var(--text-inverse);
   }
 
   .badge.loc {
-    background: #5a6470;
-    color: #fff;
+    background: var(--text-3);
+    color: var(--text-inverse);
   }
 </style>

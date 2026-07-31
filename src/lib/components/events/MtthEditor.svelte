@@ -147,23 +147,23 @@
 
   .lbl {
     font-size: 0.8rem;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .baseval {
     width: 6rem;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.2rem 0.35rem;
   }
 
   .unit {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.2rem 0.3rem;
@@ -171,7 +171,7 @@
 
   .hint {
     font-size: 0.74rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .mods {
@@ -182,9 +182,9 @@
 
   .addmod {
     align-self: flex-start;
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.25rem 0.6rem;
@@ -192,7 +192,7 @@
   }
 
   .addmod:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 </style>

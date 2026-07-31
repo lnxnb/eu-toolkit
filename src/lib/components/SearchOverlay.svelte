@@ -233,45 +233,45 @@
 {/if}
 
 <style>
-  .q { flex: 1; min-width: 12rem; background: #16191f; border: 1px solid #1f242c; color: #cfd4db; padding: 0.3rem 0.5rem; font-family: inherit; font-size: 0.85rem; }
-  .scope { background: #16191f; border: 1px solid #1f242c; color: #cfd4db; font-family: inherit; font-size: 0.78rem; padding: 0.25rem; }
-  .spin { color: #8a919c; }
-  .stats { font-size: 0.74rem; color: #8a919c; white-space: nowrap; }
+  .q { flex: 1; min-width: 12rem; background: var(--bg-0); border: 1px solid var(--border); color: var(--text-1); padding: 0.3rem 0.5rem; font-family: inherit; font-size: 0.85rem; }
+  .scope { background: var(--bg-0); border: 1px solid var(--border); color: var(--text-1); font-family: inherit; font-size: 0.78rem; padding: 0.25rem; }
+  .spin { color: var(--text-2); }
+  .stats { font-size: 0.74rem; color: var(--text-2); white-space: nowrap; }
 
   .results { display: flex; flex-direction: column; gap: 0.5rem; }
-  .hint { color: #8a919c; font-size: 0.82rem; padding: 0.6rem 0.2rem; }
+  .hint { color: var(--text-2); font-size: 0.82rem; padding: 0.6rem 0.2rem; }
 
-  .file-group { border: 1px solid #1f242c; background: #262c35; }
-  .file-head { display: flex; align-items: center; gap: 0.5rem; padding: 0.28rem 0.5rem; background: #21262e; border-bottom: 1px solid #1f242c; }
-  .fname { flex: 1; min-width: 0; color: #9aecc0; font-size: 0.8rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .origin { font-size: 0.64rem; border: 1px solid #3a434f; padding: 0 0.25rem; color: #9aa2ad; }
-  .origin.mod { color: #9aecc0; border-color: #2f5f48; }
-  .fcount { font-size: 0.7rem; color: #8a919c; font-variant-numeric: tabular-nums; }
+  .file-group { border: 1px solid var(--border); background: var(--bg-2); }
+  .file-head { display: flex; align-items: center; gap: 0.5rem; padding: 0.28rem 0.5rem; background: var(--bg-1); border-bottom: 1px solid var(--border); }
+  .fname { flex: 1; min-width: 0; color: var(--ok); font-size: 0.8rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .origin { font-size: 0.64rem; border: 1px solid var(--bg-3); padding: 0 0.25rem; color: var(--text-2); }
+  .origin.mod { color: var(--ok); border-color: var(--ok); }
+  .fcount { font-size: 0.7rem; color: var(--text-2); font-variant-numeric: tabular-nums; }
 
   .hits { list-style: none; margin: 0; padding: 0; }
-  .hit { display: flex; align-items: baseline; gap: 0.55rem; width: 100%; text-align: left; border: none; border-bottom: 1px solid #21262e; background: transparent; color: #cfd4db; font: inherit; font-size: 0.78rem; padding: 0.16rem 0.55rem; cursor: pointer; }
-  .hit:hover { background: #4a6da7; color: #fff; }
-  .ln { flex: 0 0 auto; width: 3rem; text-align: right; color: #6b7482; font-variant-numeric: tabular-nums; }
-  .hit:hover .ln { color: #cdd; }
+  .hit { display: flex; align-items: baseline; gap: 0.55rem; width: 100%; text-align: left; border: none; border-bottom: 1px solid var(--bg-1); background: transparent; color: var(--text-1); font: inherit; font-size: 0.78rem; padding: 0.16rem 0.55rem; cursor: pointer; }
+  .hit:hover { background: var(--accent); color: var(--text-inverse); }
+  .ln { flex: 0 0 auto; width: 3rem; text-align: right; color: var(--text-3); font-variant-numeric: tabular-nums; }
+  .hit:hover .ln { color: var(--text-1); }
   .ctx { flex: 1; min-width: 0; font-family: "Cascadia Code", "Consolas", monospace; white-space: pre; overflow: hidden; text-overflow: ellipsis; }
-  .ctx mark { background: #d8a020; color: #1a1d22; }
+  .ctx mark { background: var(--warn); color: var(--bg-0); }
 
-  .pager { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.2rem; color: #8a919c; font-size: 0.76rem; }
-  .pager button { border: 1px solid #3a434f; background: #2b323d; color: #cfd4db; font-family: inherit; font-size: 0.72rem; padding: 0.15rem 0.6rem; cursor: pointer; }
+  .pager { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.2rem; color: var(--text-2); font-size: 0.76rem; }
+  .pager button { border: 1px solid var(--bg-3); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 0.72rem; padding: 0.15rem 0.6rem; cursor: pointer; }
   .pager button:disabled { opacity: 0.4; cursor: default; }
 
   /* Read-only preview modal (z above the overlay panel's 101). */
-  .pv-root { position: fixed; inset: 0; z-index: 110; display: flex; align-items: center; justify-content: center; }
+  .pv-root { position: fixed; inset: 0; z-index: var(--z-modal); display: flex; align-items: center; justify-content: center; }
   .pv-backdrop { position: absolute; inset: 0; border: none; background: rgba(0,0,0,0.55); cursor: default; }
-  .pv-panel { position: relative; display: flex; flex-direction: column; width: 80vw; max-width: 60rem; height: 80vh; background: #2b323d; border: 1px solid #1f242c; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
-  .pv-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0.6rem; background: #3f4855; border-bottom: 1px solid #1f242c; }
+  .pv-panel { position: relative; display: flex; flex-direction: column; width: 80vw; max-width: 60rem; height: 80vh; background: var(--bg-2); border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+  .pv-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0.6rem; background: var(--bg-3); border-bottom: 1px solid var(--border); }
   .pv-title { flex: 1; min-width: 0; font-weight: 700; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .pv-note { font-size: 0.68rem; color: #d8a020; border: 1px solid #6b5720; padding: 0 0.3rem; }
-  .pv-close { border: none; background: transparent; color: #cfd4db; font-size: 1.3rem; line-height: 1; cursor: pointer; }
-  .pv-close:hover { color: #fff; }
-  .pv-body { flex: 1; min-height: 0; overflow: auto; background: #16191f; }
-  .pv-pre { margin: 0; font-family: "Cascadia Code", "Consolas", monospace; font-size: 0.76rem; color: #cfd4db; }
+  .pv-note { font-size: 0.68rem; color: var(--warn); border: 1px solid var(--warn); padding: 0 0.3rem; }
+  .pv-close { border: none; background: transparent; color: var(--text-1); font-size: 1.3rem; line-height: 1; cursor: pointer; }
+  .pv-close:hover { color: var(--text-inverse); }
+  .pv-body { flex: 1; min-height: 0; overflow: auto; background: var(--bg-0); }
+  .pv-pre { margin: 0; font-family: "Cascadia Code", "Consolas", monospace; font-size: 0.76rem; color: var(--text-1); }
   .pv-ln { display: block; white-space: pre; padding: 0 0.5rem; }
-  .pv-ln.match { background: #3a3320; }
-  .pv-lno { display: inline-block; width: 3.5rem; margin-right: 0.6rem; text-align: right; color: #556; user-select: none; }
+  .pv-ln.match { background: var(--bg-1); }
+  .pv-lno { display: inline-block; width: 3.5rem; margin-right: 0.6rem; text-align: right; color: var(--text-3); user-select: none; }
 </style>

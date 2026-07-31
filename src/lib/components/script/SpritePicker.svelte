@@ -254,9 +254,9 @@
     flex-direction: column;
     min-height: 0;
     height: 100%;
-    background: #1b2027;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
   }
 
   .head {
@@ -265,16 +265,16 @@
     gap: 0.4rem;
     flex: none;
     padding: 0.4rem;
-    background: #2b323d;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border);
   }
 
   .search {
     flex: 1;
     min-width: 0;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.3rem 0.45rem;
@@ -284,7 +284,7 @@
   .count {
     flex: none;
     font-size: 0.76rem;
-    color: #8a919c;
+    color: var(--text-2);
     font-variant-numeric: tabular-nums;
   }
 
@@ -292,7 +292,7 @@
     margin: 0;
     padding: 0.4rem 0.5rem;
     font-size: 0.8rem;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .body {
@@ -317,20 +317,20 @@
     flex-direction: column;
     align-items: center;
     gap: 0.25rem;
-    border: 1px solid #1f242c;
-    background: #21262e;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
+    color: var(--text-1);
     font-family: inherit;
     padding: 0.3rem;
     cursor: pointer;
   }
 
   .tile:hover {
-    border-color: #4a6da7;
+    border-color: var(--accent);
   }
 
   .tile.selected {
-    border-color: #4a6da7;
+    border-color: var(--accent);
     background: rgba(74, 109, 167, 0.25);
   }
 
@@ -340,7 +340,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #14181d;
+    background: var(--bg-0);
     overflow: hidden;
   }
 
@@ -352,15 +352,15 @@
   }
 
   .thumb-err {
-    color: #e0a44a;
+    color: var(--warn);
     font-size: 1.3rem;
   }
 
   .thumb-load {
     width: 1rem;
     height: 1rem;
-    border: 2px solid #333b46;
-    border-top-color: #4a6da7;
+    border: 2px solid var(--bg-3);
+    border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
@@ -374,7 +374,7 @@
   .tile-name {
     width: 100%;
     font-size: 0.66rem;
-    color: #9aa2ad;
+    color: var(--text-2);
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -382,15 +382,15 @@
   }
 
   .empty {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.82rem;
   }
 
   .preview {
     flex: none;
     width: 15rem;
-    border-left: 1px solid #1f242c;
-    background: #16191f;
+    border-left: 1px solid var(--border);
+    background: var(--bg-0);
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
@@ -401,7 +401,7 @@
   .preview-name {
     font-family: "Consolas", "Courier New", monospace;
     font-size: 0.74rem;
-    color: #cfd4db;
+    color: var(--text-1);
     word-break: break-all;
   }
 
@@ -411,7 +411,7 @@
     justify-content: center;
     min-height: 6rem;
     background:
-      repeating-conic-gradient(#20262e 0% 25%, #191d23 0% 50%) 50% / 16px 16px;
+      repeating-conic-gradient(var(--bg-1) 0% 25%, var(--bg-1) 0% 50%) 50% / 16px 16px;
     padding: 0.5rem;
   }
 
@@ -421,24 +421,24 @@
   }
 
   .preview-err {
-    color: #e0a44a;
+    color: var(--warn);
     font-size: 0.76rem;
   }
 
   .preview-err span {
     display: block;
-    color: #9aa2ad;
+    color: var(--text-2);
     margin-top: 0.25rem;
     word-break: break-word;
   }
 
   .preview-load {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.8rem;
   }
 
   .preview-hint {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.78rem;
   }
 </style>

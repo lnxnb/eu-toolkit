@@ -8,7 +8,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import { ScriptTreeEditor } from "$lib/components/script";
   import type { KnownKey, ScriptBlock } from "$lib/components/script";
-  import type { DropdownItem } from "$lib/components/ui";
+  import { LoadingState, type DropdownItem } from "$lib/components/ui";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
 
   let {
@@ -123,14 +123,14 @@
         onedit={onTreeEdit}
       />
     {:else}
-      <p class="dim">Loading…</p>
+      <LoadingState label="Loading script block…" />
     {/if}
   {/if}
 </div>
 
 <style>
   .sb {
-    border: 1px solid #232a33;
+    border: 1px solid var(--bg-1);
     margin-top: 0.25rem;
   }
   .sb-head {
@@ -138,7 +138,7 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.15rem 0.3rem;
-    background: #21262e;
+    background: var(--bg-1);
   }
   .sb-title {
     display: flex;
@@ -148,23 +148,23 @@
     text-align: left;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     cursor: pointer;
   }
   .sb-title:disabled {
     cursor: default;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .caret {
-    color: #8a919c;
+    color: var(--text-2);
     width: 0.8rem;
     flex: none;
   }
   code {
-    color: #9aecc0;
-    background: #16191f;
+    color: var(--ok);
+    background: var(--bg-0);
     padding: 0 0.3rem;
     font-size: 0.76rem;
   }
@@ -172,12 +172,12 @@
     font-size: 0.66rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .mini {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.7rem;
     padding: 0.05rem 0.35rem;
@@ -185,22 +185,17 @@
     flex: none;
   }
   .mini:hover {
-    border-color: #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .mini.danger {
-    color: #fca5a5;
-    border-color: #6b3630;
+    color: var(--err);
+    border-color: var(--danger-bg);
   }
   .err {
-    color: #fca5a5;
+    color: var(--err);
     font-size: 0.76rem;
-    padding: 0.2rem 0.4rem;
-  }
-  .dim {
-    color: #9ca3af;
-    font-size: 0.74rem;
     padding: 0.2rem 0.4rem;
   }
 </style>

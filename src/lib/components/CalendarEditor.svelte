@@ -146,13 +146,13 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.4rem 0.5rem;
-    border-bottom: 1px solid #2b323d;
+    border-bottom: 1px solid var(--bg-2);
   }
 
   .back {
-    border: 1px solid #2b323d;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--bg-2);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     line-height: 1;
@@ -161,15 +161,15 @@
   }
 
   .back:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .cal-title {
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .cal-body {
@@ -179,7 +179,7 @@
 
   .cal-sec {
     padding: 0.5rem 0 0.35rem;
-    border-bottom: 1px solid #2b323d;
+    border-bottom: 1px solid var(--bg-2);
   }
 
   .cal-sec:last-child {
@@ -190,20 +190,20 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #9ca3af;
+    color: var(--text-2);
     margin-bottom: 0.35rem;
   }
 
   .hint {
     margin: 0 0 0.4rem;
     font-size: 0.72rem;
-    color: #8a919c;
+    color: var(--text-2);
     line-height: 1.3;
   }
 
   .hint code {
-    background: #21262e;
-    color: #cfd4db;
+    background: var(--bg-1);
+    color: var(--text-1);
     padding: 0 0.2rem;
   }
 
@@ -223,14 +223,14 @@
     font-size: 0.62rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: #7f8792;
+    color: var(--text-3);
   }
 
   .mn-input,
   .era-input {
-    background: #21262e;
-    border: 1px solid #2b323d;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.2rem 0.35rem;
@@ -241,7 +241,7 @@
 
   .mn-input:focus,
   .era-input:focus {
-    border-color: #4a6da7;
+    border-color: var(--accent);
   }
 
   .range-row {
@@ -254,7 +254,7 @@
   .rr-label {
     font-size: 0.7rem;
     text-transform: uppercase;
-    color: #8a919c;
+    color: var(--text-2);
     width: 2.5rem;
   }
 </style>

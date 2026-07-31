@@ -371,6 +371,25 @@ fn trade_details_atlas(vfs: &Vfs, fallback: Option<&Vfs>) -> Result<IconAtlas, S
     )
 }
 
+/// EU4 defines no per-national-idea sprites. It renders individual ideas from
+/// the 18-frame `GFX_modifier_icons` strip based on their modifier payload. The
+/// engine's modifier-to-frame table is compiled, not exposed in script files;
+/// callers therefore select a stable preview frame from the first modifier key.
+fn idea_modifiers_atlas(vfs: &Vfs, fallback: Option<&Vfs>) -> Result<IconAtlas, String> {
+    let img = read_strip(vfs, fallback, "gfx/interface/modifiers.dds")?;
+    let index = (0..18).map(|i| (format!("modifier_{i}"), i)).collect();
+    strip_from_dds("idea_modifiers", img, index)
+}
+
+fn estates_atlas(vfs: &Vfs, fallback: Option<&Vfs>) -> Result<IconAtlas, String> {
+    let img = read_strip(vfs, fallback, "gfx/interface/estates_icons.dds")?;
+    // Asset dimensions are authoritative: vanilla's DDS is 14 frames despite a
+    // .gfx declaration saying 15, while total conversions can extend the strip.
+    let count = img.width / img.height.max(1);
+    let index = (0..count).map(|i| (format!("estate_{i}"), i)).collect();
+    strip_from_dds("estates", img, index)
+}
+
 /// Builds the icon atlas for `kind` ∈ `trade_goods` | `religions` | `development`.
 ///
 /// `fallback` is a base-only [`Vfs`] used to recover the strip PNG when a mod
@@ -394,6 +413,8 @@ pub fn icon_atlas(vfs: &Vfs, fallback: Option<&Vfs>, kind: &str) -> Result<IconA
         }
         "development" => development_atlas(vfs, fallback),
         "trade_details" => trade_details_atlas(vfs, fallback),
+        "idea_modifiers" => idea_modifiers_atlas(vfs, fallback),
+        "estates" => estates_atlas(vfs, fallback),
         other => Err(format!("Unknown icon atlas kind: {other}")),
     }
 }
@@ -752,6 +773,61 @@ pub fn get_icon_atlas(
     Ok(tauri::ipc::Response::new(atlas.to_wire()))
 }
 
+// ---------------------------------------------------------------------------
+// Per-modifier icons (Sprint: technology editor)
+// ---------------------------------------------------------------------------
+//
+// EU4 exposes NO modifier-key → sprite table: `GFX_modifier_icons` is an 18-frame
+// positional strip whose frame selection is compiled into the engine, and only a
+// partial, inconsistently-named subset of modifiers has a `GFX_icon_*`/`GFX_text_*`
+// spriteType. What DOES exist is a filename convention — `gfx/interface/ideas_EU4/`
+// holds ~923 `.dds` files named exactly after modifier keys. Resolving by filename
+// through the Vfs is therefore both accurate and mod-aware (a mod shipping its own
+// `ideas_EU4/<key>.dds` shadows the base one, and a mod-only modifier works for
+// free). A key with no such file has no icon — callers render the label alone
+// rather than a wrong picture.
+
+const MODIFIER_ICON_DIR: &str = "gfx/interface/ideas_EU4";
+
+/// Game-relative path of a modifier key's icon, or `None` if the key is not a
+/// plain identifier (guards against `..`/separators reaching the Vfs).
+pub fn modifier_icon_rel(key: &str) -> Option<String> {
+    if key.is_empty()
+        || !key
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+    {
+        return None;
+    }
+    Some(format!("{MODIFIER_ICON_DIR}/{}.dds", key.to_ascii_lowercase()))
+}
+
+/// Decodes one modifier icon to PNG bytes. `Err` when the key has no icon file —
+/// an expected, non-exceptional outcome the caller renders as "no icon".
+pub fn modifier_icon(vfs: &Vfs, fallback: Option<&Vfs>, key: &str) -> Result<Vec<u8>, String> {
+    let rel = modifier_icon_rel(key).ok_or_else(|| format!("Not a modifier key: {key}"))?;
+    let img = read_strip(vfs, fallback, &rel)?;
+    encode_png_rgba(&img.rgba, img.width, img.height)
+}
+
+#[tauri::command(async)]
+pub fn get_modifier_icon(
+    install_path: String,
+    mod_path: Option<String>,
+    key: String,
+) -> Result<tauri::ipc::Response, String> {
+    let vfs = Vfs::new(&install_path, mod_path.as_deref())?;
+    let base = mod_path
+        .as_deref()
+        .map(|_| Vfs::new(&install_path, None))
+        .transpose()?;
+    Ok(tauri::ipc::Response::new(modifier_icon(
+        &vfs,
+        base.as_ref(),
+        &key,
+    )?))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -945,6 +1021,40 @@ mod tests {
             image::load_from_memory_with_format(&atlas.png, image::ImageFormat::Png).unwrap();
         assert_eq!(img.width(), atlas.frame_w * 7);
         assert_eq!(img.height(), atlas.frame_h);
+    }
+
+    #[test]
+    fn real_idea_modifier_atlas() {
+        let Some(vfs) = real_install() else { return };
+        let atlas = icon_atlas(&vfs, None, "idea_modifiers").unwrap();
+        assert_eq!(atlas.count, 18);
+        assert_eq!(atlas.index.len(), 18);
+        assert!(atlas.index.iter().all(|(_, frame)| *frame < atlas.count));
+        assert!(image::load_from_memory_with_format(&atlas.png, image::ImageFormat::Png).is_ok());
+    }
+
+    #[test]
+    fn anbennar_idea_modifier_atlas_smoke() {
+        if !Path::new(ANBENNAR).is_dir() || real_install().is_none() { return; }
+        let vfs = Vfs::new(INSTALL, Some(ANBENNAR)).unwrap();
+        let base = Vfs::new(INSTALL, None).unwrap();
+        let atlas = icon_atlas(&vfs, Some(&base), "idea_modifiers").unwrap();
+        assert_eq!(atlas.count, 18);
+        assert!(atlas.png.len() > 100);
+    }
+
+    #[test]
+    fn real_and_anbennar_estates_atlas() {
+        let Some(base) = real_install() else { return };
+        let vanilla = icon_atlas(&base, None, "estates").unwrap();
+        assert_eq!(vanilla.count, 14);
+        assert!(vanilla.index.iter().all(|(_, frame)| *frame < vanilla.count));
+        if Path::new(ANBENNAR).is_dir() {
+            let mod_vfs = Vfs::new(INSTALL, Some(ANBENNAR)).unwrap();
+            let atlas = icon_atlas(&mod_vfs, Some(&base), "estates").unwrap();
+            assert!(atlas.count >= 14);
+            assert!(atlas.png.len() > 100);
+        }
     }
 
     #[test]

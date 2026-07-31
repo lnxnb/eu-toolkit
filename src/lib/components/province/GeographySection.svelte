@@ -266,18 +266,18 @@
 
 <style>
   section { margin-bottom: 1rem; }
-  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; }
-  .ro { font-size: 0.85rem; color: #cfd4db; }
-  .dim { color: #8a919c; font-size: 0.82rem; }
+  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2); }
+  .ro { font-size: 0.85rem; color: var(--text-1); }
+  .dim { color: var(--text-2); font-size: 0.82rem; }
   .check { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer; }
   .cont-ctl { display: flex; align-items: center; gap: 0.25rem; width: 100%; }
   .cont-dd { flex: 1; min-width: 0; }
   .cont-new { display: flex; align-items: center; gap: 0.25rem; margin: 0.3rem 0 0; }
-  .cont-lead { font-size: 0.72rem; color: #9ca3af; white-space: nowrap; }
-  .cont-in { flex: 1; min-width: 0; background: #14181d; border: 1px solid #4b5563; color: #cfd4db; font-family: inherit; font-size: 0.85rem; padding: 0.2rem 0.4rem; outline: none; }
-  .cont-in:focus { border-color: #4a6da7; }
-  .ico { border: 1px solid #4b5563; background: #2b323d; color: #cfd4db; font-family: inherit; font-size: 0.85rem; line-height: 1; padding: 0.2rem 0.4rem; cursor: pointer; }
-  .ico:hover { border-color: #4a6da7; background: #4a6da7; color: #fff; }
-  .ico.danger { color: #fca5a5; border-color: #6b3630; }
-  .ico.danger:hover { background: #7a2820; border-color: #9a3226; color: #fff; }
+  .cont-lead { font-size: 0.72rem; color: var(--text-2); white-space: nowrap; }
+  .cont-in { flex: 1; min-width: 0; background: var(--bg-0); border: 1px solid var(--border-strong); color: var(--text-1); font-family: inherit; font-size: 0.85rem; padding: 0.2rem 0.4rem; outline: none; }
+  .cont-in:focus { border-color: var(--accent); }
+  .ico { border: 1px solid var(--border-strong); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 0.85rem; line-height: 1; padding: 0.2rem 0.4rem; cursor: pointer; }
+  .ico:hover { border-color: var(--accent); background: var(--accent); color: var(--text-inverse); }
+  .ico.danger { color: var(--err); border-color: var(--danger-bg); }
+  .ico.danger:hover { background: var(--danger-bg); border-color: var(--danger-bg); color: var(--text-inverse); }
 </style>

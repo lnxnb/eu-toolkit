@@ -387,8 +387,8 @@
 <style>
   .bench {
     min-height: 100vh;
-    background: #14181d;
-    color: #cfd4db;
+    background: var(--bg-0);
+    color: var(--text-1);
     font-family: Inter, system-ui, sans-serif;
     padding: 1rem 1rem 4rem;
   }
@@ -406,13 +406,13 @@
   }
 
   .note {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.85rem;
   }
 
   .back {
     margin-left: auto;
-    color: #7ba3d6;
+    color: var(--accent-text);
     font-size: 0.85rem;
   }
 
@@ -430,8 +430,8 @@
   }
 
   .card {
-    background: #2b323d;
-    border: 1px solid #1f242c;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
     padding: 0.75rem;
   }
 
@@ -440,7 +440,7 @@
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   h3 {
@@ -448,14 +448,14 @@
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #7f8792;
+    color: var(--text-3);
   }
 
   .hint,
   .status,
   .quick {
     font-size: 0.78rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .status {
@@ -463,18 +463,18 @@
   }
 
   code {
-    color: #cfd4db;
-    background: #21262e;
+    color: var(--text-1);
+    background: var(--bg-1);
     padding: 0 0.25rem;
   }
 
   .log {
     margin: 0.2rem 0 0;
     padding: 0.4rem 0.5rem;
-    background: #191d23;
-    border: 1px solid #1f242c;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
     font-size: 0.74rem;
-    color: #b7c0cc;
+    color: var(--text-2);
     white-space: pre-wrap;
     word-break: break-word;
     max-height: 16rem;
@@ -493,22 +493,22 @@
     align-items: center;
     gap: 0.4rem;
     font-size: 0.8rem;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .controls input {
     width: 6rem;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     padding: 0.2rem 0.35rem;
   }
 
   .controls button {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.25rem 0.7rem;
@@ -516,8 +516,8 @@
   }
 
   .controls button:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .detail-head {
@@ -528,7 +528,7 @@
   }
 
   .dim {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.8rem;
   }
 
@@ -536,12 +536,12 @@
     margin: 0.2rem 0;
     font-family: ui-monospace, "Cascadia Code", monospace;
     font-size: 0.75rem;
-    color: #b7c0cc;
+    color: var(--text-2);
   }
 
   .anchor-note {
     font-size: 0.75rem;
-    color: #9aa2ad;
+    color: var(--text-2);
   }
 
   .diff {
@@ -552,19 +552,19 @@
 
   .diff th,
   .diff td {
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     padding: 0.15rem 0.4rem;
     text-align: left;
   }
 
   .diff th {
-    background: #303844;
-    color: #9aa2ad;
+    background: var(--bg-3);
+    color: var(--text-2);
     font-weight: 600;
   }
 
   .diff .changed {
-    color: #86efac;
+    color: var(--ok);
   }
 
   .geo {
@@ -576,21 +576,21 @@
   }
 
   .geo dt {
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .geo dd {
     margin: 0;
-    color: #cfd4db;
+    color: var(--text-1);
   }
 
   .badge {
     font-size: 0.66rem;
     padding: 0.1rem 0.35rem;
-    color: #fff;
+    color: var(--text-inverse);
   }
 
   .badge.warn {
-    background: #a1662f;
+    background: var(--warn);
   }
 </style>

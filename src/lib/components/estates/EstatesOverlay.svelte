@@ -1,7 +1,7 @@
 <!--
   EstatesOverlay — View ▸ Estates… (Sprint 20).
 
-  A full-screen OverlaySurface with three tabs (Estates / Privileges / Agendas),
+  The Sprint-31 pilot workspace view with three content tabs (Estates / Privileges / Agendas),
   each a searchable list (origin badge base/mod) → expand editor. Expanding opens
   the shared EstateObjectEditor (loc, icon, typed scalars + modifier rows, 14.2
   trigger/effect trees, availability for privileges, preserve-unknown). "＋ New …"
@@ -13,7 +13,7 @@
 -->
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { OverlaySurface } from "$lib/components/script";
+  import { TabStrip } from "$lib/components/workspace";
   import type { KnownKey } from "$lib/components/script";
   import type { DropdownItem, KnownModifier } from "$lib/components/ui";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
@@ -32,7 +32,6 @@
   } from "$lib/estates";
 
   let {
-    open = $bindable(false),
     installPath,
     modPath = null,
     date = null,
@@ -41,7 +40,6 @@
     onfocused,
     onopencountry,
   }: {
-    open?: boolean;
     installPath: string;
     modPath?: string | null;
     date?: string | null;
@@ -74,7 +72,6 @@
   let newError = $state<string | null>(null);
 
   $effect(() => {
-    if (!open) return;
     void load(installPath, modPath);
   });
 
@@ -140,7 +137,7 @@
 
   // Consume the focus request once loaded (auto-detect which tab the key is in).
   $effect(() => {
-    if (!open || !focusKey || !data) return;
+    if (!focusKey || !data) return;
     const target = focusKey;
     for (const t of TABS) {
       if (listOf(data, t).some((o) => o.key === target)) {
@@ -239,25 +236,23 @@
   }
 </script>
 
-<OverlaySurface bind:open title="Estates">
-  {#snippet toolbar()}
+<div class="estates-view">
+  <div class="view-toolbar">
     <input class="search" type="text" placeholder="Search…" bind:value={search} />
     <label class="modonly">
       <input type="checkbox" bind:checked={modOnly} />
       Mod only
     </label>
     <span class="counter">{shown.length}</span>
-  {/snippet}
+  </div>
 
   <div class="body">
-    <div class="tabs">
-      {#each TABS as t (t)}
-        <button class="tabbtn" class:active={tab === t} onclick={() => switchTab(t)}>
-          {KIND_SCHEMAS[t].label}
-          {#if data}<span class="tabn">{listOf(data, t).length}</span>{/if}
-        </button>
-      {/each}
-    </div>
+    <TabStrip
+      tier="content"
+      tabs={TABS.map((t) => ({ id: t, label: KIND_SCHEMAS[t].label, count: data ? listOf(data, t).length : undefined }))}
+      activeId={tab}
+      onselect={(id) => switchTab(id as EstateKind)}
+    />
 
     <div class="newrow">
       {#if tab === "privilege" || tab === "agenda"}
@@ -316,13 +311,13 @@
       {/each}
     </ul>
   </div>
-</OverlaySurface>
+</div>
 
 <style>
   .search {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.83rem;
     padding: 0.2rem 0.4rem;
@@ -333,45 +328,16 @@
     align-items: center;
     gap: 0.3rem;
     font-size: 0.8rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .counter {
     font-size: 0.8rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .body {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-  }
-  .tabs {
-    display: flex;
-    gap: 0.15rem;
-    border-bottom: 1px solid #1f242c;
-  }
-  .tabbtn {
-    border: 1px solid #1f242c;
-    border-bottom: none;
-    background: #2b323d;
-    color: #cfd4db;
-    font-family: inherit;
-    font-size: 0.85rem;
-    padding: 0.3rem 0.8rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-  .tabbtn.active {
-    background: #4a6da7;
-    color: #fff;
-  }
-  .tabn {
-    font-size: 0.7rem;
-    color: #8a919c;
-  }
-  .tabbtn.active .tabn {
-    color: #dbe4f0;
   }
   .newrow {
     display: flex;
@@ -381,9 +347,9 @@
   }
   .estsel,
   .newkey {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.83rem;
     padding: 0.25rem 0.4rem;
@@ -392,29 +358,29 @@
     width: 15rem;
   }
   .newbtn {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.28rem 0.7rem;
     cursor: pointer;
   }
   .newbtn:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .newerr {
-    color: #d9756b;
+    color: var(--err);
     font-size: 0.78rem;
   }
   .msg {
     margin: 0.2rem 0;
     font-size: 0.85rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .msg.err {
-    color: #d9756b;
+    color: var(--err);
   }
   .list {
     list-style: none;
@@ -424,14 +390,14 @@
     flex-direction: column;
   }
   .row {
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     border-bottom: none;
   }
   .row:last-child {
-    border-bottom: 1px solid #1f242c;
+    border-bottom: 1px solid var(--border);
   }
   .row.expanded {
-    background: #262d37;
+    background: var(--bg-2);
   }
   .rowmain {
     display: flex;
@@ -441,17 +407,17 @@
     text-align: left;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.86rem;
     padding: 0.35rem 0.5rem;
     cursor: pointer;
   }
   .rowmain:hover {
-    background: #303844;
+    background: var(--bg-3);
   }
   .caret {
-    color: #8a919c;
+    color: var(--text-2);
     width: 0.8rem;
     flex: none;
   }
@@ -463,8 +429,8 @@
     max-width: 18rem;
   }
   .key {
-    color: #9aecc0;
-    background: #16191f;
+    color: var(--ok);
+    background: var(--bg-0);
     padding: 0 0.3rem;
     font-size: 0.76rem;
   }
@@ -473,23 +439,30 @@
     text-transform: uppercase;
     letter-spacing: 0.03em;
     padding: 0.05rem 0.35rem;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
   .badge.origin.base {
-    background: #3f4855;
-    color: #cfd4db;
+    background: var(--bg-3);
+    color: var(--text-1);
   }
   .badge.origin.mod {
-    background: #3f8a6d;
-    color: #fff;
+    background: var(--ok);
+    color: var(--text-inverse);
   }
   .file {
     margin-left: auto;
-    color: #6d7683;
+    color: var(--text-3);
     font-size: 0.72rem;
     white-space: nowrap;
   }
   .rowbody {
     padding: 0 0.6rem 0.4rem;
+  }
+  .estates-view { min-height: 100%; }
+  .view-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-3);
   }
 </style>

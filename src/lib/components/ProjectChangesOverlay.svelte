@@ -190,49 +190,49 @@
 </OverlaySurface>
 
 <style>
-  .tally { font-size: 0.74rem; color: #8a919c; display: inline-flex; align-items: center; gap: 0.3rem; }
-  .rerun { border: 1px solid #4a6da7; background: #4a6da7; color: #fff; font-family: inherit; font-size: 0.74rem; padding: 0.16rem 0.6rem; cursor: pointer; margin-left: auto; }
+  .tally { font-size: 0.74rem; color: var(--text-2); display: inline-flex; align-items: center; gap: 0.3rem; }
+  .rerun { border: 1px solid var(--accent); background: var(--accent); color: var(--text-inverse); font-family: inherit; font-size: 0.74rem; padding: 0.16rem 0.6rem; cursor: pointer; margin-left: auto; }
   .rerun:disabled { opacity: 0.6; cursor: default; }
 
   .split { display: flex; gap: 0.6rem; height: 100%; min-height: 0; }
-  .tree { flex: 0 0 34%; max-width: 34%; overflow: auto; border: 1px solid #1f242c; background: #262c35; }
-  .diff { flex: 1; min-width: 0; overflow: auto; border: 1px solid #1f242c; background: #16191f; }
+  .tree { flex: 0 0 34%; max-width: 34%; overflow: auto; border: 1px solid var(--border); background: var(--bg-2); }
+  .diff { flex: 1; min-width: 0; overflow: auto; border: 1px solid var(--border); background: var(--bg-0); }
 
-  .hint { color: #8a919c; font-size: 0.82rem; padding: 0.7rem; }
+  .hint { color: var(--text-2); font-size: 0.82rem; padding: 0.7rem; }
 
-  .grp, .hidden-sec { border-bottom: 1px solid #1f242c; }
-  .grp-head { display: flex; align-items: center; gap: 0.4rem; width: 100%; text-align: left; border: none; background: #21262e; color: #cfd4db; font: inherit; font-size: 0.8rem; padding: 0.28rem 0.5rem; cursor: pointer; }
+  .grp, .hidden-sec { border-bottom: 1px solid var(--border); }
+  .grp-head { display: flex; align-items: center; gap: 0.4rem; width: 100%; text-align: left; border: none; background: var(--bg-1); color: var(--text-1); font: inherit; font-size: 0.8rem; padding: 0.28rem 0.5rem; cursor: pointer; }
   .grp-head.static { cursor: default; }
-  .grp-head:not(.static):hover { background: #2f3946; }
-  .chev { width: 0.8rem; color: #8a919c; }
+  .grp-head:not(.static):hover { background: var(--bg-3); }
+  .chev { width: 0.8rem; color: var(--text-2); }
   .grp-name { flex: 1; font-weight: 600; }
-  .grp-count { font-size: 0.7rem; color: #8a919c; font-variant-numeric: tabular-nums; }
+  .grp-count { font-size: 0.7rem; color: var(--text-2); font-variant-numeric: tabular-nums; }
 
   .flist { list-style: none; margin: 0; padding: 0; }
-  .frow { display: flex; align-items: center; gap: 0.4rem; width: 100%; text-align: left; border: none; border-bottom: 1px solid #21262e; background: transparent; color: #cfd4db; font: inherit; font-size: 0.76rem; padding: 0.14rem 0.5rem 0.14rem 1.3rem; cursor: pointer; }
-  .frow:hover { background: #2f3946; }
-  .frow.sel { background: #4a6da7; color: #fff; }
+  .frow { display: flex; align-items: center; gap: 0.4rem; width: 100%; text-align: left; border: none; border-bottom: 1px solid var(--bg-1); background: transparent; color: var(--text-1); font: inherit; font-size: 0.76rem; padding: 0.14rem 0.5rem 0.14rem 1.3rem; cursor: pointer; }
+  .frow:hover { background: var(--bg-3); }
+  .frow.sel { background: var(--accent); color: var(--text-inverse); }
   .frel { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .bin { font-size: 0.62rem; color: #9aa2ad; border: 1px solid #3a434f; padding: 0 0.2rem; }
+  .bin { font-size: 0.62rem; color: var(--text-2); border: 1px solid var(--bg-3); padding: 0 0.2rem; }
 
-  .hidden-row { display: flex; align-items: center; gap: 0.4rem; padding: 0.14rem 0.5rem; font-size: 0.74rem; color: #cfd4db; }
-  .hrel { color: #d8a020; }
-  .hcount { color: #8a919c; font-size: 0.7rem; }
+  .hidden-row { display: flex; align-items: center; gap: 0.4rem; padding: 0.14rem 0.5rem; font-size: 0.74rem; color: var(--text-1); }
+  .hrel { color: var(--warn); }
+  .hcount { color: var(--text-2); font-size: 0.7rem; }
 
-  .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1rem; height: 1rem; font-size: 0.66rem; font-weight: 700; color: #fff; border-radius: 1px; padding: 0 0.15rem; }
-  .badge.add { background: #2f7d4f; }
-  .badge.shadow { background: #4a6da7; }
-  .badge.hide { background: #8a6d1f; color: #1a1d22; }
+  .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1rem; height: 1rem; font-size: 0.66rem; font-weight: 700; color: var(--text-inverse); border-radius: 1px; padding: 0 0.15rem; }
+  .badge.add { background: var(--ok); }
+  .badge.shadow { background: var(--accent); }
+  .badge.hide { background: var(--warn); color: var(--bg-0); }
 
-  .diff-head { display: flex; align-items: baseline; gap: 0.6rem; padding: 0.4rem 0.6rem; background: #21262e; border-bottom: 1px solid #1f242c; position: sticky; top: 0; }
-  .dtitle { font-weight: 700; font-size: 0.82rem; color: #9aecc0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .dmeta { font-size: 0.72rem; color: #8a919c; white-space: nowrap; }
+  .diff-head { display: flex; align-items: baseline; gap: 0.6rem; padding: 0.4rem 0.6rem; background: var(--bg-1); border-bottom: 1px solid var(--border); position: sticky; top: 0; }
+  .dtitle { font-weight: 700; font-size: 0.82rem; color: var(--ok); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dmeta { font-size: 0.72rem; color: var(--text-2); white-space: nowrap; }
 
-  .diff-pre { margin: 0; font-family: "Cascadia Code", "Consolas", monospace; font-size: 0.75rem; color: #cfd4db; }
+  .diff-pre { margin: 0; font-family: "Cascadia Code", "Consolas", monospace; font-size: 0.75rem; color: var(--text-1); }
   .dl { display: block; white-space: pre; padding: 0 0.5rem; }
-  .dl .sign { display: inline-block; width: 1rem; color: #6b7482; user-select: none; }
-  .dl.add { background: #16321f; }
-  .dl.add .sign { color: #6fdc8c; }
-  .dl.del { background: #3a1a1a; }
-  .dl.del .sign { color: #e06b6b; }
+  .dl .sign { display: inline-block; width: 1rem; color: var(--text-3); user-select: none; }
+  .dl.add { background: var(--bg-1); }
+  .dl.add .sign { color: var(--ok); }
+  .dl.del { background: var(--danger-bg); }
+  .dl.del .sign { color: var(--err); }
 </style>

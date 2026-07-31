@@ -1,12 +1,12 @@
 <script module lang="ts">
   // Tab selection persists across country switches (module-level, one panel at a
   // time). Sprint 3.1: clicking between countries keeps the active tab.
-  let activeTab = $state("country");
+  let activeTab = $state("overview");
 </script>
 
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { SidePanel } from "$lib/components/ui";
+  import { SidePanel, LoadingState, EditableHeading } from "$lib/components/ui";
   import type { DropdownItem } from "$lib/components/ui";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
   import type { Calendar } from "$lib/calendar";
@@ -55,7 +55,11 @@
     ondeleted,
     onopennaming,
     onopenestates,
+    onzoomtoprovince,
     onopenmechanics,
+    embedded = false,
+    contentTab,
+    onopenmissions, onopenevents, onopendecisions,
   }: {
     installPath: string;
     modPath: string | null;
@@ -100,10 +104,17 @@
     onopennaming?: (schemeKey?: string) => void;
     /** Open the Estates editor (Sprint 20), optionally at an estate/priv/agenda. */
     onopenestates?: (key?: string) => void;
+    /** Centre the map on a province — the header flag's zoom-to-capital click. */
+    onzoomtoprovince?: (id: number) => void;
     /** Open the Mechanics editor (Sprint 27) at a family, optionally focused on a
      *  key — the government-reform edit…/new… affordance. */
     onopenmechanics?: (family: string, key?: string) => void;
+    embedded?: boolean;
+    contentTab?: "overview" | "rulers" | "ideas" | "diplomacy" | "estates" | "history" | "names";
+    onopenmissions?: (tag: string) => void; onopenevents?: (tag: string) => void; onopendecisions?: (tag: string) => void;
   } = $props();
+
+  $effect(() => { if (contentTab) activeTab = contentTab; });
 
   let details = $state<CountryDetails | null>(null);
   let flagUrl = $state<string | null>(null);
@@ -120,6 +131,27 @@
   let countries = $state<DropdownItem[]>([]);
 
   let pendingName = $derived(queue.pendingLocOverride(tag));
+
+  // Renaming from the headline shares IdentitySection's coalesce key, so the
+  // two affordances collapse into one composite instead of stacking edits.
+  function commitHeaderName(next: string) {
+    queue.push({
+      label: `Rename ${tag} to ${next}`,
+      edits: [{ kind: "locOverride", key: tag, value: next }],
+      coalesceKey: `name:${tag}`,
+    });
+  }
+
+  // The capital the header flag zooms to: a pending Set-Capital edit wins over
+  // disk, and a not-yet-saved country has only its scaffold seed.
+  let capitalId = $derived.by(() => {
+    if (pendingMode) return seed?.capitalId ?? null;
+    if (!details) return null;
+    const hf = details.history_file ?? `history/countries/${tag} - ${details.name}.txt`;
+    const pending = queue.pendingField(hf, "capital")?.value;
+    const raw = pending != null ? Number(pending) : details.capital;
+    return raw != null && Number.isFinite(Number(raw)) ? Number(raw) : null;
+  });
   let titleName = $derived(pendingName ?? details?.localized_name ?? seed?.name ?? tag);
   // Adjective + color, pending-aware (seed backs the pending-scaffold view).
   let effectiveAdjective = $derived(
@@ -130,8 +162,13 @@
   );
 
   const tabs = [
-    { id: "country", label: "Country" },
+    { id: "overview", label: "Overview" },
+    { id: "rulers", label: "Rulers" },
+    { id: "ideas", label: "Ideas" },
     { id: "diplomacy", label: "Diplomacy" },
+    { id: "estates", label: "Estates" },
+    { id: "history", label: "History" },
+    { id: "names", label: "Names" },
   ];
 
   // Rivals/friends folded with pending edits, for the Diplomacy tab's read view.
@@ -298,16 +335,35 @@
   }
 </script>
 
-<SidePanel title={titleName} {tabs} bind:activeTab {onclose}>
+<SidePanel title={titleName} {tabs} bind:activeTab {onclose} {embedded}>
   {#snippet header()}
     <div class="head">
       {#if flagUrl}
-        <img class="flag" src={flagUrl} alt="Flag of {titleName}" />
+        {#if onzoomtoprovince && capitalId != null}
+          <button
+            class="flag-btn"
+            title="Zoom to {titleName}'s capital (#{capitalId})"
+            onclick={() => onzoomtoprovince?.(capitalId!)}
+          >
+            <img class="flag" src={flagUrl} alt="Flag of {titleName}" />
+          </button>
+        {:else}
+          <img class="flag" src={flagUrl} alt="Flag of {titleName}" />
+        {/if}
       {/if}
-      <span class="tag-chip">
-        <span class="swatch" style="background: {css(effectiveColor) ?? 'transparent'}"></span>
-        {tag}
-      </span>
+      <div class="ident">
+        <EditableHeading
+          value={titleName}
+          label="Country name"
+          edited={pendingName !== undefined}
+          readonly={pendingMode}
+          oncommit={commitHeaderName}
+        />
+        <span class="tag-chip">
+          <span class="swatch" style="background: {css(effectiveColor) ?? 'transparent'}"></span>
+          {tag}
+        </span>
+      </div>
     </div>
   {/snippet}
 
@@ -328,7 +384,7 @@
   {:else if error}
     <p class="error">{error}</p>
   {:else if !details}
-    <p class="dim">Loading…</p>
+    <LoadingState label="Loading country…" />
   {:else if activeTab === "diplomacy"}
     <DiplomacyTab
       {installPath}
@@ -345,7 +401,10 @@
       {onopenprovince}
       {onopenmechanics}
     />
-  {:else}
+  {:else if activeTab === "overview"}
+    <nav class="jump-chips" aria-label="Related country tools">
+      <button onclick={() => onopenmissions?.(tag)}>Missions ↗</button><button onclick={() => onopenevents?.(tag)}>Events ↗</button><button onclick={() => onopendecisions?.(tag)}>Decisions ↗</button>
+    </nav>
     <IdentitySection
       {installPath}
       {modPath}
@@ -356,17 +415,18 @@
     />
 
     <GovernmentSection {installPath} {modPath} {tag} {details} {queue} {date} {onopennaming} {onopenmechanics} />
-
+  {:else if activeTab === "rulers"}
     <RulerSection {installPath} {modPath} {tag} {details} {queue} {date} {startDate} {cultures} {religions} {personalityItems} />
 
     <QueenSection {installPath} {modPath} {tag} {details} {queue} {date} {startDate} {cultures} {religions} {personalityItems} {countries} />
 
     <HeirSection {installPath} {modPath} {tag} {details} {queue} {date} {startDate} {cultures} {religions} {personalityItems} />
-
+    <HistoryTimelineSection {installPath} {modPath} {tag} {details} {queue} {calendar} {date} {startDate} {cultures} {religions} {personalityItems} {onopenmechanics} />
+  {:else if activeTab === "ideas"}
     <IdeasSection {installPath} {modPath} {tag} {details} {queue} />
-
+  {:else if activeTab === "estates"}
     <EstatesSection {installPath} {modPath} {tag} {queue} {date} {startDate} {onopenestates} />
-
+  {:else if activeTab === "names"}
     <NamePoolsSection {tag} {details} {queue} />
 
     <ProvinceNamesSection
@@ -380,8 +440,8 @@
       onpickconsumed={onprovnamepickconsumed}
     />
 
+  {:else if activeTab === "history"}
     <HistoricalSection {installPath} {modPath} {tag} {details} {queue} />
-
     <HistoryTimelineSection
       {installPath}
       {modPath}
@@ -523,13 +583,39 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    min-width: 0;
+  }
+  /* Headline over tag+colour: the name is what identifies a country at a
+     glance, the tag is the lookup key underneath it. */
+  .ident {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+  .jump-chips { display:flex; flex-wrap:wrap; gap:var(--sp-2); margin-bottom:var(--sp-4); }
+  .jump-chips button { border:1px solid var(--border); border-radius:999px; background:var(--bg-3); color:var(--text-2); padding:var(--sp-1) var(--sp-3); cursor:pointer; }
+  .jump-chips button:hover { background:var(--bg-hover); color:var(--text-1); }
+
+  .flag-btn {
+    display: block;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--r-1);
+    background: none;
+    cursor: zoom-in;
+    line-height: 0;
+  }
+
+  .flag-btn:hover {
+    border-color: var(--accent);
   }
 
   .flag {
     width: 2.6rem;
     height: 2.6rem;
     object-fit: cover;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
 
   .tag-chip {
@@ -537,22 +623,22 @@
     align-items: center;
     gap: 0.35rem;
     font-size: 0.8rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .swatch {
     width: 0.75rem;
     height: 0.75rem;
     display: inline-block;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
 
   .dim {
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .error {
-    color: #fca5a5;
+    color: var(--err);
   }
 
   .pending-scaffold {
@@ -563,36 +649,36 @@
     margin: 0 0 0.6rem;
     padding: 0.4rem 0.6rem;
     background: rgba(240, 180, 41, 0.12);
-    border-left: 3px solid #f0b429;
-    color: #cfd4db;
+    border-left: 3px solid var(--warn);
+    color: var(--text-1);
     font-size: 0.82rem;
   }
 
   .mono {
     font-family: ui-monospace, monospace;
     font-size: 0.85rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
 
   /* --- Delete country (danger zone + confirm dialog) --- */
   .danger-zone {
     margin-top: 0.9rem;
     padding-top: 0.7rem;
-    border-top: 1px solid #1f242c;
+    border-top: 1px solid var(--border);
   }
   .delete-btn {
     width: 100%;
-    border: 1px solid #7a2c25;
-    background: #3a2320;
-    color: #fca5a5;
+    border: 1px solid var(--danger-bg);
+    background: var(--bg-1);
+    color: var(--err);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.35rem 0.6rem;
     cursor: pointer;
   }
   .delete-btn:hover {
-    background: #7a2c25;
-    color: #fff;
+    background: var(--danger-bg);
+    color: var(--text-inverse);
   }
 
   .modal-scrim {
@@ -602,14 +688,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 120;
+    z-index: var(--z-modal);
   }
   .modal {
     width: min(28rem, 92vw);
     max-height: 84vh;
     overflow-y: auto;
-    background: #2b323d;
-    border: 1px solid #7a2c25;
+    background: var(--bg-2);
+    border: 1px solid var(--danger-bg);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
     padding: 0.9rem 1rem;
     display: flex;
@@ -619,19 +705,19 @@
   .modal-title {
     margin: 0;
     font-size: 1rem;
-    color: #f3f4f6;
+    color: var(--text-inverse);
   }
   .modal-lede {
     margin: 0;
     font-size: 0.78rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .modal-warn {
     margin: 0;
     padding: 0.45rem 0.6rem;
     background: rgba(240, 180, 41, 0.12);
-    border-left: 3px solid #f0b429;
-    color: #cfd4db;
+    border-left: 3px solid var(--warn);
+    color: var(--text-1);
     font-size: 0.82rem;
   }
   .impact {
@@ -641,24 +727,24 @@
     flex-direction: column;
     gap: 0.2rem;
     font-size: 0.82rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .danger-text {
-    color: #fca5a5;
+    color: var(--err);
   }
   .impact-block {
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
-    border: 1px solid #1f242c;
-    background: #262c35;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
     padding: 0.4rem 0.45rem;
   }
   .impact-head {
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .jump-row {
     display: flex;
@@ -667,7 +753,7 @@
     width: 100%;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.15rem 0.1rem;
@@ -675,28 +761,28 @@
     text-align: left;
   }
   .jump-row:hover {
-    color: #fff;
+    color: var(--text-inverse);
   }
   .role-badge,
   .war-badge {
     font-size: 0.62rem;
     padding: 0.02rem 0.3rem;
-    color: #fff;
-    background: #4a6da7;
+    color: var(--text-inverse);
+    background: var(--accent);
     text-transform: uppercase;
   }
   .role-badge.orphan {
-    background: #b45309;
+    background: var(--warn);
   }
   .war-badge {
-    background: #6b7280;
+    background: var(--text-3);
   }
   .war-badge.active {
-    background: #c0392b;
+    background: var(--err);
   }
   .hist {
     font-size: 0.66rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .prov-chips {
     display: flex;
@@ -704,17 +790,17 @@
     gap: 0.25rem;
   }
   .chip {
-    border: 1px solid #1f242c;
-    background: #21262e;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
+    color: var(--text-1);
     font-family: ui-monospace, monospace;
     font-size: 0.72rem;
     padding: 0.05rem 0.3rem;
     cursor: pointer;
   }
   .chip:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .transfer {
     display: flex;
@@ -725,12 +811,12 @@
     font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #8a919c;
+    color: var(--text-2);
   }
   .transfer select {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.83rem;
     padding: 0.25rem 0.3rem;
@@ -743,29 +829,29 @@
     margin-top: 0.3rem;
   }
   .modal-actions .cancel {
-    border: 1px solid #1f242c;
-    background: #3f4855;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.3rem 0.8rem;
     cursor: pointer;
   }
   .modal-actions .cancel:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .modal-actions .danger {
-    border: 1px solid #7a2c25;
-    background: #7a2c25;
-    color: #fff;
+    border: 1px solid var(--danger-bg);
+    background: var(--danger-bg);
+    color: var(--text-inverse);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.3rem 0.8rem;
     cursor: pointer;
   }
   .modal-actions .danger:hover:not(:disabled) {
-    background: #a13a30;
+    background: var(--err);
   }
   .modal-actions .danger:disabled {
     opacity: 0.5;

@@ -82,6 +82,7 @@
       {#if flagUrl}
         <img class="flag" src={flagUrl} alt="" />
       {:else}
+        <!-- Dynamic country-data swatch fallback, not component chrome. -->
         <span class="flag ph" style="background: {partner?.swatch ?? '#3a4150'}"></span>
       {/if}
       <span class="name">{partnerName}</span>
@@ -136,7 +137,7 @@
 
 <style>
   .row {
-    border-bottom: 1px solid #1f242c;
+    border-bottom: 1px solid var(--border);
     padding: 0.15rem 0.1rem;
   }
   .row:last-child {
@@ -156,7 +157,7 @@
     gap: 0.35rem;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.1rem 0.15rem;
@@ -164,13 +165,13 @@
     min-width: 0;
   }
   .partner:hover {
-    color: #fff;
+    color: var(--text-inverse);
   }
   .flag {
     width: 1.2rem;
     height: 1.2rem;
     object-fit: cover;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     flex: none;
   }
   .flag.ph {
@@ -183,7 +184,7 @@
     max-width: 7rem;
   }
   .arrow {
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.7rem;
   }
   .spacer {
@@ -191,7 +192,7 @@
   }
   .dates {
     font-size: 0.72rem;
-    color: #9ca3af;
+    color: var(--text-2);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
@@ -199,39 +200,39 @@
     font-size: 0.62rem;
     padding: 0.02rem 0.3rem;
     border: 1px solid rgba(0, 0, 0, 0.35);
-    color: #fff;
+    color: var(--text-inverse);
     text-transform: uppercase;
     letter-spacing: 0.03em;
   }
   .badge.type {
-    background: #4a6da7;
+    background: var(--accent);
     text-transform: none;
     letter-spacing: 0;
   }
   .badge.expired {
-    background: #8a5a2b;
+    background: var(--warn);
   }
   .badge.future {
-    background: #566;
+    background: var(--text-3);
   }
   .badge.pend {
-    background: #6b4aa7;
+    background: var(--accent-text);
   }
   .mini {
-    border: 1px solid #1f242c;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text-1);
     cursor: pointer;
     font-size: 0.72rem;
     padding: 0.05rem 0.3rem;
     flex: none;
   }
   .mini:hover {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .mini.danger:hover {
-    background: #c0392b;
+    background: var(--err);
   }
   .confirm,
   .editor {
@@ -240,7 +241,7 @@
     gap: 0.4rem;
     padding: 0.3rem 0.15rem 0.15rem;
     font-size: 0.75rem;
-    color: #cfd4db;
+    color: var(--text-1);
     flex-wrap: wrap;
   }
   .editor label {
@@ -250,7 +251,7 @@
   }
   .editor span {
     font-size: 0.7rem;
-    color: #8a919c;
+    color: var(--text-2);
     text-transform: uppercase;
   }
 </style>

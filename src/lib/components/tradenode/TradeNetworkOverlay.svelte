@@ -64,6 +64,7 @@
   }
 
   function nodeColor(c: [number, number, number] | null): string {
+    // Canvas network colors encode game/map state and deliberately remain literals.
     return c ? `rgb(${c[0]}, ${c[1]}, ${c[2]})` : "#c9ccd1";
   }
 

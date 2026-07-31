@@ -13,7 +13,7 @@
   import OverlaySurface from "./OverlaySurface.svelte";
   import ScriptTreeEditor from "./ScriptTreeEditor.svelte";
   import type { KnownKey, ScriptBlock } from "./scriptTypes";
-  import type { DropdownItem } from "$lib/components/ui";
+  import { LoadingState, type DropdownItem } from "$lib/components/ui";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
   import { scriptedDefs, loadScriptedDefs, type ScriptedDef } from "$lib/scripted.svelte";
 
@@ -216,7 +216,7 @@
             onedit={onTreeEdit}
           />
         {:else}
-          <p class="dim">Loading…</p>
+          <LoadingState label="Loading scripted definitions…" />
         {/if}
       {:else}
         <p class="dim center">Select a scripted trigger or effect to edit its body.</p>
@@ -227,41 +227,41 @@
 
 <style>
   .wrap { display: flex; gap: 0.6rem; height: 100%; min-height: 0; }
-  .list { flex: none; width: 22rem; display: flex; flex-direction: column; min-height: 0; border: 1px solid #1f242c; background: #21262e; }
-  .list-head { display: flex; flex-wrap: wrap; gap: 0.3rem; padding: 0.35rem; border-bottom: 1px solid #1f242c; align-items: center; }
-  .search { flex: 1; min-width: 8rem; background: #16191f; border: 1px solid #1f242c; color: #cfd4db; padding: 0.25rem 0.4rem; font-family: inherit; font-size: 0.8rem; }
+  .list { flex: none; width: 22rem; display: flex; flex-direction: column; min-height: 0; border: 1px solid var(--border); background: var(--bg-1); }
+  .list-head { display: flex; flex-wrap: wrap; gap: 0.3rem; padding: 0.35rem; border-bottom: 1px solid var(--border); align-items: center; }
+  .search { flex: 1; min-width: 8rem; background: var(--bg-0); border: 1px solid var(--border); color: var(--text-1); padding: 0.25rem 0.4rem; font-family: inherit; font-size: 0.8rem; }
   .filters { display: flex; gap: 0.2rem; }
-  .chip { border: 1px solid #3a434f; background: #2b323d; color: #cfd4db; font-family: inherit; font-size: 0.7rem; padding: 0.1rem 0.4rem; cursor: pointer; text-transform: capitalize; }
-  .chip.on { background: #4a6da7; border-color: #4a6da7; color: #fff; }
-  .new-btn { border: 1px solid #3a434f; background: #2b323d; color: #cfd4db; font-family: inherit; font-size: 0.72rem; padding: 0.1rem 0.45rem; cursor: pointer; }
-  .new-btn:hover { background: #4a6da7; color: #fff; }
-  .count { flex: 1 0 100%; font-size: 0.68rem; color: #8a919c; }
+  .chip { border: 1px solid var(--bg-3); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 0.7rem; padding: 0.1rem 0.4rem; cursor: pointer; text-transform: capitalize; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: var(--text-inverse); }
+  .new-btn { border: 1px solid var(--bg-3); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 0.72rem; padding: 0.1rem 0.45rem; cursor: pointer; }
+  .new-btn:hover { background: var(--accent); color: var(--text-inverse); }
+  .count { flex: 1 0 100%; font-size: 0.68rem; color: var(--text-2); }
   .defs { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; min-height: 0; }
-  .def { display: flex; align-items: center; gap: 0.35rem; width: 100%; text-align: left; border: none; background: transparent; color: #cfd4db; font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.4rem; cursor: pointer; }
-  .def:hover { background: #262c35; }
-  .def.sel { background: #4a6da7; color: #fff; }
-  .kind { flex: none; font-size: 0.6rem; font-weight: 700; background: #3f8a6d; color: #fff; padding: 0 0.28rem; }
-  .kind.effect { background: #b8863b; }
+  .def { display: flex; align-items: center; gap: 0.35rem; width: 100%; text-align: left; border: none; background: transparent; color: var(--text-1); font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.4rem; cursor: pointer; }
+  .def:hover { background: var(--bg-2); }
+  .def.sel { background: var(--accent); color: var(--text-inverse); }
+  .kind { flex: none; font-size: 0.6rem; font-weight: 700; background: var(--ok); color: var(--text-inverse); padding: 0 0.28rem; }
+  .kind.effect { background: var(--warn); }
   .dname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-  .mod { flex: none; font-size: 0.6rem; color: #9aecc0; border: 1px solid #2f5f48; padding: 0 0.2rem; }
-  .pcount { flex: none; font-size: 0.62rem; color: #d8b45a; }
-  .empty { color: #8a919c; font-size: 0.78rem; padding: 0.4rem; }
+  .mod { flex: none; font-size: 0.6rem; color: var(--ok); border: 1px solid var(--ok); padding: 0 0.2rem; }
+  .pcount { flex: none; font-size: 0.62rem; color: var(--warn); }
+  .empty { color: var(--text-2); font-size: 0.78rem; padding: 0.4rem; }
   .editor { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; }
   .ed-head { display: flex; align-items: center; gap: 0.5rem; padding: 0.2rem 0.1rem 0.4rem; }
-  .ed-head code { color: #9aecc0; background: #16191f; padding: 0.05rem 0.35rem; font-size: 0.85rem; }
-  .file { font-size: 0.7rem; color: #8a919c; margin-left: auto; }
+  .ed-head code { color: var(--ok); background: var(--bg-0); padding: 0.05rem 0.35rem; font-size: 0.85rem; }
+  .file { font-size: 0.7rem; color: var(--text-2); margin-left: auto; }
   .params { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; padding: 0.2rem 0 0.4rem; }
-  .plabel { font-size: 0.72rem; color: #8a919c; }
-  .ptok { background: #2b241a; color: #d8b45a; padding: 0 0.3rem; font-size: 0.74rem; }
-  .err { color: #fca5a5; font-size: 0.78rem; }
-  .dim { color: #9ca3af; font-size: 0.8rem; }
+  .plabel { font-size: 0.72rem; color: var(--text-2); }
+  .ptok { background: var(--bg-1); color: var(--warn); padding: 0 0.3rem; font-size: 0.74rem; }
+  .err { color: var(--err); font-size: 0.78rem; }
+  .dim { color: var(--text-2); font-size: 0.8rem; }
   .center { text-align: center; padding: 2rem; }
   .create { max-width: 24rem; }
   .create h3 { margin: 0 0 0.5rem; font-size: 0.95rem; }
   .crow { display: flex; gap: 1rem; margin-bottom: 0.5rem; font-size: 0.82rem; }
-  .cname { width: 100%; background: #16191f; border: 1px solid #1f242c; color: #cfd4db; padding: 0.3rem 0.4rem; font-family: inherit; font-size: 0.85rem; }
+  .cname { width: 100%; background: var(--bg-0); border: 1px solid var(--border); color: var(--text-1); padding: 0.3rem 0.4rem; font-family: inherit; font-size: 0.85rem; }
   .cbtns { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
-  .ok { background: #4a6da7; border: 1px solid #4a6da7; color: #fff; font-family: inherit; padding: 0.25rem 0.8rem; cursor: pointer; }
+  .ok { background: var(--accent); border: 1px solid var(--accent); color: var(--text-inverse); font-family: inherit; padding: 0.25rem 0.8rem; cursor: pointer; }
   .ok:disabled { opacity: 0.5; cursor: default; }
-  .cancel { background: #2b323d; border: 1px solid #3a434f; color: #cfd4db; font-family: inherit; padding: 0.25rem 0.8rem; cursor: pointer; }
+  .cancel { background: var(--bg-2); border: 1px solid var(--bg-3); color: var(--text-1); font-family: inherit; padding: 0.25rem 0.8rem; cursor: pointer; }
 </style>

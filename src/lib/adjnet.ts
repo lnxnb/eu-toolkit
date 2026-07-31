@@ -3,8 +3,9 @@
 // Framework-free core for the Provinces map mode's adjacency overlay. Holds the
 // wire types of `get_adjacencies`, the pending-edit fold (one `csvRewrite`
 // carries the whole desired row list, so last-wins gives the effective state),
-// wrap-aware line geometry between endpoint province centroids (reusing the
-// trade-route antimeridian machinery), screen-space hit-testing, and the two
+// wrap-aware line geometry trimmed to the edge-to-edge crossing between the
+// endpoint provinces (reusing the trade-route antimeridian machinery),
+// screen-space hit-testing, and the two
 // "+ Add strait" heuristics (type derivation + through-province suggestion).
 //
 // Kept DOM-free so it is unit-testable; `AdjacencyOverlay.svelte` stays a thin
@@ -71,7 +72,7 @@ export function rewriteEdit(rows: AdjRowInput[]): TypedEdit {
   return { kind: "csvRewrite", file: ADJ_FILE, rows: rows.map(cloneRow) };
 }
 
-// ── Line geometry (wrap-aware, between endpoint centroids) ────────────────────
+// ── Line geometry (wrap-aware, trimmed to the actual crossing) ────────────────
 
 /**
  * On-map polyline pieces for the straight adjacency line between endpoint
@@ -95,6 +96,72 @@ export function endpoints(
     [a.x, a.y],
     [b.x, b.y],
   ];
+}
+
+/** A drawable adjacency segment (map/top-left space, both points in [0,mapW)). */
+export type AdjSegment = [Xy, Xy];
+
+/**
+ * Trims the centroid→centroid segment to the actual crossing. Centroid-to-
+ * centroid lines read wrong on the map (a strait looks like it spans two whole
+ * provinces; a canal between two sea provinces spans half a sea): the visual
+ * truth is the edge-to-edge gap. Sample the province-id buffer along the
+ * short-way (unwrapped) segment at ~1px steps and keep only the span from the
+ * last sample still inside `from` to the first sample inside `to` after it —
+ * i.e. the segment's final exit from one province to its entry into the other.
+ * Falls back to the untrimmed endpoints when sampling never sees that pattern
+ * (e.g. a concave province whose centroid lies outside it).
+ */
+export function trimSegment(
+  a: Xy,
+  b: Xy,
+  fromId: number,
+  toId: number,
+  idAt: (x: number, y: number) => number,
+  mapW: number,
+): AdjSegment {
+  const [ua, ub] = unwrapControl([a, b], mapW);
+  const dx = ub[0] - ua[0];
+  const dy = ub[1] - ua[1];
+  const steps = Math.max(1, Math.ceil(Math.hypot(dx, dy)));
+  const wrap = (x: number) => ((x % mapW) + mapW) % mapW;
+  let lastFrom = -1;
+  let firstTo = -1;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const id = idAt(Math.round(wrap(ua[0] + dx * t)) % mapW, Math.round(ua[1] + dy * t));
+    if (id === fromId) {
+      lastFrom = i;
+    } else if (id === toId && lastFrom >= 0) {
+      firstTo = i;
+      break;
+    }
+  }
+  if (firstTo < 0) return [a, b];
+  const pt = (i: number): Xy => {
+    const t = i / steps;
+    return [wrap(ua[0] + dx * t), ua[1] + dy * t];
+  };
+  return [pt(lastFrom), pt(firstTo)];
+}
+
+/**
+ * Per-row drawable segments: endpoint centroids trimmed to the crossing when a
+ * province-id sampler is available (null = centroid unknown → not drawable).
+ * Computed once per (rows, centroids, id-buffer) by the host and shared by the
+ * overlay renderer and `adjacencyAt` so both agree on the geometry.
+ */
+export function adjSegments(
+  rows: AdjRow[],
+  centroids: Map<number, Point>,
+  idAt: ((x: number, y: number) => number) | null,
+  mapW: number,
+): (AdjSegment | null)[] {
+  return rows.map((row) => {
+    const ep = endpoints(row, centroids);
+    if (!ep) return null;
+    return idAt ? trimSegment(ep[0], ep[1], row.from, row.to, idAt, mapW) : ep;
+  });
 }
 
 // ── Per-type style ────────────────────────────────────────────────────────────
@@ -158,12 +225,13 @@ function segDist2(
 }
 
 /**
- * Index (into `rows`) of the adjacency line nearest the screen point `sx,sy`,
- * within `tolPx`, or null. Wrap-aware (measures on-map pieces, not the long way).
+ * Index (into `segments`, i.e. the row list) of the adjacency line nearest the
+ * screen point `sx,sy`, within `tolPx`, or null. Takes the precomputed
+ * `adjSegments` output so hit-testing measures exactly the drawn (trimmed)
+ * geometry. Wrap-aware (measures on-map pieces, not the long way).
  */
 export function adjacencyAt(
-  rows: AdjRow[],
-  centroids: Map<number, Point>,
+  segments: (AdjSegment | null)[],
   sx: number,
   sy: number,
   view: Viewport,
@@ -172,8 +240,8 @@ export function adjacencyAt(
 ): number | null {
   let best: number | null = null;
   let bestD = tolPx * tolPx;
-  for (let ri = 0; ri < rows.length; ri++) {
-    const ep = endpoints(rows[ri], centroids);
+  for (let ri = 0; ri < segments.length; ri++) {
+    const ep = segments[ri];
     if (!ep) continue;
     for (const piece of adjLinePieces(ep[0], ep[1], mapW)) {
       let prev = project({ x: piece[0][0], y: piece[0][1] }, view);

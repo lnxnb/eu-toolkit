@@ -5,7 +5,7 @@
   `reformation_center = protestant`).
 -->
 <script lang="ts">
-  import { SearchDropdown } from "$lib/components/ui";
+  import { AtlasIcon, SearchDropdown } from "$lib/components/ui";
   import type { DropdownItem } from "$lib/components/ui";
   import FieldRow from "$lib/components/country/FieldRow.svelte";
   import type { EditQueue } from "$lib/edits.svelte";
@@ -20,6 +20,8 @@
     cultures,
     religions,
     dateCtx,
+    installPath,
+    modPath,
   }: {
     details: ProvinceDetails;
     effective: ProvinceSnapshot;
@@ -29,6 +31,8 @@
     religions: DropdownItem[];
     /** Sprint 12.3 date context; later dates write into a dated block. */
     dateCtx?: DateCtx;
+    installPath: string;
+    modPath: string | null;
   } = $props();
 
   const ops = $derived(fieldOps(queue, file, dateCtx));
@@ -59,6 +63,7 @@
   </FieldRow>
 
   <FieldRow label="Religion" edited={ops.edited("religion", effective.religion)}>
+    {#if religionVal}<AtlasIcon {installPath} {modPath} kind="religions" frame={Math.max(0, religions.findIndex((r) => r.key === religionVal))} size={24} label={religions.find((r) => r.key === religionVal)?.label ?? religionVal} />{/if}
     <SearchDropdown items={religions} value={religionVal} placeholder="Religion…" onselect={(k) => ops.set("religion", top.religion != null, k, `Set religion of #${details.id}`)} />
   </FieldRow>
 
@@ -74,6 +79,6 @@
 
 <style>
   section { margin-bottom: 1rem; }
-  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; }
+  h3 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2); }
   .check { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer; }
 </style>

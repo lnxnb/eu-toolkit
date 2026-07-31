@@ -108,9 +108,9 @@
 
   .lock {
     flex: none;
-    border: 1px solid #1f242c;
-    background: #21262e;
-    color: #cfd4db;
+    border: 1px solid var(--border);
+    background: var(--bg-1);
+    color: var(--text-1);
     font-size: 0.75rem;
     line-height: 1;
     padding: 0.15rem 0.3rem;
@@ -118,14 +118,14 @@
   }
 
   .lock.locked {
-    background: #4a6da7;
+    background: var(--accent);
   }
 
   .label {
     flex: none;
     width: 5.5rem;
     font-size: 0.82rem;
-    color: #cfd4db;
+    color: var(--text-1);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -140,7 +140,7 @@
   input[type="range"] {
     flex: 1;
     min-width: 0;
-    accent-color: #4a6da7;
+    accent-color: var(--accent);
   }
 
   .slider-group.vertical input[type="range"] {
@@ -158,7 +158,7 @@
     text-align: right;
     font-size: 0.8rem;
     font-variant-numeric: tabular-nums;
-    color: #cfd4db;
+    color: var(--text-1);
   }
 
   .slider-group.vertical .readout {

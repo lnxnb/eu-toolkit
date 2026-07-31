@@ -384,25 +384,25 @@
     width: 1rem;
     height: 1rem;
     display: inline-block;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
   .key-chip {
     font-size: 0.8rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .badge {
     font-size: 0.68rem;
     padding: 0.05rem 0.35rem;
-    border: 1px solid #1f242c;
-    color: #fff;
-    background: #8b5a2b;
+    border: 1px solid var(--border);
+    color: var(--text-inverse);
+    background: var(--warn);
   }
   .strip-wrap {
     margin: -0.2rem 0 0.4rem;
   }
   section {
     padding: 0.4rem 0 0.6rem;
-    border-bottom: 1px solid #232a33;
+    border-bottom: 1px solid var(--bg-1);
   }
   section.hint {
     border-bottom: none;
@@ -412,20 +412,20 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .text {
     width: 100%;
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.2rem 0.4rem;
   }
   .mono {
     font-family: ui-monospace, monospace;
-    color: #9ca3af;
+    color: var(--text-2);
     font-size: 0.82rem;
   }
   .sr-ctl {
@@ -448,13 +448,13 @@
   }
   .sr-lead {
     font-size: 0.72rem;
-    color: #9ca3af;
+    color: var(--text-2);
     white-space: nowrap;
   }
   .ico {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #cfd4db;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     line-height: 1;
@@ -462,18 +462,18 @@
     cursor: pointer;
   }
   .ico:hover {
-    border-color: #4a6da7;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .ico.danger {
-    color: #fca5a5;
-    border-color: #6b3630;
+    color: var(--err);
+    border-color: var(--danger-bg);
   }
   .ico.danger:hover {
-    background: #7a2820;
-    border-color: #9a3226;
-    color: #fff;
+    background: var(--danger-bg);
+    border-color: var(--danger-bg);
+    color: var(--text-inverse);
   }
   .areas {
     list-style: none;
@@ -491,28 +491,28 @@
     text-align: left;
   }
   .link {
-    border: 1px solid #4b5563;
-    background: #2b323d;
-    color: #9cc7ea;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-2);
+    color: var(--accent-text);
     font-family: inherit;
     font-size: 0.78rem;
     padding: 0.1rem 0.4rem;
     cursor: pointer;
   }
   .link:hover {
-    border-color: #4a6da7;
-    color: #fff;
+    border-color: var(--accent);
+    color: var(--text-inverse);
   }
   .tag {
     font-size: 0.7rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .raw {
     list-style: none;
     margin: 0;
     padding: 0;
     font-size: 0.8rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .monsoon {
     list-style: none;
@@ -527,7 +527,7 @@
   }
   .mlead {
     font-size: 0.72rem;
-    color: #9ca3af;
+    color: var(--text-2);
     width: 1.6rem;
   }
   .date {
@@ -537,48 +537,48 @@
   }
   .md {
     width: 2.6rem;
-    background: #14181d;
-    border: 1px solid #4b5563;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border-strong);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.15rem 0.25rem;
     text-align: center;
   }
   .dot {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .arrow {
-    color: #9ca3af;
+    color: var(--text-2);
     font-size: 0.8rem;
   }
   .mdel {
     margin-left: auto;
     border: none;
     background: transparent;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 1.1rem;
     line-height: 1;
     cursor: pointer;
     padding: 0 0.2rem;
   }
   .mdel:hover {
-    color: #fca5a5;
+    color: var(--err);
   }
   .warn {
     list-style: none;
     margin: 0 0 0.4rem;
     padding: 0;
     font-size: 0.74rem;
-    color: #e0b341;
+    color: var(--warn);
   }
   .warn li {
     padding: 0.05rem 0;
   }
   .btn {
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.8rem;
     padding: 0.2rem 0.6rem;
@@ -588,16 +588,16 @@
     width: 100%;
   }
   .btn.danger {
-    color: #fca5a5;
-    border-color: #6b3630;
+    color: var(--err);
+    border-color: var(--danger-bg);
   }
   .btn.danger:hover {
-    background: #7a2820;
-    border-color: #9a3226;
-    color: #fff;
+    background: var(--danger-bg);
+    border-color: var(--danger-bg);
+    color: var(--text-inverse);
   }
   .dim {
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .small {
     font-size: 0.76rem;

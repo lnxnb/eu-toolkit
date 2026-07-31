@@ -305,17 +305,17 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .e {
-    color: #fde68a;
+    color: var(--warn);
   }
 
   .text {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.25rem 0.4rem;
@@ -324,9 +324,9 @@
 
   .dyn {
     align-self: flex-start;
-    border: 1px solid #4b5563;
-    background: #21262e;
-    color: #cfd4db;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-1);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.25rem 0.6rem;
@@ -334,7 +334,7 @@
   }
 
   .dyn:hover {
-    border-color: #9ca3af;
+    border-color: var(--text-2);
   }
 
   .triple {
@@ -347,7 +347,7 @@
     align-items: center;
     gap: 0.2rem;
     font-size: 0.72rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .check {
@@ -369,9 +369,9 @@
     align-items: center;
     gap: 0.3rem;
     align-self: flex-start;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-size: 0.8rem;
     padding: 0.12rem 0.2rem 0.12rem 0.45rem;
   }
@@ -379,7 +379,7 @@
   .x {
     border: none;
     background: transparent;
-    color: #9ca3af;
+    color: var(--text-2);
     cursor: pointer;
     font-size: 0.95rem;
     line-height: 1;
@@ -387,12 +387,12 @@
   }
 
   .x:hover {
-    color: #fca5a5;
+    color: var(--err);
   }
 
   .btn {
     align-self: flex-start;
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     background: transparent;
     color: inherit;
     font-family: inherit;
@@ -402,8 +402,8 @@
   }
 
   .btn:hover {
-    border-color: #9ca3af;
-    background: #4a6da7;
-    color: #fff;
+    border-color: var(--text-2);
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 </style>

@@ -244,8 +244,8 @@
     flex-direction: column;
     gap: 0.5rem;
     padding: 0.55rem 0.5rem 0.7rem;
-    background: #21262e;
-    border-top: 1px solid #1f242c;
+    background: var(--bg-1);
+    border-top: 1px solid var(--border);
   }
 
   .field {
@@ -266,18 +266,18 @@
 
   .lbl {
     font-size: 0.78rem;
-    color: #8a919c;
+    color: var(--text-2);
     min-width: 6rem;
   }
 
   .block .lbl {
     min-width: 0;
-    color: #cfd4db;
+    color: var(--text-1);
     font-weight: 600;
   }
 
   .dot {
-    color: #f0b429;
+    color: var(--warn);
     margin-left: 0.2rem;
   }
 
@@ -289,9 +289,9 @@
 
   .text,
   .num {
-    background: #14181d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-0);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.25rem 0.4rem;
@@ -310,23 +310,23 @@
   .mono {
     font-family: ui-monospace, monospace;
     font-size: 0.75rem;
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .note {
     margin: 0;
     font-size: 0.75rem;
-    color: #b9bec7;
+    color: var(--text-1);
   }
 
   .note.dim {
-    color: #8a919c;
+    color: var(--text-2);
   }
 
   .raw {
     margin: 0;
     padding-left: 1rem;
     font-size: 0.78rem;
-    color: #b9bec7;
+    color: var(--text-1);
   }
 </style>

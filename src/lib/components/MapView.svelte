@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { open } from "@tauri-apps/plugin-dialog";
   import CountryPanel from "./CountryPanel.svelte";
@@ -13,11 +13,22 @@
   import DynastyModal from "./DynastyModal.svelte";
   import WorkshopModal from "./WorkshopModal.svelte";
   import MenuFlyout from "./MenuFlyout.svelte";
+  import MapMenuBar from "./MapMenuBar.svelte";
   import { DecisionsOverlay } from "./decisions";
   import { EventsOverlay } from "./events";
   import { MissionsOverlay } from "./missions";
   import { GovernmentNamesOverlay } from "./govnames";
   import { EstatesOverlay } from "./estates";
+  import { NewTabView, ShortcutsView, WorkspaceWindow } from "$lib/components/workspace";
+  import {
+    hasFocusedWorkspaceWindow,
+    initializeWorkspace,
+    closeTab,
+    openView,
+    workspaceWindows,
+  } from "$lib/workspace.svelte";
+  import type { View } from "$lib/views";
+  import { requiredMapMode } from "$lib/entityCatalog";
   import { RebelsOverlay } from "./rebels";
   import { MechanicsOverlay } from "./mechanics";
   import { ColorPoolsOverlay } from "./colorpools";
@@ -34,6 +45,15 @@
     type ScriptedDef,
   } from "$lib/scripted.svelte";
   import MapBrush from "./MapBrush.svelte";
+  import {
+    brushDisc,
+    provincePixels,
+    borderingProvinces,
+    provinceColor,
+    applyOpsToRgba,
+    paintOp,
+    dissolveOp,
+  } from "$lib/provinceEdit";
   import TradeNetworkOverlay from "./tradenode/TradeNetworkOverlay.svelte";
   import TradeNodePanel from "./tradenode/TradeNodePanel.svelte";
   import AdjacencyOverlay from "./adjacency/AdjacencyOverlay.svelte";
@@ -42,11 +62,13 @@
     foldAdjacencies,
     rewriteEdit,
     adjacencyAt,
+    adjSegments,
     suggestThrough,
     deriveType,
     ADJ_FILE,
     type AdjRow,
     type AdjRowInput,
+    type AdjSegment,
   } from "$lib/adjnet";
   import AreaPanel from "./geo/AreaPanel.svelte";
   import RegionPanel from "./geo/RegionPanel.svelte";
@@ -67,11 +89,11 @@
   import ProjectChangesOverlay from "./ProjectChangesOverlay.svelte";
   import type { SearchRoute } from "$lib/searchRoute";
   import type { EditJump } from "$lib/editsPanel";
-  import { BottomToolbar, PromptBanner, InlineNamePrompt, DatePicker, NewGroupModal, createEntityFlow } from "$lib/components/ui";
+  import { BottomToolbar, EmptyState, PromptBanner, InlineNamePrompt, DatePicker, NewGroupModal, createEntityFlow } from "$lib/components/ui";
   import type { ToolButton, EntityFlowState, GroupScaffold, NewGroupResult } from "$lib/components/ui";
   import type { Session } from "$lib/session";
-  import { EditQueue, type TypedEdit, type Composite } from "$lib/edits.svelte";
-  import { editAtDate, provinceEditMutations } from "$lib/editAtDate";
+  import { EditQueue, type TypedEdit, type Composite, type BmpOp } from "$lib/edits.svelte";
+  import { editAtDate, isShadowed, provinceEditMutations } from "$lib/editAtDate";
   import {
     formatGameDate,
     formatDate,
@@ -213,49 +235,20 @@
   let dirty = $derived(queue.dirty);
 
   // --- Menu bar ---
-  let openMenu = $state<"file" | "edit" | "view" | null>(null);
+  let openMenu = $state<"file" | "edit" | "view" | "tools" | null>(null);
   // Mass dynasty management (Sprint 1.3), reachable from the Edit menu.
   let dynastiesOpen = $state(false);
-  let decisionsOpen = $state(false);
-  let eventsOpen = $state(false);
-  let missionsOpen = $state(false);
-  let govNamesOpen = $state(false);
-  // Scheme key the Government-names overlay auto-expands to (jump-to-scheme).
-  let govNamesFocusKey = $state<string | null>(null);
-  let estatesOpen = $state(false);
-  // Estate/privilege/agenda key the Estates overlay auto-expands to.
-  let estatesFocusKey = $state<string | null>(null);
-  let rebelsOpen = $state(false);
-  let technologyOpen = $state(false);
-  // Country-interior mechanics pack (Sprint 26); family = launch target.
-  let mechanicsOpen = $state(false);
-  let mechanicsFamily = $state<string | null>(null);
-  let mechanicsFocusKey = $state<string | null>(null);
-  // Color-pool editor (Sprint 27): custom_country_colors / dynasty_colors.
-  let colorPoolsOpen = $state(false);
-  // Empires (HRE + Mandate) overlay (Sprint 29).
-  let empiresOpen = $state(false);
   // HRE member province ids to highlight in political mode (null = none).
   let hreHighlightIds = $state<Set<number> | null>(null);
   // Sprint 28 script-plumbing overlays.
-  let scriptedOpen = $state(false);
-  let scriptedFocus = $state<string | null>(null);
-  let onActionsOpen = $state(false);
-  let localisationOpen = $state(false);
-  let definesOpen = $state(false);
-  // Sprint 30.3 project-wide search / 30.4 mod-vs-base diff browser.
-  let searchOpen = $state(false);
-  let projectChangesOpen = $state(false);
   // Fork-from-Steam (18.4) / on-open workshop warn (18.2).
   let steamBacked = $state(false);
   let workshop = $state<{ mode: "browse" | "warn"; source: string | null } | null>(null);
   let workshopWarnPath = $state<string | null>(null);
 
   // --- Sprint 30.1 Edits panel / 30.2 Problems dashboard ---
-  let editsPanelOpen = $state(false);
   // Composites captured at each successful save this session (grayed history).
   let savedComposites = $state<Composite[]>([]);
-  let problemsOpen = $state(false);
   let problemsReports = $state<DomainReport[]>([]);
   let problemsRunning = $state(false);
   let problemsHasRun = $state(false);
@@ -293,7 +286,7 @@
 
   function openProblems() {
     openMenu = null;
-    problemsOpen = true;
+    openView({kind:"problems"});
     // Fetch on first open, or whenever nothing has been run yet.
     if (!problemsHasRun && !problemsRunning) void runProblems();
   }
@@ -313,7 +306,6 @@
   /// Routes a Problems-dashboard jump (typed JumpTarget) to the right mode +
   /// selection, closing the modal so the map is visible (Sprint 30.2).
   function problemsJump(j: JumpTarget) {
-    problemsOpen = false;
     switch (j.kind) {
       case "province":
         openProvince(j.id);
@@ -325,33 +317,37 @@
         jumpToAreaMode(j.id);
         break;
       case "node":
-        if (mode === "trade_nodes") selectNodeByKey(j.id);
-        else {
-          pendingSelectNodeKey = j.id;
-          setMode("trade_nodes");
-        }
+        openView({ kind: "trade-node", key: j.id }, "reuse");
         break;
       case "colonial_region":
       case "trade_company": {
         const target = j.kind === "colonial_region" ? "colonial_regions" : "trade_companies";
-        if (mode === target) {
-          const gi = colonialKeyToGroup.get(j.id);
-          if (gi !== undefined) select(gi);
-        } else {
-          pendingSelectColonialKey = j.id;
-          setMode(target);
-        }
+        openView({ kind: "colonial", colonialKind: target, key: j.id }, "reuse");
         break;
       }
       // "file" targets have no in-map location — nothing to jump to.
     }
   }
 
+  /// Opens a view picked in the New-tab page. Trade nodes, areas/regions,
+  /// colonial regions, adjacencies and climate render off mode-scoped state, so
+  /// picking one has to switch the map into that mode first; `open` then does
+  /// the actual tab navigation (in place, or new window on Shift).
+  function openEntityFromPicker(view: View, open: () => void) {
+    const need = requiredMapMode(view);
+    if (need && need !== mode) {
+      if (view.kind === "trade-node") pendingSelectNodeKey = view.key;
+      else if (view.kind === "colonial") pendingSelectColonialKey = view.key;
+      else if (view.kind === "area") pendingSelectGeoKey = view.key;
+      setMode(need);
+    }
+    open();
+  }
+
   /// Routes a project-wide search hit into its owning editor (Sprint 30.3).
   /// `preview` routes are handled inside the SearchOverlay itself; here we handle
   /// the map-modes / panels / overlays. See src/lib/searchRoute.ts for the table.
   function searchJump(route: SearchRoute) {
-    searchOpen = false;
     switch (route.kind) {
       case "province":
         openProvince(route.id);
@@ -364,19 +360,19 @@
         break;
       case "overlay":
         switch (route.overlay) {
-          case "decisions": decisionsOpen = true; break;
-          case "events": eventsOpen = true; break;
-          case "missions": missionsOpen = true; break;
-          case "govnames": govNamesFocusKey = null; govNamesOpen = true; break;
-          case "estates": estatesFocusKey = null; estatesOpen = true; break;
-          case "rebels": rebelsOpen = true; break;
-          case "technology": technologyOpen = true; break;
-          case "mechanics": mechanicsFamily = route.family ?? null; mechanicsFocusKey = null; mechanicsOpen = true; break;
-          case "empires": empiresOpen = true; break;
-          case "scripted": scriptedFocus = null; scriptedOpen = true; break;
-          case "onactions": onActionsOpen = true; break;
-          case "localisation": localisationOpen = true; break;
-          case "defines": definesOpen = true; break;
+          case "decisions": openView({kind:"decisions"}); break;
+          case "events": openView({kind:"events"}); break;
+          case "missions": openView({kind:"missions"}); break;
+          case "govnames": openView({kind:"government-names"}); break;
+          case "estates": openView({ kind: "estates" }, "reuse"); break;
+          case "rebels": openView({kind:"rebels"}); break;
+          case "technology": openView({kind:"technology"}); break;
+          case "mechanics": openView({kind:"mechanics", family: route.family}); break;
+          case "empires": openView({kind:"empires"}); break;
+          case "scripted": openView({kind:"scripted"}); break;
+          case "onactions": openView({kind:"on-actions"}); break;
+          case "localisation": openView({kind:"localisation"}); break;
+          case "defines": openView({kind:"defines"}); break;
         }
         break;
     }
@@ -431,21 +427,28 @@
     }
     saving = true;
     error = "";
+    const savedEdits = queue.serialize();
     // Did this save write calendar loc (month names / era)? If so, re-read the
     // resolved calendar afterwards so the (now-empty) queue's base reflects disk.
-    const touchedCalendar = queue
-      .serialize()
-      .some(
-        (e) =>
-          e.kind === "locOverride" &&
-          ((MONTH_KEYS as readonly string[]).includes(e.key) || e.key === WORLD_YEAR_KEY),
-      );
+    const touchedCalendar = savedEdits.some(
+      (e) =>
+        e.kind === "locOverride" &&
+        ((MONTH_KEYS as readonly string[]).includes(e.key) || e.key === WORLD_YEAR_KEY),
+    );
+    // Did this save change the province map (add/expand/dissolve, or a new
+    // definition row)? If so the id buffer + every mode's render must re-read
+    // disk, so we do a full reload after the queue clears.
+    const touchedProvinceMap = savedEdits.some(
+      (e) =>
+        e.kind === "provinceBmp" ||
+        (e.kind === "appendText" && e.file === "map/definition.csv"),
+    );
     try {
       const written = await invoke<string[]>("save_project", {
         installPath,
         modPath,
         targetDir: target,
-        edits: queue.serialize(),
+        edits: savedEdits,
       });
       // Bake pending political ownership into the in-memory baseline so the map
       // and hit-testing stay correct after the queue clears (edits are now on
@@ -703,6 +706,19 @@
       // history (grayed, read-only in the Edits panel) before the queue clears.
       savedComposites = [...savedComposites, ...queue.composites];
       queue.clear();
+      // Province structural edits (add/expand/dissolve) are now on disk. The
+      // session-start id buffer + the current mode's render are stale, so drop
+      // them and reload: get_province_ids re-reads the new definition/bitmap and
+      // render_map_mode shows the new province in EVERY mode (Province Colors
+      // rebuilds its edit canvas from the fresh, now-empty-queue image).
+      if (touchedProvinceMap) {
+        provinceIds = null;
+        pcColorLut = null;
+        pcIds = null;
+        pcCreated = [];
+        pcIdsDirty = true;
+        await loadMap();
+      }
       // Adjacency edits are now on disk; refresh the base rows so the Provinces
       // overlay stays correct once the (just-cleared) pending edits are gone.
       if (adjLoaded) {
@@ -832,6 +848,49 @@
     }
   }
 
+  // --- Rename the project from the title bar -------------------------------
+  // Writes the descriptor's `name` immediately (it is not a game-data edit, so
+  // it does not join the pending queue); the session keeps its identity, so the
+  // shell updates the label without a remount.
+  let renaming = $state(false);
+  let renameValue = $state("");
+  let renameInput = $state<HTMLInputElement | null>(null);
+
+  function startRename() {
+    if (!modPath) return;
+    renameValue = projectName ?? "";
+    renaming = true;
+  }
+
+  $effect(() => {
+    if (renaming && renameInput) renameInput.select();
+  });
+
+  async function commitRename() {
+    if (!renaming) return;
+    const next = renameValue.trim();
+    renaming = false;
+    if (!modPath || !next || next === projectName) return;
+    try {
+      const name = await invoke<string>("rename_project", { modPath, name: next });
+      onsession({ installPath, modPath, projectName: name }, false);
+    } catch (e) {
+      error = String(e);
+    }
+  }
+
+  function renameKey(e: KeyboardEvent) {
+    // Keep Ctrl+S / Ctrl+Shift+F (window-level) from firing while typing.
+    e.stopPropagation();
+    if (e.key === "Enter") {
+      e.preventDefault();
+      void commitRename();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      renaming = false;
+    }
+  }
+
   function menuOpenBase() {
     openMenu = null;
     if (!confirmDiscard()) return;
@@ -873,6 +932,22 @@
     openMenu = null;
     if (!confirmDiscard()) return;
     onhome();
+  }
+
+  /// Centres the viewport on a province (the country panel's zoom-to-capital
+  /// flag). Zooms in to at least `LOCATE_SCALE` — a province is a few pixels at
+  /// the fitted scale — but never zooms back OUT of a closer view.
+  const LOCATE_SCALE = 6;
+
+  function centerOnProvince(id: number) {
+    if (!bitmap || !container || !provinceIds) return;
+    ensureCentroids();
+    const p = centroids.get(id);
+    if (!p) return;
+    scale = Math.min(MAX_SCALE, Math.max(scale, LOCATE_SCALE));
+    offsetX = container.clientWidth / 2 - p.x * scale;
+    offsetY = container.clientHeight / 2 - p.y * scale;
+    redraw();
   }
 
   function zoomTo100() {
@@ -1050,6 +1125,48 @@
 
   $effect(() => saveBrushSize(brushSize));
 
+  // --- Province Colors structural editing (add / expand / dissolve) --------
+  // Its own edit model: color-space pixel ops on provinces.bmp (backend
+  // province_edit), NOT the per-province override brushes above. `pc_*` tool ids
+  // stay out of BRUSH_TOOLS so none of the categorical paint machinery engages.
+  const PC_TOOLS = new Set(["pc_new", "pc_expand", "pc_dissolve"]);
+  let pcArmed = $derived(PC_TOOLS.has(armedTool ?? ""));
+  // New/Expand paint with the disc brush; Dissolve is a plain click (no circle).
+  let pcBrushArmed = $derived(armedTool === "pc_new" || armedTool === "pc_expand");
+  // Edit-aware province-id buffer. The session-start `provinceIds` doesn't know
+  // about pending carves/expands/dissolves, so hit-testing a province you just
+  // drew would hit the one underneath. `pcColorLut` maps a bitmap color → id
+  // (existing provinces from the pristine scan + provinces created this session);
+  // `pcIds` is rebuilt from the CURRENT edited colors, so clicks resolve to the
+  // right province. Freed on leaving the mode (it is a ~33 MB lookup table).
+  let pcColorLut: Uint16Array | null = null; // packed-rgb (2^24) → province id
+  let pcIds: Uint16Array | null = null; // edited province-id-per-pixel
+  let pcIdsDirty = true;
+  let pcCreated: { color: Rgb; id: number }[] = []; // provinces carved this session
+  // The displayed, mutable province_colors bitmap = saved image + pending ops.
+  let pcEditCanvas: HTMLCanvasElement | null = null;
+  let pcPristine: ImageData | null = null; // the saved (rendered) province_colors image
+  let pcCurImage: ImageData | null = null; // current colors (pristine + pending) backing the canvas
+  let pcOverlay: HTMLCanvasElement | null = null; // source/target tint highlight
+  // Selection: Expand's grow-target, or Dissolve's source province.
+  let pcSelectedId = $state<number | null>(null);
+  let pcTargets = $state<Set<number>>(new Set()); // Dissolve target neighbours
+  // Active brush stroke (Expand paint / New carve).
+  let pcPointerActive = false; // a left-press on the map with a pc tool armed
+  let pcMoved = 0;
+  let pcDownX = 0;
+  let pcDownY = 0;
+  let pcPainting = false; // the press turned into a drag → painting
+  let pcStrokePixels: Set<number> = new Set();
+  let pcStrokeColor: Rgb | null = null; // the color the active stroke paints
+  // New-province name prompt (shown after a New carve stroke).
+  let pcNamePrompt = $state<{ x: number; y: number; pixels: number[]; sourceId: number } | null>(
+    null,
+  );
+  let pcNewName = $state("New Province");
+  let pcDissolveCandidates: Set<number> = new Set(); // provinces a Dissolve may divide into
+  let pcSourceId = 0; // province under a New carve's first pixel (inherits area/culture)
+
   // Bulk per-province political + eligibility data (loaded once per session).
   interface ProvincePolitical {
     id: number;
@@ -1167,8 +1284,8 @@
   let tradeNodeKeyToGroup = new Map<string, number>();
   // Node keys with a `color` on disk (or in a create scaffold) — SetBlock vs
   // InsertStatement, and the panel's colorPresent flag.
-  let baseColorPresent = new Set<string>();
-  let createdNodeKeys = new Set<string>();
+  let baseColorPresent = $state(new Set<string>());
+  let createdNodeKeys = $state(new Set<string>());
   // province id -> current effective node key (recolor + steal eligibility).
   let tnMemberCache = new Map<number, string>();
   // Live membership overlay for the in-progress paint stroke (id -> key|null).
@@ -1208,6 +1325,17 @@
   const selectedAdj = $derived(
     selectedAdjIndex != null ? (effectiveAdj[selectedAdjIndex] ?? null) : null,
   );
+  // Drawable line segments, trimmed to the edge-to-edge crossing via the
+  // province-id buffer (view-independent; recomputed only when the rows,
+  // centroids, or id buffer change). Shared by the overlay and hit-testing.
+  const adjSegs = $derived.by<(AdjSegment | null)[]>(() => {
+    const ids = provinceIds;
+    const idAt = ids
+      ? (x: number, y: number) =>
+          x >= 0 && y >= 0 && x < mapW && y < mapH ? ids[y * mapW + x] : NONE
+      : null;
+    return adjSegments(effectiveAdj, centroids, idAt, mapW);
+  });
   const selectedAdjIssues = $derived(
     adjIssues.filter((i) => i.row === selectedAdjIndex),
   );
@@ -1242,6 +1370,15 @@
   });
   // Hover tooltip listing a province's trade-modifier display names.
   let tradeDetailTooltip = $state<{ x: number; y: number; names: string[] } | null>(null);
+
+  // View toggle (persisted) for the Provinces-mode adjacency lines. Purely a
+  // rendering/hit-testing gate — the rows themselves are untouched.
+  let showStraits = $state(true);
+  let straitsLoaded = false;
+  $effect(() => {
+    const on = showStraits;
+    if (straitsLoaded) invoke("set_view_toggle", { key: "straits", value: on }).catch(() => {});
+  });
 
   // Reactive viewport + container size for the trade-node overlay (mirrors the
   // live map transform; updated in redraw()/resize()).
@@ -1391,6 +1528,7 @@
     queue.version;
     return baseClimate ? foldClimate(baseClimate, queue.serialize()) : null;
   });
+  $effect(() => { if ((mode === "climate" || mode === "winter") && climateModel) untrack(() => openView({kind:"climate", key:mode}, "reuse")); });
   // Per-list province counts for the selector (base + PENDING).
   let climateCountMap = $derived.by<Map<string, number>>(() => {
     const m = climateModel;
@@ -1506,6 +1644,9 @@
       ? (modeData!.groups[selectedGroup]?.key ?? null)
       : null,
   );
+  $effect(() => {
+    if (selectedTag) untrack(() => openView({ kind: "country", tag: selectedTag }, "reuse"));
+  });
 
   // Religion mode selection opens the religion panel (Sprint 5.1/5.2).
   let selectedReligionKey = $derived(
@@ -1570,6 +1711,14 @@
       ? (colonialData.entries.find((e) => e.key === selectedColonialKey) ?? null)
       : null,
   );
+
+  $effect(() => { if (selectedReligionKey) untrack(() => openView({kind:"religion", key:selectedReligionKey}, "reuse")); });
+  $effect(() => { if (selectedCultureKey) untrack(() => openView({kind:"culture", key:selectedCultureKey}, "reuse")); });
+  $effect(() => { if (selectedNodeKey) untrack(() => openView({kind:"trade-node", key:selectedNodeKey}, "reuse")); });
+  $effect(() => { if (selectedAreaKey) untrack(() => openView({kind:"area", key:selectedAreaKey}, "reuse")); });
+  $effect(() => { if (selectedRegionKey) untrack(() => openView({kind:"region", key:selectedRegionKey}, "reuse")); });
+  $effect(() => { if (selectedColonialKey && isColonialMode) untrack(() => openView({kind:"colonial", colonialKind: mode as "colonial_regions" | "trade_companies", key:selectedColonialKey}, "reuse")); });
+  $effect(() => { const index = selectedAdjIndex; if (index != null) untrack(() => openView({kind:"adjacency", index}, "reuse")); });
 
   // The active paint target for the brush tools: a country tag (political), a
   // religion key, or a culture key. Null when no paintable selection exists.
@@ -1712,6 +1861,9 @@
     const n = k != null ? parseInt(k, 10) : NaN;
     return Number.isFinite(n) ? n : null;
   });
+  $effect(() => {
+    if (selectedProvinceId != null) untrack(() => openView({ kind: "province", id: selectedProvinceId }, "reuse"));
+  });
 
   // A tag to auto-select once political mode finishes loading (owner
   // click-through from the province panel).
@@ -1721,14 +1873,8 @@
   let pendingSelectGeoKey: string | null = null;
 
   /// Switch to political mode and select `tag` (province-panel owner link).
-  function openCountryInPolitical(tag: string) {
-    if (mode === "political") {
-      const gi = tagToGroup.get(tag);
-      if (gi !== undefined) select(gi);
-    } else {
-      pendingSelectTag = tag;
-      setMode("political");
-    }
+  function openCountryInPolitical(tag: string, tab?: "overview" | "rulers" | "ideas" | "diplomacy" | "estates" | "history" | "names") {
+    openView({ kind: "country", tag, ...(tab ? { tab } : {}) }, "reuse");
   }
 
   // A culture key to auto-select once Culture mode finishes loading (province
@@ -1736,13 +1882,7 @@
   let pendingSelectCultureKey: string | null = null;
   /// Switch to culture mode and select `key` (reverse province-names jump).
   function openCultureMode(key: string) {
-    if (mode === "culture") {
-      const gi = cultureKeyToGroup.get(key);
-      if (gi !== undefined) select(gi);
-    } else {
-      pendingSelectCultureKey = key;
-      setMode("culture");
-    }
+    openView({ kind: "culture", key }, "reuse");
   }
 
   // The localized label to show bottom-left: hovered group wins, else selected.
@@ -1811,6 +1951,369 @@
     octx.drawImage(bitmap, 0, 0);
     const pristine = octx.getImageData(0, 0, off.width, off.height);
     compositor = new MapCompositor(pristine, provinceIds);
+  }
+
+  // --- Province Colors edit layer ------------------------------------------
+
+  /// Every pending province-bitmap op in the queue, in order (static edits, so
+  /// the full serialize — not the date-gated one).
+  function pendingBmpOps(): BmpOp[] {
+    const ops: BmpOp[] = [];
+    for (const e of queue.serialize()) {
+      if (e.kind === "provinceBmp" && e.file === "map/provinces.bmp") ops.push(...e.ops);
+    }
+    return ops;
+  }
+
+  /// Snapshots the freshly rendered province_colors bitmap as the pristine
+  /// (saved) image, then applies pending ops so the canvas shows current state.
+  function buildPcCanvas() {
+    if (!bitmap) return;
+    const off = pcEditCanvas ?? document.createElement("canvas");
+    off.width = bitmap.width;
+    off.height = bitmap.height;
+    const octx = off.getContext("2d")!;
+    octx.drawImage(bitmap, 0, 0);
+    pcPristine = octx.getImageData(0, 0, off.width, off.height);
+    pcEditCanvas = off;
+    pcOverlay = pcOverlay ?? document.createElement("canvas");
+    pcOverlay.width = off.width;
+    pcOverlay.height = off.height;
+    // Build the color → province-id lookup from the saved bitmap (every pixel is
+    // a definition color, so this is exact), plus any provinces already carved
+    // this session (their color isn't in the just-rendered pristine yet).
+    if (provinceIds) {
+      const lut = new Uint16Array(1 << 24).fill(NONE);
+      const pd = pcPristine.data;
+      for (let i = 0; i < provinceIds.length; i++) {
+        lut[(pd[i * 4] << 16) | (pd[i * 4 + 1] << 8) | pd[i * 4 + 2]] = provinceIds[i];
+      }
+      for (const c of pcCreated) {
+        lut[(c.color[0] << 16) | (c.color[1] << 8) | c.color[2]] = c.id;
+      }
+      pcColorLut = lut;
+    }
+    pcIds = null;
+    pcIdsDirty = true;
+    rebuildPcCanvas();
+    rebuildPcOverlay();
+  }
+
+  /// The edit-aware province-id buffer: `provinceIds` reprojected through the
+  /// current (pending-edited) bitmap colors. Falls back to `provinceIds` until
+  /// the pc canvas/lut are built. Rebuilt lazily when pixels change.
+  function getPcIds(): Uint16Array | null {
+    if (!provinceIds) return null;
+    if (!pcColorLut || !pcCurImage) return provinceIds;
+    if (!pcIds || pcIds.length !== provinceIds.length) {
+      pcIds = new Uint16Array(provinceIds.length);
+      pcIdsDirty = true;
+    }
+    if (pcIdsDirty) {
+      const d = pcCurImage.data;
+      for (let i = 0; i < pcIds.length; i++) {
+        pcIds[i] = pcColorLut[(d[i * 4] << 16) | (d[i * 4 + 1] << 8) | d[i * 4 + 2]];
+      }
+      pcIdsDirty = false;
+    }
+    return pcIds;
+  }
+
+  /// Province id under the cursor, edit-aware (the province you just drew, not
+  /// the one underneath).
+  function pcProvinceIdAt(clientX: number, clientY: number): number {
+    const ids = getPcIds();
+    const px = pcPixelAt(clientX, clientY);
+    if (!ids || !px) return NONE;
+    return ids[px[1] * mapW + px[0]];
+  }
+
+  /// Re-derives the displayed bitmap = pristine + every pending op (keeps
+  /// undo/redo exact without a backend re-render).
+  function rebuildPcCanvas() {
+    if (!pcEditCanvas || !pcPristine) return;
+    const img = new ImageData(
+      new Uint8ClampedArray(pcPristine.data),
+      pcPristine.width,
+      pcPristine.height,
+    );
+    applyOpsToRgba(img.data, pendingBmpOps(), mapW, mapH);
+    pcEditCanvas.getContext("2d")!.putImageData(img, 0, 0);
+    pcCurImage = img;
+    pcIdsDirty = true;
+  }
+
+  /// Rebuilds the source/target tint overlay (Dissolve source = warm, targets =
+  /// cool). Only recomputed on selection change, not per redraw.
+  function rebuildPcOverlay() {
+    const ids = getPcIds();
+    if (!pcOverlay || !ids) return;
+    const octx = pcOverlay.getContext("2d")!;
+    const img = octx.createImageData(pcOverlay.width, pcOverlay.height);
+    const d = img.data;
+    if (pcSelectedId != null || pcTargets.size > 0) {
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        const o = i * 4;
+        if (id === pcSelectedId) {
+          d[o] = 255; d[o + 1] = 120; d[o + 2] = 60; d[o + 3] = 120;
+        } else if (pcTargets.has(id)) {
+          d[o] = 80; d[o + 1] = 200; d[o + 2] = 120; d[o + 3] = 120;
+        }
+      }
+    }
+    octx.putImageData(img, 0, 0);
+  }
+
+  /// Current bitmap color of a province, sampled from the displayed image via
+  /// the edit-aware id buffer (so a just-carved province samples ITS color).
+  function pcColorOf(id: number): Rgb | null {
+    const ids = getPcIds();
+    if (!ids || !pcCurImage) return null;
+    return provinceColor(ids, pcCurImage.data, id);
+  }
+
+  /// Map pixel (x,y) under the cursor, or null off-map.
+  function pcPixelAt(clientX: number, clientY: number): [number, number] | null {
+    const [mx, my] = toMap(clientX, clientY);
+    const x = Math.floor(mx);
+    const y = Math.floor(my);
+    if (x < 0 || y < 0 || x >= mapW || y >= mapH) return null;
+    return [x, y];
+  }
+
+  /// Stamps `pixels` on the displayed canvas with `color` (efficient dirty-rect
+  /// putImageData) and repaints.
+  function pcStamp(pixels: number[], color: Rgb) {
+    if (!pcEditCanvas || !pcCurImage || pixels.length === 0) return;
+    const d = pcCurImage.data;
+    let minX = mapW, minY = mapH, maxX = 0, maxY = 0;
+    for (const p of pixels) {
+      const o = p * 4;
+      d[o] = color[0]; d[o + 1] = color[1]; d[o + 2] = color[2];
+      const x = p % mapW;
+      const y = (p / mapW) | 0;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+    if (maxX < minX) return;
+    pcEditCanvas
+      .getContext("2d")!
+      .putImageData(pcCurImage, 0, 0, minX, minY, maxX - minX + 1, maxY - minY + 1);
+    pcIdsDirty = true;
+    redraw();
+  }
+
+  function clearPcSelection() {
+    pcSelectedId = null;
+    pcTargets = new Set();
+    rebuildPcOverlay();
+    redraw();
+  }
+
+  // Rebuild the displayed bitmap whenever the queue changes (undo/redo/save) so
+  // the province_colors view always reflects pending ops.
+  $effect(() => {
+    queue.version;
+    if (mode === "province_colors" && pcEditCanvas) {
+      untrack(() => {
+        rebuildPcCanvas();
+        redraw();
+      });
+    }
+  });
+
+  // Pointer lifecycle for the province-colors tools (routed from the shared
+  // onPointerDown/Move/Up). New/Expand paint on drag; a non-drag press is a
+  // click (select / absorb / toggle a dissolve target).
+  function pcOnDown(clientX: number, clientY: number) {
+    pcPointerActive = true;
+    pcPainting = false;
+    pcMoved = 0;
+    pcDownX = clientX;
+    pcDownY = clientY;
+    pcStrokePixels = new Set();
+    pcSourceId = pcProvinceIdAt(clientX, clientY);
+    if (armedTool === "pc_new") {
+      pcStrokeColor = [255, 0, 255]; // placeholder until the backend allocates the real color
+    } else if (armedTool === "pc_expand" && pcSelectedId != null) {
+      pcStrokeColor = pcColorOf(pcSelectedId);
+    } else {
+      pcStrokeColor = null;
+    }
+  }
+
+  function pcOnMove(clientX: number, clientY: number) {
+    pcMoved = Math.max(pcMoved, Math.abs(clientX - pcDownX) + Math.abs(clientY - pcDownY));
+    setBrushCursor(clientX, clientY, true);
+    const canPaint =
+      armedTool === "pc_new" || (armedTool === "pc_expand" && pcSelectedId != null);
+    if (!canPaint || !pcStrokeColor) return;
+    if (pcMoved > 4) pcPainting = true;
+    if (!pcPainting) return;
+    const px = pcPixelAt(clientX, clientY);
+    if (!px) return;
+    const stamp = brushDisc(px[0], px[1], brushSize, mapW, mapH);
+    for (const p of stamp) pcStrokePixels.add(p);
+    pcStamp(stamp, pcStrokeColor);
+  }
+
+  function pcOnUp(clientX: number, clientY: number, shift: boolean) {
+    pcPointerActive = false;
+    const wasPaint = pcPainting;
+    pcPainting = false;
+    if (wasPaint) {
+      if (armedTool === "pc_new") openPcNamePrompt(clientX, clientY);
+      else if (armedTool === "pc_expand") commitExpandStroke();
+      return;
+    }
+    // A click (no drag).
+    const id = pcProvinceIdAt(clientX, clientY);
+    if (id === NONE) return;
+    if (armedTool === "pc_expand") pcClickExpand(id, shift);
+    else if (armedTool === "pc_dissolve") pcClickDissolve(id);
+  }
+
+  function commitExpandStroke() {
+    if (!pcStrokeColor || pcStrokePixels.size === 0 || pcSelectedId == null) {
+      rebuildPcCanvas();
+      redraw();
+      return;
+    }
+    const op = paintOp([...pcStrokePixels], pcStrokeColor);
+    queue.push({
+      label: `Expand province ${pcSelectedId}`,
+      edits: [{ kind: "provinceBmp", file: "map/provinces.bmp", ops: [op] }],
+    });
+  }
+
+  function pcClickExpand(id: number, shift: boolean) {
+    if (pcSelectedId == null) {
+      pcSelectedId = id;
+      rebuildPcOverlay();
+      redraw();
+      return;
+    }
+    if (shift) {
+      const ids = getPcIds();
+      if (id === pcSelectedId || !ids) return;
+      const color = pcColorOf(pcSelectedId);
+      if (!color) return;
+      const pixels = provincePixels(ids, id);
+      if (pixels.length === 0) return;
+      pcStamp(pixels, color);
+      queue.push({
+        label: `Absorb province ${id} into ${pcSelectedId}`,
+        edits: [{ kind: "provinceBmp", file: "map/provinces.bmp", ops: [paintOp(pixels, color)] }],
+      });
+    } else {
+      pcSelectedId = id; // reselect the province to grow
+      rebuildPcOverlay();
+      redraw();
+    }
+  }
+
+  function pcClickDissolve(id: number) {
+    const ids = getPcIds();
+    if (!ids) return;
+    const setSource = () => {
+      pcSelectedId = id;
+      pcDissolveCandidates = new Set(borderingProvinces(ids, id, mapW, mapH));
+      pcTargets = new Set();
+      rebuildPcOverlay();
+      redraw();
+    };
+    if (pcSelectedId == null) {
+      setSource();
+    } else if (id === pcSelectedId) {
+      clearPcSelection();
+      pcDissolveCandidates = new Set();
+    } else if (pcDissolveCandidates.has(id)) {
+      const next = new Set(pcTargets);
+      next.has(id) ? next.delete(id) : next.add(id);
+      pcTargets = next;
+      rebuildPcOverlay();
+      redraw();
+    } else {
+      setSource(); // clicked a non-neighbour → start over on it
+    }
+  }
+
+  function confirmDissolve() {
+    if (pcSelectedId == null || pcTargets.size === 0) return;
+    const from = pcColorOf(pcSelectedId);
+    if (!from) return;
+    const into: Rgb[] = [];
+    for (const t of pcTargets) {
+      const c = pcColorOf(t);
+      if (c) into.push(c);
+    }
+    if (into.length === 0) return;
+    queue.push({
+      label: `Dissolve province ${pcSelectedId} into ${into.length}`,
+      edits: [{ kind: "provinceBmp", file: "map/provinces.bmp", ops: [dissolveOp(from, into)] }],
+    });
+    clearPcSelection();
+    pcDissolveCandidates = new Set();
+  }
+
+  function openPcNamePrompt(clientX: number, clientY: number) {
+    if (pcStrokePixels.size === 0) return;
+    if (pcSourceId === NONE) {
+      // Carved over water/off-map: no area to inherit — revert the placeholder.
+      rebuildPcCanvas();
+      redraw();
+      error = "Carve a new province starting over an existing land province.";
+      return;
+    }
+    pcNamePrompt = { x: clientX, y: clientY, pixels: [...pcStrokePixels], sourceId: pcSourceId };
+    pcNewName = "New Province";
+  }
+
+  interface ProvinceScaffoldResult {
+    id: number;
+    color: Rgb;
+    name: string;
+    area: string;
+    edits: TypedEdit[];
+  }
+
+  async function acceptPcName(name: string) {
+    const prompt = pcNamePrompt;
+    pcNamePrompt = null;
+    if (!prompt) return;
+    try {
+      const scaffold = await invoke<ProvinceScaffoldResult>("add_province_scaffold", {
+        installPath,
+        modPath,
+        pixels: prompt.pixels,
+        name,
+        sourceId: prompt.sourceId,
+      });
+      queue.push({ label: `Add province ${name}`, edits: scaffold.edits });
+      // Register the new province's color→id so it becomes independently
+      // selectable (dissolve/expand) immediately, before any save.
+      pcCreated.push({ color: scaffold.color, id: scaffold.id });
+      if (pcColorLut) {
+        pcColorLut[
+          (scaffold.color[0] << 16) | (scaffold.color[1] << 8) | scaffold.color[2]
+        ] = scaffold.id;
+      }
+      pcIdsDirty = true;
+      // The queue effect rebuilds the canvas with the real allocated color.
+    } catch (e) {
+      error = String(e);
+      rebuildPcCanvas(); // drop the placeholder paint
+      redraw();
+    }
+  }
+
+  function cancelPcName() {
+    pcNamePrompt = null;
+    rebuildPcCanvas();
+    redraw();
   }
 
   /// Loads interaction data for `m` and (for categorical modes) builds the
@@ -1893,6 +2396,13 @@
       await ensureProvinceIds();
       if (seq !== renderSeq) return;
       buildCompositor();
+    }
+    // Province Colors: build the editable pixel canvas (needs the id buffer for
+    // whole-province ops, dissolve targets, and color sampling).
+    if (m === "province_colors") {
+      await ensureProvinceIds();
+      if (seq !== renderSeq) return;
+      buildPcCanvas();
     }
     if (m === "development") {
       // Bulk data carries the three dev components per province (paint + stats);
@@ -2936,6 +3446,33 @@
     return selectedDate != null && compareDates(selectedDate, effectiveStart) > 0;
   }
 
+  /// Per province, the keys already assigned by dated blocks at or before the
+  /// selected date (backend `get_province_shadowed_keys`). A province in here
+  /// has history that overrides its top level before the campaign starts, so a
+  /// paint stroke must write a dated block rather than the baseline — otherwise
+  /// the edit is silently overridden on a timeline mod. Empty on vanilla at
+  /// 1444.11.11. Refreshed with the date; a stale/failed load degrades to the
+  /// pre-existing top-level behaviour rather than blocking the edit.
+  let shadowedKeysByProvince = $state(new Map<number, Set<string>>());
+
+  async function loadShadowedKeys(install: string, mod: string | null, d: string | null) {
+    try {
+      const raw = await invoke<Record<string, string[]>>("get_province_shadowed_keys", {
+        installPath: install,
+        modPath: mod,
+        date: d,
+      });
+      const next = new Map<number, Set<string>>();
+      for (const [id, keys] of Object.entries(raw)) next.set(Number(id), new Set(keys));
+      shadowedKeysByProvince = next;
+    } catch {
+      shadowedKeysByProvince = new Map();
+    }
+  }
+  $effect(() => {
+    void loadShadowedKeys(installPath, modPath, selectedDate);
+  });
+
   /// The dated-block statement for a start-date-shaped stroke edit (paint/dev),
   /// or null when it has no clean dated form (scalar clears / owner unset —
   /// these are only meaningful as base-state edits). `remove_*` inverses cover
@@ -2954,16 +3491,18 @@
     return null;
   }
 
-  /// Rewrites a stroke's start-date-shaped edits into dated-block edits when the
-  /// selected date is later than the start (Sprint 12.3). All statements for one
-  /// province (file) collapse into a single `Y.M.D = { … }` block so a brush
-  /// stamp that sets owner+controller+core writes one block, not three. Edits on
-  /// non-province files pass through unchanged. At the start date, returns the
-  /// input untouched.
+  /// Rewrites a stroke's start-date-shaped edits into dated-block edits whenever
+  /// the top level is not the state at the selected date — either because the
+  /// date is past the start (Sprint 12.3) or because that province's own history
+  /// already overrides the painted keys beforehand (timeline mods). All
+  /// statements for one province (file) collapse into a single `Y.M.D = { … }`
+  /// block so a brush stamp that sets owner+controller+core writes one block,
+  /// not three. Edits on non-province files, and provinces whose baseline is
+  /// still authoritative, pass through unchanged.
   function strokeEditsAtDate(edits: TypedEdit[]): TypedEdit[] {
-    if (!editingAtLaterDate()) return edits;
-    const date = selectedDate as string;
-    const byFile = new Map<string, string[]>();
+    if (selectedDate == null) return edits;
+    const date = selectedDate;
+    const byFile = new Map<string, { edits: TypedEdit[]; statements: string[] }>();
     const passthrough: TypedEdit[] = [];
     for (const e of edits) {
       const file = "file" in e ? (e.file as string) : undefined;
@@ -2971,29 +3510,56 @@
         ? strokeEditToDatedStatement(e)
         : null;
       if (file && stmt) {
-        const list = byFile.get(file) ?? [];
-        list.push(stmt);
-        byFile.set(file, list);
+        const g = byFile.get(file) ?? { edits: [], statements: [] };
+        g.edits.push(e);
+        g.statements.push(stmt);
+        byFile.set(file, g);
       } else {
         passthrough.push(e);
       }
     }
     const out = [...passthrough];
-    for (const [file, statements] of byFile) {
+    for (const [file, g] of byFile) {
+      const id = idFromFile(file);
       out.push(
         ...editAtDate({
           file,
           selectedDate: date,
           startDate: effectiveStart,
-          // Paint has no per-province dated-block list loaded, so it always
-          // inserts a fresh block (valid EU4; duplicate-date blocks are legal).
+          // Paint has no per-province dated-block list loaded, so a dated write
+          // always inserts a fresh block (valid EU4; duplicate-date blocks are
+          // legal and mod_writer places it in date order).
           datedBlocks: [],
-          startEdits: [],
-          statements,
+          startEdits: g.edits,
+          statements: g.statements,
+          shadowedKeys:
+            (id !== null ? shadowedKeysByProvince.get(id) : undefined) ?? new Set<string>(),
         }),
       );
     }
     return out;
+  }
+
+  /// True when `edits` contains at least one province-history write that
+  /// `strokeEditsAtDate` will turn into a dated block — the condition for
+  /// date-tagging the composite so the pending folds gate it.
+  function strokeWritesDatedBlock(edits: TypedEdit[]): boolean {
+    if (selectedDate == null) return false;
+    if (editingAtLaterDate()) {
+      return edits.some(
+        (e) => "file" in e && (e.file as string).startsWith("history/provinces/"),
+      );
+    }
+    return edits.some((e) => {
+      if (!("file" in e)) return false;
+      const file = e.file as string;
+      if (!file.startsWith("history/provinces/")) return false;
+      const stmt = strokeEditToDatedStatement(e);
+      if (stmt === null) return false;
+      const id = idFromFile(file);
+      const keys = id !== null ? shadowedKeysByProvince.get(id) : undefined;
+      return keys != null && isShadowed([stmt], keys);
+    });
   }
 
   /// Pushes a stroke composite through the date rule. Province-history strokes
@@ -3003,13 +3569,10 @@
   /// date-aware in EU4 — they pass through untagged and always apply. At the
   /// start date every stroke is an ordinary push.
   function pushStroke(label: string, edits: TypedEdit[]) {
-    const later = editingAtLaterDate();
-    const touchesHistory =
-      later &&
-      edits.some((e) => "file" in e && (e.file as string).startsWith("history/provinces/"));
-    const finalEdits = touchesHistory ? strokeEditsAtDate(edits) : edits;
+    const dated = strokeWritesDatedBlock(edits);
+    const finalEdits = dated ? strokeEditsAtDate(edits) : edits;
     if (finalEdits.length === 0) return;
-    queue.push({ label, edits: finalEdits, ...(touchesHistory ? { date: selectedDate! } : {}) });
+    queue.push({ label, edits: finalEdits, ...(dated ? { date: selectedDate! } : {}) });
   }
 
   /// Rebuilds the mode-relevant pending projection from the committed queue and
@@ -3507,8 +4070,7 @@
   function colonialJump(j: JumpTarget) {
     if (j.kind === "province") openProvince(j.id);
     else if (j.kind === "colonial_region" || j.kind === "trade_company") {
-      const gi = colonialKeyToGroup.get(j.id);
-      if (gi !== undefined) select(gi);
+      openView({ kind: "colonial", colonialKind: j.kind === "colonial_region" ? "colonial_regions" : "trade_companies", key: j.id }, "reuse");
     }
   }
 
@@ -3993,11 +4555,11 @@
 
   /// Screen point → nearest adjacency line index (within tolerance), or null.
   function adjHitAt(clientX: number, clientY: number): number | null {
-    if (!provinceIds) return null;
+    // Hidden lines are not clickable — hit-testing follows what is drawn.
+    if (!provinceIds || !showStraits) return null;
     const rect = canvas.getBoundingClientRect();
     return adjacencyAt(
-      effectiveAdj,
-      centroids,
+      adjSegs,
       clientX - rect.left,
       clientY - rect.top,
       view,
@@ -4663,9 +5225,8 @@
 
   /// Jump to a province in Provinces mode (religion panel usage link).
   let pendingSelectProvince: number | null = null;
-  function openProvince(id: number) {
-    pendingSelectProvince = id;
-    setMode("provinces");
+  function openProvince(id: number, tab?: "overview" | "economy" | "military" | "monuments" | "history" | "advanced") {
+    openView({ kind: "province", id, ...(tab ? { tab } : {}) }, "reuse");
   }
 
   // --- Trade Nodes interaction (Sprint 8) ----------------------------------
@@ -4927,7 +5488,7 @@
     select(NONE);
   }
   function tradeJump(j: JumpTarget) {
-    if (j.kind === "node") selectNodeByKey(j.id);
+    if (j.kind === "node") openView({ kind: "trade-node", key: j.id }, "reuse");
     else if (j.kind === "province") openProvince(j.id);
   }
 
@@ -5062,19 +5623,11 @@
   }
   /// Jump from a region's member-area link to that area in Areas mode.
   function jumpToAreaMode(areaKey: string) {
-    if (mode === "areas") {
-      selectGroupByKey(areaKey);
-    } else {
-      pendingSelectGeoKey = areaKey;
-      setMode("areas");
-    }
+    openView({ kind: "area", key: areaKey }, "reuse");
   }
   function geoJump(j: JumpTarget) {
     if (j.kind === "province") openProvince(j.id);
-    else if (j.kind === "area") {
-      if (mode === "areas") selectGroupByKey(j.id);
-      else jumpToAreaMode(j.id);
-    }
+    else if (j.kind === "area") jumpToAreaMode(j.id);
   }
 
   /// Trade-node membership brush with steal semantics.
@@ -5745,7 +6298,10 @@
     const devCtx = mode === "development";
     const climateCtx = mode === "climate" || mode === "winter";
     const terrainCtx = mode === "simple_terrain";
-    if (!politicalCtx && !createCountryCtx && !religionCtx && !cultureCtx && !tradeCtx && !areasCtx && !regionsCtx && !colonialCtx && !goodsCtx && !devCtx && !climateCtx && !terrainCtx) {
+    // Province Colors hosts its own pc_* tools (add/expand/dissolve), which
+    // manage their own selection and must not be auto-disarmed here.
+    const pcCtx = mode === "province_colors";
+    if (!politicalCtx && !createCountryCtx && !religionCtx && !cultureCtx && !tradeCtx && !areasCtx && !regionsCtx && !colonialCtx && !goodsCtx && !devCtx && !climateCtx && !terrainCtx && !pcCtx) {
       if (armedTool !== null) armedTool = null;
       if (previewSet.size > 0) clearPreview();
       return;
@@ -5964,6 +6520,19 @@
     // Any (dis)arm resets the two-click "+ Add strait" sequence (the two clicks
     // keep armedTool === "adj_add" between them, so this never fires mid-add).
     adjAddFirst = null;
+    // Province-colors tools own their selection; (dis)arming or switching among
+    // them resets it and any open name prompt.
+    if (PC_TOOLS.has(armedTool ?? "") && id !== armedTool) {
+      clearPcSelection();
+      pcDissolveCandidates = new Set();
+      pcNamePrompt = null;
+    }
+    if (id && PC_TOOLS.has(id)) {
+      armedTool = id;
+      hovering = false;
+      clearPreview();
+      return;
+    }
     if (id && DISABLED_TOOLS.has(id)) {
       // Placeholder tools are inert; never actually arm them.
       armedTool = null;
@@ -6089,8 +6658,23 @@
     // overrides); other modes draw the rendered bitmap directly.
     // Development is gradient but composites its pending recolor like categorical.
     const usesComp = categorical || mode === "development";
-    const baseSource = usesComp && compositor ? compositor.base : bitmap;
+    // Province Colors draws its own editable canvas (saved bitmap + pending
+    // pixel ops); categorical/dev draw the compositor; everything else the raw
+    // rendered bitmap.
+    const baseSource =
+      mode === "province_colors" && pcEditCanvas
+        ? pcEditCanvas
+        : usesComp && compositor
+          ? compositor.base
+          : bitmap;
     ctx.drawImage(baseSource, 0, 0);
+    if (
+      mode === "province_colors" &&
+      pcOverlay &&
+      (pcSelectedId != null || pcTargets.size > 0)
+    ) {
+      ctx.drawImage(pcOverlay, 0, 0);
+    }
     const tradeExtra =
       mode === "trade_nodes" && (showUnassigned || hoverRoute !== null || selectedRoute !== null);
     const devExtra =
@@ -6175,6 +6759,13 @@
       startStroke(e.clientX, e.clientY);
       return;
     }
+    // Province-colors pixel tools take the left button (drag = paint, click =
+    // select); other buttons still pan.
+    if (mode === "province_colors" && pcArmed && e.button === 0) {
+      canvas.setPointerCapture(e.pointerId);
+      pcOnDown(e.clientX, e.clientY);
+      return;
+    }
     dragging = true;
     lastX = downX = e.clientX;
     lastY = downY = e.clientY;
@@ -6185,6 +6776,10 @@
   function onPointerMove(e: PointerEvent) {
     if (draggingHandle >= 0) {
       dragHandle(e.clientX, e.clientY);
+      return;
+    }
+    if (pcPointerActive) {
+      pcOnMove(e.clientX, e.clientY);
       return;
     }
     if (painting) {
@@ -6205,6 +6800,9 @@
     } else if (brushArmed) {
       setBrushCursor(e.clientX, e.clientY, true);
       updatePreview(e.clientX, e.clientY);
+    } else if (mode === "province_colors" && pcArmed) {
+      // New/Expand show the brush circle; Dissolve is a plain pointer.
+      setBrushCursor(e.clientX, e.clientY, armedTool !== "pc_dissolve");
     } else if (mode === "trade_nodes") {
       tradeHover(e.clientX, e.clientY);
     } else if (mode === "development") {
@@ -6225,6 +6823,13 @@
   /// mode-specific list selection; else clear the map selection (closes the
   /// panel). Returns false when there was nothing to back out of.
   function backOut(): boolean {
+    // Province-colors: first Esc clears the working selection, keeping the tool
+    // armed; a second Esc disarms via the armedTool branch below.
+    if (mode === "province_colors" && (pcSelectedId != null || pcTargets.size > 0)) {
+      clearPcSelection();
+      pcDissolveCandidates = new Set();
+      return true;
+    }
     if (armedTool) {
       onArm(null);
       return true;
@@ -6275,6 +6880,13 @@
   function onPointerUp(e: PointerEvent) {
     if (draggingHandle >= 0) {
       draggingHandle = -1;
+      if (canvas.hasPointerCapture(e.pointerId)) {
+        canvas.releasePointerCapture(e.pointerId);
+      }
+      return;
+    }
+    if (pcPointerActive) {
+      pcOnUp(e.clientX, e.clientY, e.shiftKey);
       if (canvas.hasPointerCapture(e.pointerId)) {
         canvas.releasePointerCapture(e.pointerId);
       }
@@ -6364,10 +6976,11 @@
         select(groupAt(e.clientX, e.clientY));
       }
     } else if (!wasDrag && mode === "development" && !brushArmed && armedTool === null) {
-      // Click-to-edit (9.1b): open the province panel scrolled to Development.
+      // Click-to-edit (9.1b): deep-link to the province Economy content tab.
       const id = provinceIdAt(e.clientX, e.clientY);
       const b = id !== NONE ? baseProv?.get(id) : undefined;
       devSelectedId = b && !b.water && !b.wasteland ? id : null;
+      if (devSelectedId != null) openProvince(devSelectedId, "economy");
       updateHighlight();
       redraw();
     }
@@ -6404,7 +7017,7 @@
 
   function onCanvasWheelZoom() {
     // Keep the brush circle sized correctly when zooming without moving.
-    if (brushArmed && brushCursor.on) {
+    if ((brushArmed || pcBrushArmed) && brushCursor.on) {
       brushCursor = { ...brushCursor, d: Math.max(4, brushSize * scale) };
     }
   }
@@ -6452,6 +7065,16 @@
     // Leaving Provinces mode clears its adjacency selection/hover.
     selectedAdjIndex = null;
     hoverAdjIndex = null;
+    // Leaving Province Colors: disarm its tools and drop the working selection.
+    if (mode === "province_colors" && id !== "province_colors") {
+      if (PC_TOOLS.has(armedTool ?? "")) armedTool = null;
+      clearPcSelection();
+      pcDissolveCandidates = new Set();
+      pcNamePrompt = null;
+      // Free the ~33 MB color lookup + id buffer; rebuilt on re-entry.
+      pcColorLut = null;
+      pcIds = null;
+    }
     mode = id;
     loadMap();
   }
@@ -6611,6 +7234,7 @@
   }
 
   onMount(() => {
+    void initializeWorkspace();
     invoke<MapMode[]>("list_map_modes")
       .then((m) => (modes = m))
       .catch(() => {});
@@ -6623,8 +7247,7 @@
     // tree) and register the jump handler that opens the scripted browser.
     void cachesCleared.then(() => loadScriptedDefs(installPath, modPath));
     setScriptedJump((def: ScriptedDef) => {
-      scriptedFocus = def.name;
-      scriptedOpen = true;
+      openView({kind:"scripted", focusKey: def.name});
     });
     // Gate File ▸ Fork from Steam… on whether this install has a Workshop folder.
     invoke<boolean>("is_steam_backed_install", { installPath })
@@ -6641,6 +7264,13 @@
         }
       })
       .catch(() => (tradeDetailsLoaded = true));
+    // Restore the persisted "Straits/Canals" view toggle (default on).
+    invoke<boolean | null>("get_view_toggle", { key: "straits" })
+      .then((v) => {
+        if (v !== null) showStraits = v;
+        straitsLoaded = true;
+      })
+      .catch(() => (straitsLoaded = true));
     // Resolve the selected date before the first render so the whole view derives
     // at the right date; fall back to an immediate render if context load fails.
     cachesCleared
@@ -6663,7 +7293,7 @@
       }
       // Esc = universal back-out (same cascade as right-click): tool, route
       // editor, dev box, list selection, map selection — one step per press.
-      if (e.key === "Escape" && backOut()) {
+      if (e.key === "Escape" && !hasFocusedWorkspaceWindow() && backOut()) {
         e.preventDefault();
         return;
       }
@@ -6688,7 +7318,7 @@
         // Ctrl+Shift+F: project-wide search (Sprint 30.3).
         e.preventDefault();
         openMenu = null;
-        searchOpen = true;
+        openView({kind:"search"});
       } else if (key === "s") {
         e.preventDefault();
         saveProject();
@@ -6750,10 +7380,10 @@
     </label>
   {/if}
 
-  {#if mode === "provinces" && provinceIds}
+  {#if mode === "provinces" && provinceIds && showStraits}
     <AdjacencyOverlay
       rows={effectiveAdj}
-      {centroids}
+      segments={adjSegs}
       {view}
       cssWidth={cssW}
       cssHeight={cssH}
@@ -6804,7 +7434,8 @@
     ></button>
   {/if}
 
-  <div class="toolbar">
+  <MapMenuBar>
+    {#snippet children()}
     <div class="menu">
       <button
         class="menu-btn"
@@ -6872,10 +7503,6 @@
             Redo{queue.redoLabel ? ` ${queue.redoLabel}` : ""}
             <span class="shortcut">Ctrl+Y</span>
           </button>
-          <hr />
-          <button onclick={saveProject} disabled={!dirty || saving}>
-            Save Project <span class="shortcut">Ctrl+S</span>
-          </button>
         </div>
       {/if}
     </div>
@@ -6900,9 +7527,9 @@
           <button
             class="toggle-item"
             title="Show the pending edit queue (undo units) with jump / revert actions"
-            onclick={() => { openMenu = null; editsPanelOpen = !editsPanelOpen; }}
+            onclick={() => { openMenu = null; openView({kind:"edits"}); }}
           >
-            <span class="check">{editsPanelOpen ? "✓" : ""}</span>
+            <span class="check"></span>
             Edits{#if dirty}<span class="menu-badge">{queue.composites.length}</span>{/if}
           </button>
           <button
@@ -6917,13 +7544,13 @@
           </button>
           <button
             title="Search every script and localisation file in the project"
-            onclick={() => { openMenu = null; searchOpen = true; }}
+            onclick={() => { openMenu = null; openView({kind:"search"}); }}
           >
             Find in Project… <span class="shortcut">Ctrl+Shift+F</span>
           </button>
           <button
             title="Browse the whole mod vs the base game (added / shadowed / hidden files)"
-            onclick={() => { openMenu = null; projectChangesOpen = true; }}
+            onclick={() => { openMenu = null; openView({kind:"project-changes"}); }}
             disabled={modPath === null}
           >
             Project Changes…
@@ -6937,66 +7564,103 @@
             <span class="check">{showTradeDetails ? "✓" : ""}</span>
             Trade details
           </button>
-          <hr />
-          <button onclick={() => { openMenu = null; decisionsOpen = true; }}>
+          <button
+            class="toggle-item"
+            title="Draw strait, canal, and land adjacency links in Provinces mode"
+            onclick={() => (showStraits = !showStraits)}
+          >
+            <span class="check">{showStraits ? "✓" : ""}</span>
+            Straits/Canals
+          </button>
+        </div>
+      {/if}
+    </div>
+    <div class="menu">
+      <button
+        class="menu-btn"
+        class:open={openMenu === "tools"}
+        onclick={() => (openMenu = openMenu === "tools" ? null : "tools")}
+      >
+        Tools
+      </button>
+      {#if openMenu === "tools"}
+        <div class="dropdown">
+          <button onclick={() => { openMenu = null; openView({kind:"decisions"}); }}>
             Decisions…
           </button>
-          <button onclick={() => { openMenu = null; eventsOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({kind:"events"}); }}>
             Events…
           </button>
-          <button onclick={() => { openMenu = null; missionsOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({kind:"missions"}); }}>
             Missions…
           </button>
-          <button onclick={() => { openMenu = null; govNamesFocusKey = null; govNamesOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({kind:"government-names"}); }}>
             Government names…
           </button>
-          <button onclick={() => { openMenu = null; estatesFocusKey = null; estatesOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({ kind: "estates" }, "reuse"); }}>
             Estates…
           </button>
-          <button onclick={() => { openMenu = null; rebelsOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({kind:"rebels"}); }}>
             Rebels…
           </button>
-          <button onclick={() => { openMenu = null; technologyOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({kind:"technology"}); }}>
             Technology…
           </button>
           <button
             title="Generic idea groups (common/ideas with a category) — national TAG ideas are edited in the country panel"
-            onclick={() => { openMenu = null; mechanicsFamily = "idea_groups"; mechanicsFocusKey = null; mechanicsOpen = true; }}
+            onclick={() => { openMenu = null; openView({kind:"mechanics", family:"idea_groups"}); }}
           >
             Ideas…
           </button>
-          <button onclick={() => { openMenu = null; mechanicsFamily = null; mechanicsOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({kind:"mechanics"}); }}>
             Mechanics…
           </button>
-          <button onclick={() => { openMenu = null; empiresOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({kind:"empires"}); }}>
             Empires…
           </button>
-          <button onclick={() => { openMenu = null; colorPoolsOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({kind:"color-pools"}); }}>
             Color Pools…
           </button>
           <button onclick={() => { openMenu = null; dynastiesOpen = true; }}>
             Dynasties…
           </button>
           <hr />
-          <button onclick={() => { openMenu = null; scriptedFocus = null; scriptedOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({kind:"scripted"}); }}>
             Scripted Triggers/Effects…
           </button>
-          <button onclick={() => { openMenu = null; onActionsOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({kind:"on-actions"}); }}>
             On Actions…
           </button>
-          <button onclick={() => { openMenu = null; localisationOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({kind:"localisation"}); }}>
             Localisation…
           </button>
-          <button onclick={() => { openMenu = null; definesOpen = true; }}>
+          <button onclick={() => { openMenu = null; openView({kind:"defines"}); }}>
             Defines…
           </button>
         </div>
       {/if}
     </div>
 
-    <span class="title">
-      {projectName ?? "Base Game"}{dirty ? " •" : ""}
-    </span>
+    <div class="menu">
+      <button class="menu-btn" onclick={() => { openMenu = null; openView({kind:"shortcuts"}); }}>Help</button>
+    </div>
+
+    {#if renaming}
+      <input
+        class="title title-edit"
+        bind:this={renameInput}
+        bind:value={renameValue}
+        onblur={commitRename}
+        onkeydown={renameKey}
+        aria-label="Project name"
+      />
+    {:else if modPath}
+      <button class="title title-btn" onclick={startRename} title="Rename project">
+        {projectName ?? "Base Game"}{dirty ? " •" : ""}
+      </button>
+    {:else}
+      <span class="title">Base Game{dirty ? " •" : ""}</span>
+    {/if}
     <span class="path" title={modPath ?? installPath}>
       {modPath ?? installPath}
     </span>
@@ -7004,7 +7668,8 @@
       <span class="saved">{saveMessage}</span>
     {/if}
     <span class="zoom">{zoomPct}%</span>
-  </div>
+    {/snippet}
+  </MapMenuBar>
 
   {#if modes.length > 0}
     <div class="modes">
@@ -7028,15 +7693,6 @@
   {/if}
 
   <!-- Edits panel (Sprint 30.1): left-docked, toggled from View ▸ Edits. -->
-  {#if editsPanelOpen}
-    <EditsPanel
-      {queue}
-      saved={savedComposites}
-      onjump={editJump}
-      onclose={() => (editsPanelOpen = false)}
-      onclearsaved={() => (savedComposites = [])}
-    />
-  {/if}
 
   <!-- Date selector chip (Sprint 12.1): top-right, map-anchored chrome (z-9). -->
   <div class="date-chip-wrap">
@@ -7191,33 +7847,7 @@
     </div>
   {/if}
 
-  {#if selectedTag}
-    <CountryPanel
-      {installPath}
-      {modPath}
-      {queue}
-      {calendar}
-      date={selectedDate}
-      startDate={effectiveStart}
-      tag={selectedTag}
-      seed={countryScaffoldSeeds.get(selectedTag) ?? null}
-      oncolor={onCountryColor}
-      {capitalRequest}
-      oncapitalapplied={() => (capitalRequest = null)}
-      provNamePick={provNamePick}
-      onarmprovnamepick={() => onArm("pick_prov_name")}
-      onprovnamepickconsumed={() => (provNamePick = null)}
-      onopencountry={openCountryInPolitical}
-      onopenprovince={openProvince}
-      onremovepending={removePendingCreatedCountry}
-      onopennaming={(schemeKey) => { govNamesFocusKey = schemeKey ?? null; govNamesOpen = true; }}
-      onopenestates={(key) => { estatesFocusKey = key ?? null; estatesOpen = true; }}
-      onopenmechanics={(fam, key) => { mechanicsFamily = fam; mechanicsFocusKey = key ?? null; mechanicsOpen = true; }}
-      onclose={() => select(NONE)}
-    />
-  {/if}
-
-  {#if selectedReligionKey}
+  {#if selectedReligionKey && !workspaceWindows().some((w) => w.tabs.some((t) => t.view.kind === "religion" && t.view.key === selectedReligionKey))}
     {#key selectedReligionKey}
       <ReligionPanel
         {installPath}
@@ -7228,13 +7858,13 @@
         oncolor={onReligionColor}
         onjumpcountry={openCountryInPolitical}
         onjumpprovince={openProvince}
-        onopenmechanics={(fam) => { mechanicsFamily = fam; mechanicsFocusKey = null; mechanicsOpen = true; }}
+        onopenmechanics={(fam) => openView({kind:"mechanics", family:fam})}
         onclose={() => select(NONE)}
       />
     {/key}
   {/if}
 
-  {#if selectedCultureKey}
+  {#if selectedCultureKey && !workspaceWindows().some((w) => w.tabs.some((t) => t.view.kind === "culture" && t.view.key === selectedCultureKey))}
     {#key selectedCultureKey}
       <CulturePanel
         {installPath}
@@ -7255,7 +7885,7 @@
     {/key}
   {/if}
 
-  {#if mode === "trade_nodes" && selectedNode && tradeNetwork}
+  {#if mode === "trade_nodes" && selectedNode && tradeNetwork && !workspaceWindows().some((w) => w.tabs.some((t) => t.view.kind === "trade-node" && t.view.key === selectedNodeKey))}
     {#key selectedNodeKey}
       <TradeNodePanel
         {installPath}
@@ -7274,12 +7904,12 @@
         onaddroute={() => onArm("tn_add_route")}
         ondeleted={onNodeDeleted}
         onjump={tradeJump}
-        onopenmechanics={(fam, key) => { mechanicsFamily = fam; mechanicsFocusKey = key ?? null; mechanicsOpen = true; }}
+        onopenmechanics={(fam, key) => openView({kind:"mechanics", family:fam, focusKey:key})}
       />
     {/key}
   {/if}
 
-  {#if mode === "areas" && selectedArea && geoNetwork}
+  {#if mode === "areas" && selectedArea && geoNetwork && !workspaceWindows().some((w) => w.tabs.some((t) => t.view.kind === "area" && t.view.key === selectedAreaKey))}
     {#key selectedAreaKey}
       <AreaPanel
         {queue}
@@ -7293,7 +7923,7 @@
     {/key}
   {/if}
 
-  {#if mode === "regions" && selectedRegion && geoNetwork}
+  {#if mode === "regions" && selectedRegion && geoNetwork && !workspaceWindows().some((w) => w.tabs.some((t) => t.view.kind === "region" && t.view.key === selectedRegionKey))}
     {#key selectedRegionKey}
       <RegionPanel
         {installPath}
@@ -7310,7 +7940,7 @@
     {/key}
   {/if}
 
-  {#if isColonialMode && selectedColonialEntry && colonialData}
+  {#if isColonialMode && selectedColonialEntry && colonialData && !workspaceWindows().some((w) => w.tabs.some((t) => t.view.kind === "colonial" && t.view.key === selectedColonialKey))}
     {#key selectedColonialKey}
       <ColonialPanel
         {installPath}
@@ -7322,25 +7952,12 @@
         onclose={() => select(NONE)}
         onjump={colonialJump}
         ondeleted={onColonialDeleted}
-        onopenmechanics={(fam, key) => { mechanicsFamily = fam; mechanicsFocusKey = key ?? null; mechanicsOpen = true; }}
+        onopenmechanics={(fam, key) => openView({kind:"mechanics", family:fam, focusKey:key})}
       />
     {/key}
   {/if}
 
   {#if selectedProvinceId != null}
-    <ProvincePanel
-      {installPath}
-      {modPath}
-      {queue}
-      {calendar}
-      date={selectedDate}
-      startDate={effectiveStart}
-      id={selectedProvinceId}
-      onclose={() => select(NONE)}
-      onopencountry={openCountryInPolitical}
-      onopenculture={openCultureMode}
-      onopenmechanics={(fam, key) => { mechanicsFamily = fam; mechanicsFocusKey = key ?? null; mechanicsOpen = true; }}
-    />
     <!-- Reserve the bottom toolbar dock (province tools land in a later sprint). -->
     <BottomToolbar tools={[]}>
       {#snippet children()}
@@ -7357,7 +7974,7 @@
   {/if}
 
   <!-- Provinces mode: adjacency editor + add-strait tool (Sprint 25). -->
-  {#if mode === "provinces" && selectedAdj}
+  {#if mode === "provinces" && selectedAdj && !workspaceWindows().some((w) => w.tabs.some((t) => t.view.kind === "adjacency" && t.view.index === selectedAdjIndex))}
     {#key selectedAdjIndex}
       <AdjacencyPanel
         row={selectedAdj}
@@ -7412,6 +8029,70 @@
         {/snippet}
       </BottomToolbar>
     {/if}
+  {/if}
+
+  {#if mode === "province_colors"}
+    {#if armedTool === "pc_new"}
+      <PromptBanner
+        message="Drag over land to carve a new province · Esc cancels"
+        oncancel={() => onArm(null)}
+      />
+    {/if}
+    {#if armedTool === "pc_expand"}
+      <PromptBanner
+        message={pcSelectedId == null
+          ? "Click the province to expand · Esc cancels"
+          : `Drag to grow province ${pcSelectedId}; Shift-click a neighbour to absorb it whole · Esc`}
+        oncancel={() => onArm(null)}
+      />
+    {/if}
+    {#if armedTool === "pc_dissolve"}
+      <PromptBanner
+        message={pcSelectedId == null
+          ? "Click the province to dissolve · Esc cancels"
+          : `Click bordering provinces to divide province ${pcSelectedId} among them (${pcTargets.size} chosen) · Esc`}
+        oncancel={() => onArm(null)}
+      />
+    {/if}
+    <BottomToolbar
+      tools={[
+        { id: "pc_new", label: "New", icon: "＋", tooltip: "Carve a new province: drag over land to paint its pixels" },
+        { id: "pc_expand", label: "Expand", icon: "⤢", tooltip: "Click a province, then drag to grow it over neighbours (Shift-click a neighbour to absorb it whole)" },
+        { id: "pc_dissolve", label: "Dissolve", icon: "－", tooltip: "Click a province, then click bordering provinces to divide its pixels among them" },
+      ]}
+      bind:armed={armedTool}
+      onarm={onArm}
+    >
+      {#snippet children()}
+        <span class="tool-lead">Province Colors · edit the map bitmap</span>
+      {/snippet}
+      {#snippet extra()}
+        {#if armedTool === "pc_new" || armedTool === "pc_expand"}
+          <MapBrush bind:size={brushSize} />
+        {/if}
+        {#if armedTool === "pc_dissolve" && pcSelectedId != null}
+          <button
+            type="button"
+            class="pc-confirm"
+            disabled={pcTargets.size === 0}
+            onclick={confirmDissolve}
+          >
+            Dissolve into {pcTargets.size}
+          </button>
+        {/if}
+      {/snippet}
+    </BottomToolbar>
+  {/if}
+
+  {#if mode === "province_colors" && pcNamePrompt}
+    <InlineNamePrompt
+      x={pcNamePrompt.x}
+      y={pcNamePrompt.y}
+      bind:value={pcNewName}
+      label="Province"
+      onaccept={acceptPcName}
+      oncancel={cancelPcName}
+    />
   {/if}
 
   {#if mode === "political" && selectedTag}
@@ -7615,7 +8296,7 @@
 
   <!-- Climate / Winter: two-slot selector + paint brush (Sprint 11.1). -->
   {#if (mode === "climate" || mode === "winter") && climateModel}
-    <ClimatePanel
+    {#if !workspaceWindows().some((w) => w.tabs.some((t) => t.view.kind === "climate"))}<ClimatePanel
       model={climateModel}
       counts={climateCountMap}
       selSlot={climateSelSlot}
@@ -7623,7 +8304,7 @@
       mode={mode === "winter" ? "winter" : "climate"}
       bind:showWinterTint
       onselect={selectClimateEntry}
-    />
+    />{/if}
     {#if hasClimateSel}
       {#if brushArmed}
         <PromptBanner
@@ -7894,23 +8575,7 @@
     </BottomToolbar>
   {/if}
 
-  {#if mode === "development" && devSelectedId != null}
-    <ProvincePanel
-      {installPath}
-      {modPath}
-      {queue}
-      {calendar}
-      date={selectedDate}
-      startDate={effectiveStart}
-      id={devSelectedId}
-      scrollTo="development"
-      onclose={() => (devSelectedId = null)}
-      onopencountry={openCountryInPolitical}
-      onopenculture={openCultureMode}
-    />
-  {/if}
-
-  {#if brushArmed && brushCursor.on && !dragging}
+  {#if (brushArmed || pcBrushArmed) && brushCursor.on && !dragging}
     <div
       class="brush-cursor"
       style="left: {brushCursor.x}px; top: {brushCursor.y}px; width: {brushCursor.d}px; height: {brushCursor.d}px;"
@@ -7940,152 +8605,140 @@
 <!-- Mass dynasty management (Sprint 1.3), opened from the Edit menu. -->
 <DynastyModal bind:open={dynastiesOpen} mode="manage" {queue} {installPath} {modPath} />
 
-<DecisionsOverlay
-  bind:open={decisionsOpen}
-  {installPath}
-  {modPath}
-  {selectedDate}
-  {queue}
-  onjumpcountry={openCountryInPolitical}
-/>
-
-<EventsOverlay
-  bind:open={eventsOpen}
-  {installPath}
-  {modPath}
-  {selectedDate}
-  {queue}
-  onjumpcountry={openCountryInPolitical}
-/>
-
-<MissionsOverlay
-  bind:open={missionsOpen}
-  {installPath}
-  {modPath}
-  {selectedDate}
-  {queue}
-/>
-
-<GovernmentNamesOverlay
-  bind:open={govNamesOpen}
-  {installPath}
-  {modPath}
-  {queue}
-  focusKey={govNamesFocusKey}
-  onfocused={() => (govNamesFocusKey = null)}
-/>
-
-<EstatesOverlay
-  bind:open={estatesOpen}
-  {installPath}
-  {modPath}
-  date={selectedDate}
-  {queue}
-  focusKey={estatesFocusKey}
-  onfocused={() => (estatesFocusKey = null)}
-  onopencountry={openCountryInPolitical}
-/>
-
-<RebelsOverlay
-  bind:open={rebelsOpen}
-  {installPath}
-  {modPath}
-  date={selectedDate}
-  {queue}
-  onopenprovince={openProvince}
-/>
-
-<MechanicsOverlay
-  bind:open={mechanicsOpen}
-  bind:family={mechanicsFamily}
-  bind:focusKey={mechanicsFocusKey}
-  {installPath}
-  {modPath}
-  date={selectedDate}
-  {queue}
-  onopenevents={() => { mechanicsOpen = false; eventsOpen = true; }}
-  onopennaming={() => { govNamesFocusKey = null; govNamesOpen = true; }}
-/>
-
-<ColorPoolsOverlay
-  bind:open={colorPoolsOpen}
-  {installPath}
-  {modPath}
-  {queue}
-/>
-
-<EmpiresOverlay
-  bind:open={empiresOpen}
-  {installPath}
-  {modPath}
-  date={selectedDate}
-  startDate={effectiveStart}
-  {queue}
-  onhighlightmembers={(ids) => { hreHighlightIds = ids ? new Set(ids) : null; if (mode === "political") updateHighlight(); }}
-  onopenevents={() => { empiresOpen = false; eventsOpen = true; }}
-  onopenreligion={() => { empiresOpen = false; setMode("religion"); }}
-/>
-
-<TechnologyOverlay
-  bind:open={technologyOpen}
-  {installPath}
-  {modPath}
-  {queue}
-/>
-
-<ScriptedOverlay
-  bind:open={scriptedOpen}
-  bind:focusName={scriptedFocus}
-  {installPath}
-  {modPath}
-  {queue}
-/>
-
-<OnActionsOverlay
-  bind:open={onActionsOpen}
-  {installPath}
-  {modPath}
-  {queue}
-/>
-
-<LocalisationOverlay
-  bind:open={localisationOpen}
-  {installPath}
-  {modPath}
-  {queue}
-/>
-
-<DefinesOverlay
-  bind:open={definesOpen}
-  {installPath}
-  {modPath}
-  {queue}
-/>
+{#each workspaceWindows() as workspaceWindow (workspaceWindow.id)}
+  <WorkspaceWindow window={workspaceWindow}>
+    {#snippet children(tab)}
+      {#if tab.view.kind === "estates"}
+        <EstatesOverlay
+          {installPath}
+          {modPath}
+          date={selectedDate}
+          {queue}
+          focusKey={tab.view.focusKey ?? null}
+          onfocused={() => openView({ kind: "estates" }, "reuse")}
+          onopencountry={openCountryInPolitical}
+        />
+      {:else if tab.view.kind === "country"}
+        <CountryPanel
+          embedded
+          {installPath}
+          {modPath}
+          {queue}
+          {calendar}
+          date={selectedDate}
+          startDate={effectiveStart}
+          tag={tab.view.tag}
+          contentTab={tab.view.tab}
+          onopenmissions={(tag) => openView({kind:"missions", tag})}
+          onopenevents={() => openView({kind:"events"})}
+          onopendecisions={() => openView({kind:"decisions"})}
+          seed={countryScaffoldSeeds.get(tab.view.tag) ?? null}
+          oncolor={onCountryColor}
+          {capitalRequest}
+          oncapitalapplied={() => (capitalRequest = null)}
+          provNamePick={provNamePick}
+          onarmprovnamepick={() => onArm("pick_prov_name")}
+          onprovnamepickconsumed={() => (provNamePick = null)}
+          onopencountry={openCountryInPolitical}
+          onopenprovince={openProvince}
+          onzoomtoprovince={centerOnProvince}
+          onremovepending={removePendingCreatedCountry}
+          onopennaming={(schemeKey) => openView({kind:"government-names", focusKey:schemeKey})}
+          onopenestates={(key) => openView({ kind: "estates", focusKey: key }, "reuse")}
+          onopenmechanics={(fam, key) => openView({kind:"mechanics", family:fam, focusKey:key})}
+          onclose={() => closeTab(tab.id)}
+        />
+      {:else if tab.view.kind === "province"}
+        <ProvincePanel
+          embedded
+          {installPath}
+          {modPath}
+          {queue}
+          {calendar}
+          date={selectedDate}
+          startDate={effectiveStart}
+          id={tab.view.id}
+          contentTab={tab.view.tab}
+          onclose={() => closeTab(tab.id)}
+          onopencountry={openCountryInPolitical}
+          onopenculture={openCultureMode}
+          onopenmechanics={(fam, key) => openView({kind:"mechanics", family:fam, focusKey:key})}
+        />
+      {:else if tab.view.kind === "religion"}
+        <ReligionPanel {installPath} {modPath} {queue} religionKey={tab.view.key} seed={createdSeed?.key === tab.view.key ? createdSeed : null} oncolor={onReligionColor} onjumpcountry={openCountryInPolitical} onjumpprovince={openProvince} onopenmechanics={(fam) => openView({kind:"mechanics",family:fam})} onclose={() => closeTab(tab.id)} />
+      {:else if tab.view.kind === "culture"}
+        <CulturePanel {installPath} {modPath} {queue} cultureKey={tab.view.key} seed={createdCultureSeed?.key === tab.view.key ? createdCultureSeed : null} oncolor={onCultureColor} onjumpcountry={openCountryInPolitical} onjumpprovince={openProvince} provNamePick={provNamePick} onarmprovnamepick={() => onArm("pick_prov_name")} onprovnamepickconsumed={() => (provNamePick = null)} onclose={() => closeTab(tab.id)} />
+      {:else if tab.view.kind === "trade-node" && tradeNetwork}
+        {@const key = tab.view.key}
+        {@const node = tradeNetwork.nodes.find((x) => x.key === key)}
+        {#if node}<TradeNodePanel {installPath} {modPath} {queue} network={tradeNetwork} {node} colorPresent={baseColorPresent.has(key) || createdNodeKeys.has(key)} mapH={tradeNetwork.map_height} issues={tradeIssues} {selectedRoute} onclose={() => closeTab(tab.id)} onselectnode={selectNodeByKey} onselectroute={selectRouteRef} onsetlocation={() => onArm("tn_set_location")} onaddroute={() => onArm("tn_add_route")} ondeleted={onNodeDeleted} onjump={tradeJump} onopenmechanics={(fam,key) => openView({kind:"mechanics",family:fam,focusKey:key})} />{/if}
+      {:else if tab.view.kind === "area" && geoNetwork}
+        {@const key = tab.view.key}
+        {@const area = geoNetwork.areas.find((x) => x.key === key)}
+        {#if area}<AreaPanel {queue} network={geoNetwork} {area} issues={geoIssues} onclose={() => closeTab(tab.id)} onjump={geoJump} ondeleted={onGeoDeleted} />{/if}
+      {:else if tab.view.kind === "region" && geoNetwork}
+        {@const key = tab.view.key}
+        {@const region = geoNetwork.regions.find((x) => x.key === key)}
+        {#if region}<RegionPanel {installPath} {modPath} {queue} network={geoNetwork} {region} issues={geoIssues} onclose={() => closeTab(tab.id)} onjumparea={jumpToAreaMode} onjump={geoJump} ondeleted={onGeoDeleted} />{/if}
+      {:else if tab.view.kind === "colonial" && colonialData}
+        {@const key = tab.view.key}
+        {@const entry = colonialData.entries.find((x) => x.key === key)}
+        {#if entry}<ColonialPanel {installPath} {modPath} {queue} data={colonialData} {entry} issues={selectedColonialIssues} onclose={() => closeTab(tab.id)} onjump={colonialJump} ondeleted={onColonialDeleted} onopenmechanics={(fam,key) => openView({kind:"mechanics",family:fam,focusKey:key})} />{/if}
+      {:else if tab.view.kind === "adjacency" && effectiveAdj[tab.view.index]}
+        {@const index = tab.view.index}
+        <AdjacencyPanel row={effectiveAdj[index]} waterIds={adjWater} issues={adjIssues.filter((i) => i.row === index)} armed={armedTool} onchange={onAdjChange} onpickendpoint={(which) => onArm(which === "from" ? "adj_pick_from" : "adj_pick_to")} onpickthrough={() => onArm("adj_pick_through")} ondelete={deleteAdj} onclose={() => closeTab(tab.id)} />
+      {:else if tab.view.kind === "climate" && climateModel}
+        <ClimatePanel model={climateModel} counts={climateCountMap} selSlot={climateSelSlot} selKey={climateSelKey} mode={tab.view.key === "winter" ? "winter" : "climate"} bind:showWinterTint onselect={selectClimateEntry} />
+      {:else if tab.view.kind === "decisions"}
+        <DecisionsOverlay open {installPath} {modPath} {selectedDate} {queue} onjumpcountry={openCountryInPolitical} />
+      {:else if tab.view.kind === "events"}
+        <EventsOverlay open {installPath} {modPath} {selectedDate} {queue} onjumpcountry={openCountryInPolitical} />
+      {:else if tab.view.kind === "missions"}
+        <MissionsOverlay open {installPath} {modPath} {selectedDate} {queue} />
+      {:else if tab.view.kind === "government-names"}
+        <GovernmentNamesOverlay open {installPath} {modPath} {queue} focusKey={tab.view.focusKey ?? null} />
+      {:else if tab.view.kind === "rebels"}
+        <RebelsOverlay open {installPath} {modPath} date={selectedDate} {queue} onopenprovince={openProvince} />
+      {:else if tab.view.kind === "mechanics"}
+        <MechanicsOverlay open family={tab.view.family ?? null} focusKey={tab.view.focusKey ?? null} {installPath} {modPath} date={selectedDate} {queue} onopenevents={() => openView({kind:"events"})} onopennaming={() => openView({kind:"government-names"})} />
+      {:else if tab.view.kind === "color-pools"}
+        <ColorPoolsOverlay open {installPath} {modPath} {queue} />
+      {:else if tab.view.kind === "empires"}
+        <EmpiresOverlay open {installPath} {modPath} date={selectedDate} startDate={effectiveStart} {queue} onhighlightmembers={(ids) => { hreHighlightIds = ids ? new Set(ids) : null; if (mode === "political") updateHighlight(); }} onopenevents={() => openView({kind:"events"})} onopenreligion={() => setMode("religion")} />
+      {:else if tab.view.kind === "technology"}
+        <TechnologyOverlay open {installPath} {modPath} {queue} />
+      {:else if tab.view.kind === "scripted"}
+        <ScriptedOverlay open focusName={tab.view.focusKey ?? null} {installPath} {modPath} {queue} />
+      {:else if tab.view.kind === "on-actions"}
+        <OnActionsOverlay open {installPath} {modPath} {queue} />
+      {:else if tab.view.kind === "localisation"}
+        <LocalisationOverlay open {installPath} {modPath} {queue} />
+      {:else if tab.view.kind === "defines"}
+        <DefinesOverlay open {installPath} {modPath} {queue} />
+      {:else if tab.view.kind === "problems"}
+        <ProblemsOverlay open reports={problemsReports} running={problemsRunning} hasRun={problemsHasRun} onrerun={runProblems} onjump={problemsJump} />
+      {:else if tab.view.kind === "search"}
+        <SearchOverlay open {installPath} {modPath} onroute={searchJump} />
+      {:else if tab.view.kind === "project-changes"}
+        <ProjectChangesOverlay open {installPath} {modPath} />
+      {:else if tab.view.kind === "edits"}
+        <EditsPanel {queue} saved={savedComposites} onclose={() => closeTab(tab.id)} onjump={editJump} />
+      {:else if tab.view.kind === "new-tab"}
+        <NewTabView {installPath} {modPath} tabId={tab.id} onopen={openEntityFromPicker} />
+      {:else if tab.view.kind === "shortcuts"}
+        <ShortcutsView />
+      {:else}
+        <EmptyState title="Nothing to show yet" detail="This view has no matching entity in the current session, or its data is still loading." />
+      {/if}
+    {/snippet}
+  </WorkspaceWindow>
+{/each}
 
 <!-- Problems dashboard (Sprint 30.2): aggregate validation across every domain. -->
-<ProblemsOverlay
-  bind:open={problemsOpen}
-  reports={problemsReports}
-  running={problemsRunning}
-  hasRun={problemsHasRun}
-  onrerun={runProblems}
-  onjump={problemsJump}
-/>
 
 <!-- Project-wide search (Sprint 30.3): Ctrl+Shift+F. -->
-<SearchOverlay
-  bind:open={searchOpen}
-  {installPath}
-  {modPath}
-  onroute={searchJump}
-/>
 
 <!-- Mod-vs-base diff browser (Sprint 30.4): View ▸ Project Changes. -->
-<ProjectChangesOverlay
-  bind:open={projectChangesOpen}
-  {installPath}
-  {modPath}
-/>
 
 {#if workshop}
   <WorkshopModal
@@ -8105,7 +8758,7 @@
   .map-screen {
     position: fixed;
     inset: 0;
-    background: #14181d;
+    background: var(--bg-0);
     overflow: hidden;
   }
 
@@ -8140,8 +8793,22 @@
 
   .tool-lead {
     font-weight: 600;
-    color: #cfd4db;
+    color: var(--text-1);
     white-space: nowrap;
+  }
+
+  .pc-confirm {
+    padding: var(--sp-1) var(--sp-3);
+    border: 1px solid var(--accent);
+    border-radius: var(--r-1);
+    background: var(--accent);
+    color: var(--bg-0);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .pc-confirm:disabled {
+    opacity: 0.5;
+    cursor: default;
   }
 
   .ng-check {
@@ -8150,28 +8817,12 @@
     gap: 0.3rem;
     margin-left: 0.6rem;
     font-size: 0.78rem;
-    color: #cfd4db;
+    color: var(--text-1);
     white-space: nowrap;
     cursor: pointer;
   }
   .ng-check input {
     cursor: pointer;
-  }
-
-  .toolbar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.25rem 0.5rem;
-    background: #3f4855;
-    border-bottom: 1px solid #2b323d;
-    color: #cfd4db;
-    font-size: 0.9rem;
   }
 
   .menu-backdrop {
@@ -8201,8 +8852,8 @@
 
   .menu-btn:hover,
   .menu-btn.open {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .dropdown {
@@ -8214,8 +8865,8 @@
     flex-direction: column;
     padding: 2px;
     border-radius: 0;
-    background: #3f4855;
-    border: 1px solid #2b323d;
+    background: var(--bg-3);
+    border: 1px solid var(--bg-2);
     box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.35);
   }
 
@@ -8226,7 +8877,7 @@
     border: none;
     border-radius: 0;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.88rem;
     text-align: left;
@@ -8236,28 +8887,28 @@
   }
 
   .dropdown button:hover:not(:disabled) {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .dropdown button:disabled {
-    color: #8a919c;
+    color: var(--text-2);
     cursor: default;
   }
 
   .dropdown hr {
     border: none;
-    border-top: 1px solid #2b323d;
+    border-top: 1px solid var(--bg-2);
     margin: 2px 0;
   }
 
   .shortcut {
-    color: #9ca3af;
+    color: var(--text-2);
     font-size: 0.8rem;
   }
 
   .saved {
-    color: #86efac;
+    color: var(--ok);
     font-size: 0.85rem;
     white-space: nowrap;
   }
@@ -8267,35 +8918,46 @@
     white-space: nowrap;
   }
 
+  .title-btn {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--r-1);
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    padding: 1px var(--sp-1);
+    cursor: text;
+  }
+
+  .title-btn:hover {
+    border-color: var(--border-strong);
+    background: var(--bg-hover);
+  }
+
+  .title-edit {
+    background: var(--bg-0);
+    border: 1px solid var(--accent);
+    border-radius: var(--r-1);
+    color: var(--text-1);
+    font: inherit;
+    font-weight: 700;
+    padding: 1px var(--sp-1);
+    min-width: 14rem;
+  }
+
   .path {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .zoom {
     min-width: 3.5rem;
     text-align: right;
     font-variant-numeric: tabular-nums;
-    color: #9ca3af;
-  }
-
-  .toolbar button {
-    border: 1px solid #4b5563;
-    border-radius: 6px;
-    background: transparent;
-    color: inherit;
-    font-family: inherit;
-    font-size: 0.85rem;
-    padding: 0.3rem 0.7rem;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-
-  .toolbar button:hover {
-    border-color: #9ca3af;
+    color: var(--text-2);
   }
 
   .modes {
@@ -8308,7 +8970,7 @@
     flex-direction: column;
     border-radius: 10px;
     background: rgba(20, 24, 29, 0.85);
-    color: #e5e7eb;
+    color: var(--text-1);
     backdrop-filter: blur(4px);
     /* Map-anchored chrome layer: above every map overlay canvas (5), below
        only the menu/toolbar + docked panels (10). */
@@ -8321,7 +8983,7 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .modes ul {
@@ -8360,8 +9022,8 @@
     letter-spacing: 0.03em;
     padding: 0.12rem 0.3rem;
     border-radius: 3px;
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .mode:hover:not(:disabled) {
@@ -8386,7 +9048,7 @@
     display: inline-block;
     width: 0.9rem;
     text-align: center;
-    color: #8fc7ff;
+    color: var(--accent-text);
   }
 
   /* Count badge on View-menu entries (Edits queue size / Problems total). */
@@ -8397,12 +9059,12 @@
     padding: 0.02rem 0.35rem;
     font-size: 0.7rem;
     font-variant-numeric: tabular-nums;
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
     border: 1px solid rgba(0, 0, 0, 0.35);
   }
   .dropdown button .menu-badge.err {
-    background: #c0392b;
+    background: var(--err);
   }
 
   /* Trade-detail hover tooltip (S3.3): follows the cursor over the map. */
@@ -8411,10 +9073,10 @@
     z-index: 20; /* popover: above overlay canvases (5) + map-anchored chrome (9) */
     max-width: 18rem;
     padding: 0.3rem 0.55rem;
-    border: 1px solid #2b323d;
+    border: 1px solid var(--bg-2);
     border-radius: 4px;
     background: rgba(20, 24, 29, 0.92);
-    color: #eef1f5;
+    color: var(--text-inverse);
     font-size: 0.78rem;
     pointer-events: none;
     white-space: nowrap;
@@ -8434,21 +9096,23 @@
     padding: 0.3rem 0.6rem;
     border-radius: 6px;
     background: rgba(20, 24, 29, 0.85);
-    color: #e5e7eb;
+    color: var(--text-1);
     font-size: 0.8rem;
     cursor: pointer;
     user-select: none;
   }
 
+  /* Bottom-anchored map chrome clears the BottomToolbar when one is mounted
+     (it publishes its measured height as --bottom-toolbar-h). */
   .country-label {
     position: absolute;
-    bottom: 1rem;
+    bottom: calc(1rem + var(--bottom-toolbar-h, 0px));
     left: 1rem;
     z-index: 9; /* map-anchored chrome: above overlay canvases (5) */
     padding: 0.35rem 0.9rem;
     border-radius: 6px;
     background: rgba(20, 24, 29, 0.85);
-    color: #e5e7eb;
+    color: var(--text-1);
     font-size: 1rem;
     font-weight: 600;
     pointer-events: none;
@@ -8458,26 +9122,26 @@
     margin-left: 0.6rem;
     font-size: 0.8rem;
     font-weight: 500;
-    color: #e0b070;
+    color: var(--warn);
   }
 
   .chip {
     position: absolute;
-    bottom: 1rem;
+    bottom: calc(1rem + var(--bottom-toolbar-h, 0px));
     left: 50%;
     transform: translateX(-50%);
     padding: 0.4rem 1rem;
     border-radius: 999px;
     background: rgba(20, 24, 29, 0.85);
-    color: #e5e7eb;
+    color: var(--text-1);
     font-size: 0.85rem;
   }
 
   .chip.notice {
-    bottom: 3rem;
+    bottom: calc(3rem + var(--bottom-toolbar-h, 0px));
     background: rgba(63, 72, 85, 0.95);
-    border: 1px solid #f0b429;
-    color: #f5d78a;
+    border: 1px solid var(--warn);
+    color: var(--warn);
   }
 
   /* --- Date selector chip (Sprint 12.1) --- */
@@ -8494,10 +9158,10 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.35rem 0.7rem;
-    border: 1px solid #2b323d;
+    border: 1px solid var(--bg-2);
     border-radius: 0;
-    background: #3f4855;
-    color: #cfd4db;
+    background: var(--bg-3);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     cursor: pointer;
@@ -8506,8 +9170,8 @@
   }
 
   .date-chip:hover {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .date-chip.busy {
@@ -8526,14 +9190,14 @@
 
   .caret {
     font-size: 0.7rem;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .date-spinner {
     width: 0.8rem;
     height: 0.8rem;
     border: 2px solid rgba(207, 212, 219, 0.35);
-    border-top-color: #cfd4db;
+    border-top-color: var(--text-1);
     border-radius: 50%;
     animation: date-spin 0.7s linear infinite;
   }
@@ -8561,8 +9225,8 @@
     width: 19rem;
     display: flex;
     flex-direction: column;
-    background: #3f4855;
-    border: 1px solid #2b323d;
+    background: var(--bg-3);
+    border: 1px solid var(--bg-2);
     box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.4);
   }
 
@@ -8571,7 +9235,7 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .bookmark-list {
@@ -8591,7 +9255,7 @@
     border: none;
     border-radius: 0;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     text-align: left;
@@ -8600,8 +9264,8 @@
   }
 
   .bookmark-row:hover {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .bookmark-row.current {
@@ -8609,7 +9273,7 @@
   }
 
   .bookmark-row .check {
-    color: #86efac;
+    color: var(--ok);
     text-align: center;
   }
 
@@ -8620,19 +9284,19 @@
   }
 
   .bm-date {
-    color: #9ca3af;
+    color: var(--text-2);
     font-variant-numeric: tabular-nums;
     font-size: 0.78rem;
     white-space: nowrap;
   }
 
   .bookmark-row:hover .bm-date {
-    color: #dbe4f0;
+    color: var(--text-1);
   }
 
   .bookmark-list .empty {
     padding: 0.5rem;
-    color: #8a919c;
+    color: var(--text-2);
     font-size: 0.82rem;
   }
 
@@ -8643,14 +9307,14 @@
     margin: 0 2px 0.25rem;
     padding: 0.35rem 0.5rem;
     background: rgba(161, 102, 47, 0.22);
-    border: 1px solid #a1662f;
-    color: #f0d3b0;
+    border: 1px solid var(--warn);
+    color: var(--warn);
     font-size: 0.74rem;
     line-height: 1.3;
   }
 
   .rw-icon {
-    color: #e2a25a;
+    color: var(--warn);
     line-height: 1.2;
   }
 
@@ -8660,15 +9324,15 @@
   }
 
   .bookmark-line.oor .bookmark-row {
-    color: #f0d3b0;
+    color: var(--warn);
   }
 
   .extend-btn {
     align-self: flex-end;
     margin: 0 0.5rem 0.25rem;
-    border: 1px solid #a1662f;
-    background: #3f4855;
-    color: #f0d3b0;
+    border: 1px solid var(--warn);
+    background: var(--bg-3);
+    color: var(--warn);
     font-family: inherit;
     font-size: 0.72rem;
     padding: 0.1rem 0.5rem;
@@ -8676,13 +9340,13 @@
   }
 
   .extend-btn:hover {
-    background: #a1662f;
-    color: #fff;
+    background: var(--warn);
+    color: var(--text-inverse);
   }
 
   .date-menu hr {
     border: none;
-    border-top: 1px solid #2b323d;
+    border-top: 1px solid var(--bg-2);
     margin: 2px 0;
   }
 
@@ -8690,7 +9354,7 @@
     border: none;
     border-radius: 0;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     text-align: left;
@@ -8699,8 +9363,8 @@
   }
 
   .new-date-btn:hover {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .new-date-form {
@@ -8714,13 +9378,13 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #9ca3af;
+    color: var(--text-2);
   }
 
   .nd-name {
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.85rem;
     padding: 0.3rem 0.4rem;
@@ -8729,13 +9393,13 @@
 
   .nd-hint {
     font-size: 0.75rem;
-    color: #f5d78a;
+    color: var(--warn);
     line-height: 1.3;
   }
 
   .nd-error {
     font-size: 0.78rem;
-    color: #fca5a5;
+    color: var(--err);
   }
 
   .nd-actions {
@@ -8746,10 +9410,10 @@
 
   .nd-ok,
   .nd-cancel {
-    border: 1px solid #2b323d;
+    border: 1px solid var(--bg-2);
     border-radius: 0;
-    background: #2b323d;
-    color: #cfd4db;
+    background: var(--bg-2);
+    color: var(--text-1);
     font-family: inherit;
     font-size: 0.82rem;
     padding: 0.3rem 0.7rem;
@@ -8757,13 +9421,13 @@
   }
 
   .nd-ok:hover {
-    background: #4a6da7;
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
 
   .nd-cancel:hover {
-    background: #7a3f3f;
-    color: #ffffff;
+    background: var(--danger-bg);
+    color: var(--text-inverse);
   }
 
   .static-note {
@@ -8774,9 +9438,9 @@
     z-index: 9;
     max-width: 32rem;
     padding: 0.4rem 0.9rem;
-    background: #3f4855;
-    border: 1px solid #f0b429;
-    color: #f5d78a;
+    background: var(--bg-3);
+    border: 1px solid var(--warn);
+    color: var(--warn);
     font-size: 0.82rem;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
   }
@@ -8789,18 +9453,18 @@
     align-items: center;
     justify-content: center;
     gap: 1rem;
-    color: #e5e7eb;
+    color: var(--text-1);
     background: rgba(20, 24, 29, 0.6);
   }
 
   .overlay .error {
     max-width: 40rem;
-    color: #fca5a5;
+    color: var(--err);
     text-align: center;
   }
 
   .overlay button {
-    border: 1px solid #4b5563;
+    border: 1px solid var(--border-strong);
     border-radius: 6px;
     background: transparent;
     color: inherit;

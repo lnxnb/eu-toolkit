@@ -120,9 +120,9 @@
     width: 21rem;
     display: flex;
     flex-direction: column;
-    background: #2b323d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-size: 0.9rem;
     box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.4);
   }
@@ -132,8 +132,8 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.4rem 0.6rem;
-    background: #3f4855;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
   }
   .title {
     font-weight: 700;
@@ -141,8 +141,8 @@
   .badge {
     font-size: 0.72rem;
     padding: 0.12rem 0.4rem;
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
     font-variant-numeric: tabular-nums;
   }
   .scroll {
@@ -158,7 +158,7 @@
     gap: 0.1rem 0.5rem;
     width: 100%;
     border: none;
-    border-bottom: 1px solid #1f242c;
+    border-bottom: 1px solid var(--border);
     background: transparent;
     color: inherit;
     font-family: inherit;
@@ -171,11 +171,11 @@
   }
   .row.selected {
     background: rgba(74, 109, 167, 0.28);
-    outline: 1px solid #4a6da7;
+    outline: 1px solid var(--accent);
     outline-offset: -1px;
   }
   .row.auto {
-    background: #262c35;
+    background: var(--bg-2);
   }
   .row.auto.selected {
     background: rgba(74, 109, 167, 0.32);
@@ -183,15 +183,15 @@
   .swatch {
     width: 22px;
     height: 22px;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
     grid-row: 1 / span 2;
   }
   .swatch.none {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #14181d;
-    color: #8a919c;
+    background: var(--bg-0);
+    color: var(--text-2);
   }
   .sub1 {
     display: flex;
@@ -203,7 +203,7 @@
     flex: 1;
     min-width: 0;
     font-size: 0.88rem;
-    color: #e5e7eb;
+    color: var(--text-1);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -212,18 +212,18 @@
     flex: none;
     font-size: 0.76rem;
     font-variant-numeric: tabular-nums;
-    color: #9ca3af;
+    color: var(--text-2);
   }
   .sub2 {
     grid-column: 2;
     font-size: 0.72rem;
-    color: #b9bec7;
+    color: var(--text-1);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   .sub2.dim {
-    color: #8a919c;
+    color: var(--text-2);
   }
   .tag {
     font-size: 0.62rem;
@@ -232,25 +232,25 @@
     vertical-align: middle;
   }
   .tag.water {
-    background: #35506b;
-    color: #cfe3f5;
+    background: var(--accent);
+    color: var(--accent-text);
   }
   .props-panel {
     flex: none;
     max-height: 45%;
     overflow-y: auto;
-    border-top: 1px solid #1f242c;
-    background: #262c35;
+    border-top: 1px solid var(--border);
+    background: var(--bg-2);
   }
   .props-head {
     padding: 0.35rem 0.6rem;
-    background: #3f4855;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
   }
   .props-title {
     font-size: 0.78rem;
     font-weight: 700;
-    color: #e5e7eb;
+    color: var(--text-1);
   }
   .props-body {
     padding: 0.45rem 0.6rem;
@@ -261,12 +261,12 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.35rem 0.6rem;
-    background: #262c35;
-    border-top: 1px solid #1f242c;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
     font-size: 0.78rem;
   }
   .s-id {
-    color: #9ca3af;
+    color: var(--text-2);
     font-variant-numeric: tabular-nums;
   }
   .s-name {
@@ -275,20 +275,20 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #e5e7eb;
+    color: var(--text-1);
   }
   .s-flag {
     flex: none;
     font-size: 0.68rem;
     padding: 0.05rem 0.35rem;
-    background: #3a4453;
-    color: #b9bec7;
+    background: var(--bg-3);
+    color: var(--text-1);
   }
   .s-flag.override {
-    background: #4a6da7;
-    color: #fff;
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .dim {
-    color: #8a919c;
+    color: var(--text-2);
   }
 </style>

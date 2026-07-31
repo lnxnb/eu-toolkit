@@ -78,17 +78,17 @@
 </div>
 
 <style>
-  .links { margin-top: 0.3rem; font-size: 0.8rem; color: #cfd4db; display: flex; flex-direction: column; gap: 0.3rem; }
+  .links { margin-top: 0.3rem; font-size: 0.8rem; color: var(--text-1); display: flex; flex-direction: column; gap: 0.3rem; }
   .fwd { display: flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; }
-  .lbl { color: #9ca3af; font-size: 0.76rem; }
-  .ev { border: 1px solid #2f3946; background: #1b2027; color: #cfd4db; font-family: inherit; font-size: 0.74rem; padding: 0.1rem 0.35rem; cursor: pointer; }
-  .ev:hover { border-color: #4a6da7; background: #303844; }
-  .load { border: 1px solid #4b5563; background: #2b323d; color: #cfd4db; font-family: inherit; font-size: 0.76rem; padding: 0.2rem 0.5rem; cursor: pointer; align-self: flex-start; }
-  .load:hover { border-color: #4a6da7; background: #4a6da7; color: #fff; }
-  code { color: #9aecc0; background: #16191f; padding: 0 0.25rem; font-size: 0.74rem; }
+  .lbl { color: var(--text-2); font-size: 0.76rem; }
+  .ev { border: 1px solid var(--bg-3); background: var(--bg-1); color: var(--text-1); font-family: inherit; font-size: 0.74rem; padding: 0.1rem 0.35rem; cursor: pointer; }
+  .ev:hover { border-color: var(--accent); background: var(--bg-3); }
+  .load { border: 1px solid var(--border-strong); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 0.76rem; padding: 0.2rem 0.5rem; cursor: pointer; align-self: flex-start; }
+  .load:hover { border-color: var(--accent); background: var(--accent); color: var(--text-inverse); }
+  code { color: var(--ok); background: var(--bg-0); padding: 0 0.25rem; font-size: 0.74rem; }
   .files { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.15rem; }
-  .file { color: #b9bec7; background: #16191f; padding: 0.05rem 0.3rem; font-size: 0.72rem; }
-  .cnt { color: #8a919c; margin-left: 0.2rem; }
-  .dim { color: #9ca3af; }
-  .err { color: #fca5a5; }
+  .file { color: var(--text-1); background: var(--bg-0); padding: 0.05rem 0.3rem; font-size: 0.72rem; }
+  .cnt { color: var(--text-2); margin-left: 0.2rem; }
+  .dim { color: var(--text-2); }
+  .err { color: var(--err); }
 </style>

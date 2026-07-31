@@ -143,26 +143,26 @@
 
 <style>
   .etl { display: flex; flex-direction: column; gap: 0.5rem; }
-  .cur { font-size: 0.9rem; color: #cfd4db; padding: 0.2rem 0; }
-  .curlabel { color: #8a919c; }
-  .cur code { color: #9aecc0; background: #16191f; padding: 0 0.3rem; font-size: 0.78rem; }
+  .cur { font-size: 0.9rem; color: var(--text-1); padding: 0.2rem 0; }
+  .curlabel { color: var(--text-2); }
+  .cur code { color: var(--ok); background: var(--bg-0); padding: 0 0.3rem; font-size: 0.78rem; }
   .rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-  .row { display: flex; align-items: center; gap: 0.5rem; padding: 0.28rem 0.3rem; border-bottom: 1px solid #1f242c; }
+  .row { display: flex; align-items: center; gap: 0.5rem; padding: 0.28rem 0.3rem; border-bottom: 1px solid var(--border); }
   .row.future { opacity: 0.7; }
-  .date { font-family: monospace; font-size: 0.8rem; color: #c9a978; width: 6.5rem; flex: none; }
+  .date { font-family: monospace; font-size: 0.8rem; color: var(--warn); width: 6.5rem; flex: none; }
   .tagsel { width: 14rem; }
-  .cname { font-size: 0.84rem; color: #cfd4db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 12rem; }
-  .badge { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.05rem 0.35rem; border: 1px solid #1f242c; }
-  .badge.future { background: #2b323d; color: #8a919c; }
-  .badge.warn { background: #5a2b2b; color: #f0c9c2; }
-  .del { margin-left: auto; border: 1px solid #1f242c; background: #3f4855; color: #cfd4db; cursor: pointer; font-size: 0.75rem; padding: 0.1rem 0.4rem; }
-  .del:hover { background: #7a3b3b; color: #fff; }
-  .empty { color: #8a919c; font-size: 0.85rem; padding: 0.3rem 0; }
+  .cname { font-size: 0.84rem; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 12rem; }
+  .badge { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.05rem 0.35rem; border: 1px solid var(--border); }
+  .badge.future { background: var(--bg-2); color: var(--text-2); }
+  .badge.warn { background: var(--danger-bg); color: var(--err); }
+  .del { margin-left: auto; border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1); cursor: pointer; font-size: 0.75rem; padding: 0.1rem 0.4rem; }
+  .del:hover { background: var(--danger-bg); color: var(--text-inverse); }
+  .empty { color: var(--text-2); font-size: 0.85rem; padding: 0.3rem 0; }
   .addrow { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; padding-top: 0.3rem; }
-  .add { border: 1px solid #1f242c; background: #3f4855; color: #cfd4db; font-family: inherit; font-size: 0.82rem; padding: 0.28rem 0.7rem; cursor: pointer; }
-  .add:hover:not(:disabled) { background: #4a6da7; color: #fff; }
+  .add { border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 0.82rem; padding: 0.28rem 0.7rem; cursor: pointer; }
+  .add:hover:not(:disabled) { background: var(--accent); color: var(--text-inverse); }
   .add:disabled { opacity: 0.5; cursor: default; }
-  .note { font-size: 0.76rem; color: #6d7683; margin: 0.1rem 0 0; }
-  .note code { color: #9aecc0; }
-  .err { color: #d9756b; font-size: 0.85rem; }
+  .note { font-size: 0.76rem; color: var(--text-3); margin: 0.1rem 0 0; }
+  .note code { color: var(--ok); }
+  .err { color: var(--err); font-size: 0.85rem; }
 </style>

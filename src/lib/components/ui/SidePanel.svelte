@@ -2,13 +2,17 @@
   SidePanel — the shared right-side panel shell (country/diplomacy, province, thin
   panels). Fixed header, optional tab strip, scrollable body. Matches the existing
   right-side panel geometry (top: 3rem; right/bottom: 0.75rem; width: 20rem) but in
-  Windows-classic square-cornered chrome per AGENTS.md.
+  legacy dock chrome. Sprint 31's Country/Province proof can render it embedded
+  in WorkspaceWindow; Sprint 32 replaces this bridge with the full adapter.
 
   z-index: 10 — the docked "surface" layer, same as the top/bottom toolbars.
   Anchored popovers (dropdowns, color/date) float above it at 20; modals sit at 100.
 -->
 <script lang="ts">
-  import type { Snippet } from "svelte";
+  import { getContext, type Snippet } from "svelte";
+  import TabStrip from "$lib/components/workspace/TabStrip.svelte";
+
+  const workspaceHosted = getContext<boolean>("eu-toolkit-workspace-window") ?? false;
 
   interface Tab {
     id: string;
@@ -20,6 +24,7 @@
     tabs = [],
     activeTab = $bindable(undefined),
     width = "20rem",
+    embedded = false,
     onclose,
     ontab,
     header,
@@ -30,12 +35,16 @@
     /** Bindable active tab id. Defaults to the first tab when tabs are given. */
     activeTab?: string | undefined;
     width?: string;
+    /** Render as content inside a WorkspaceWindow (pilot bridge; Sprint 32 replaces the adapter). */
+    embedded?: boolean;
     onclose?: () => void;
     ontab?: (id: string) => void;
     /** Extra header content (below the title row) — flags, swatches, etc. */
     header?: Snippet;
     children?: Snippet;
   } = $props();
+
+  let isEmbedded = $derived(embedded || workspaceHosted);
 
   // Default the active tab to the first one if the consumer didn't set it.
   $effect(() => {
@@ -50,7 +59,7 @@
   }
 </script>
 
-<aside class="side-panel" style="width: {width}">
+<aside class="side-panel" class:embedded={isEmbedded} style:width={isEmbedded ? undefined : width}>
   <div class="chrome">
     <div class="titlebar">
       <span class="title">{title}</span>
@@ -64,19 +73,7 @@
     {/if}
 
     {#if tabs.length > 0}
-      <div class="tabs" role="tablist">
-        {#each tabs as t}
-          <button
-            class="tab"
-            class:active={t.id === activeTab}
-            role="tab"
-            aria-selected={t.id === activeTab}
-            onclick={() => selectTab(t.id)}
-          >
-            {t.label}
-          </button>
-        {/each}
-      </div>
+      <TabStrip tier="content" {tabs} activeId={activeTab ?? tabs[0].id} onselect={selectTab} />
     {/if}
   </div>
 
@@ -91,20 +88,31 @@
     top: 3rem;
     right: 0.75rem;
     bottom: 0.75rem;
-    z-index: 10;
+    z-index: 50;
     display: flex;
     flex-direction: column;
-    background: #2b323d;
-    border: 1px solid #1f242c;
-    color: #cfd4db;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-1);
     font-size: 0.9rem;
     box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.4);
+    resize: horizontal;
+    overflow: hidden;
   }
+  .side-panel.embedded {
+    position: static;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    box-shadow: none;
+    resize: none;
+  }
+  .side-panel.embedded .titlebar { display: none; }
 
   .chrome {
     flex: none;
-    background: #3f4855;
-    border-bottom: 1px solid #1f242c;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
   }
 
   .titlebar {
@@ -126,7 +134,7 @@
     flex: none;
     border: none;
     background: transparent;
-    color: #cfd4db;
+    color: var(--text-1);
     font-size: 1.2rem;
     line-height: 1;
     padding: 0 0.25rem;
@@ -134,38 +142,11 @@
   }
 
   .close:hover {
-    color: #ffffff;
+    color: var(--text-inverse);
   }
 
   .header-extra {
     padding: 0 0.6rem 0.5rem;
-  }
-
-  .tabs {
-    display: flex;
-    gap: 1px;
-    padding: 0 0.35rem;
-  }
-
-  .tab {
-    border: none;
-    background: transparent;
-    color: #cfd4db;
-    font-family: inherit;
-    font-size: 0.85rem;
-    padding: 0.35rem 0.8rem;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-  }
-
-  .tab:hover {
-    background: #4a6da7;
-    color: #ffffff;
-  }
-
-  .tab.active {
-    border-bottom-color: #4a6da7;
-    font-weight: 600;
   }
 
   .body {

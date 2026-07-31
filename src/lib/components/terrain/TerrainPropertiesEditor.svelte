@@ -45,31 +45,31 @@
     align-items: center;
     gap: 0.4rem;
     padding-bottom: 0.35rem;
-    border-bottom: 1px solid #1f242c;
+    border-bottom: 1px solid var(--border);
   }
   .lock-key {
     flex: 1;
     font-size: 0.83rem;
-    color: #cfd4db;
+    color: var(--text-1);
   }
   .lock-val {
     font-size: 0.8rem;
     padding: 0.1rem 0.4rem;
-    background: #21262e;
-    border: 1px solid #1f242c;
-    color: #9ca3af;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-2);
   }
   .lock-val.on {
-    background: #35506b;
-    color: #cfe3f5;
+    background: var(--accent);
+    color: var(--accent-text);
   }
   .lock-tag {
     font-size: 0.62rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #8a919c;
-    background: #262c35;
+    color: var(--text-2);
+    background: var(--bg-2);
     padding: 0.08rem 0.3rem;
-    border: 1px solid #1f242c;
+    border: 1px solid var(--border);
   }
 </style>
