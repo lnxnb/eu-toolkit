@@ -33,14 +33,20 @@ jobs:
       # Portable exe only (no MSI/NSIS bundles), same as build.bat.
       - run: npm run tauri -- build --no-bundle
 
-      - name: Stage versioned artifact
+      # Two asset names: versioned for the archive, constant so the README's
+      # releases/latest/download/eu-toolkit.exe permalink never goes stale.
+      - name: Stage artifacts
         shell: bash
-        run: cp src-tauri/target/release/eu-toolkit.exe "eu-toolkit-${GITHUB_REF_NAME}.exe"
+        run: |
+          cp src-tauri/target/release/eu-toolkit.exe "eu-toolkit-${GITHUB_REF_NAME}.exe"
+          cp src-tauri/target/release/eu-toolkit.exe eu-toolkit.exe
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: eu-toolkit-*.exe
+          files: |
+            eu-toolkit-*.exe
+            eu-toolkit.exe
           generate_release_notes: true
 
       # Upload via the S3 protocol with a storage-only access-key pair

@@ -1,5 +1,9 @@
 # EU Toolkit
 
+[![Latest release](https://img.shields.io/github/v/release/lnxnb/eu-toolkit)](https://github.com/lnxnb/eu-toolkit/releases/latest)
+
+**[⬇ Download here](https://github.com/lnxnb/eu-toolkit/releases/latest/download/eu-toolkit.exe)** — portable exe, no install needed ([all releases](https://github.com/lnxnb/eu-toolkit/releases))
+
 An all-in-one desktop tool for viewing and editing Europa Universalis IV mods, built with [Tauri 2](https://tauri.app/) (Rust) and [SvelteKit](https://svelte.dev/) (Svelte 5, TypeScript).
 
 Point it at your EU4 installation and (optionally) a mod folder, and you get an interactive world map with the game's map modes — political, religion, culture, trade goods, trade nodes, development, areas/regions, climate, and more — plus editors for just about everything: countries, provinces, rulers, diplomacy, wars, estates, rebels, technology and units, missions, events, decisions, government reforms, trade companies, the HRE, localisation, defines, and beyond.
