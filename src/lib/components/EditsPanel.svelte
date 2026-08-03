@@ -14,7 +14,7 @@
   read-only, clearable) so you can still scroll back through what landed.
 
   Docked left of the map-modes panel; z-index 10 (docked side-panel layer,
-  AGENTS.md CSS stacking) in Windows-classic chrome.
+  the CSS stacking scheme) in Windows-classic chrome.
 -->
 <script lang="ts">
   import type { EditQueue, Composite } from "$lib/edits.svelte";

@@ -7,9 +7,11 @@
   // (top-level when selectedDate ≤ start, else a dated block).
   import { invoke } from "@tauri-apps/api/core";
   import { compareDates } from "$lib/calendar";
-  import { editAtDate } from "$lib/editAtDate";
+  import { editAtDate, shadowedKeysFrom } from "$lib/editAtDate";
   import type { EditQueue, TypedEdit } from "$lib/edits.svelte";
   import type { CountryEstates, EstateBrief, StartingPrivilege } from "$lib/estates";
+  import type { CountryDatedBlock } from "$lib/components/country/history";
+  import { blockRefs } from "$lib/components/country/fields";
   import { AtlasIcon, LoadingState } from "$lib/components/ui";
   import { SET_PRIVILEGE, foldStartingPrivileges } from "./starting";
 
@@ -20,6 +22,7 @@
     queue,
     date = null,
     startDate = "1444.11.11",
+    datedBlocks = [],
     onopenestates,
   }: {
     installPath: string;
@@ -28,6 +31,9 @@
     queue: EditQueue;
     date?: string | null;
     startDate?: string;
+    /** The country history file's dated blocks (`details.dated_blocks`) — the
+     *  grant writer's merge-vs-insert + timeline-shadow decision needs them. */
+    datedBlocks?: CountryDatedBlock[];
     onopenestates?: (key?: string) => void;
   } = $props();
 
@@ -100,19 +106,22 @@
     const startEdits: TypedEdit[] = [
       { kind: "insertStatement", file, blockPath: [], statement: `${SET_PRIVILEGE} = ${priv}` },
     ];
+    const refs = blockRefs(datedBlocks);
     const edits = editAtDate({
       file,
       selectedDate: date,
       startDate,
-      datedBlocks: [],
+      datedBlocks: refs,
       startEdits,
       statements: [`${SET_PRIVILEGE} = ${priv}`],
+      shadowedKeys: shadowedKeysFrom(refs, date),
     });
-    const post = date != null && compareDates(date, startDate) > 0;
+    // Identity return = top-level write (the baseline, date-agnostic); anything
+    // else landed in a dated block and gates the map folds by its date.
     queue.push({
       label: `Grant ${priv} to ${tag}`,
       edits,
-      ...(post ? { date } : {}),
+      ...(edits !== startEdits && date != null ? { date } : {}),
     });
     addFor = null;
   }

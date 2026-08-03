@@ -261,7 +261,7 @@ pub struct ProvinceScaffold {
 ///
 /// `positions.txt` / `continent.txt` are deliberately NOT emitted here: a
 /// province loads without them (it just has no city graphic and no continent),
-/// and both are follow-ups tracked in AGENTS.md.
+/// and both are known follow-ups.
 /// Tauri command wrapper: builds a session Vfs and delegates to
 /// [`prepare_add_province`].
 #[tauri::command(async)]

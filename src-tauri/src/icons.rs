@@ -27,7 +27,7 @@
 //!
 //! ## Key → index construction (definition-order proof)
 //! * **Trade goods** (`kind = "trade_goods"`): the strip is *positionally indexed
-//!   by the trade-good definition order* (AGENTS.md gotcha) — good `i` in
+//!   by the trade-good definition order* (known gotcha) — good `i` in
 //!   `common/tradegoods` uses frame `i`. So `index` is the top-level `key_blocks`
 //!   of `common/tradegoods` enumerated in file order: grain→0, wine→1, …
 //! * **Religions** (`kind = "religions"`): each religion block carries an explicit
@@ -543,7 +543,7 @@ pub fn extended_resources_strip(
 // Replace one trade-good or religion icon with a user-picked image. The picked
 // file is decoded, resized to the strip's square tile, and spliced into the
 // good/religion's POSITIONAL frame index of the project's copy of the strip (the
-// AGENTS.md gotcha: strips are indexed by definition/`icon` order). The result is
+// Gotcha: strips are indexed by definition/`icon` order). The result is
 // a whole re-encoded strip returned as a pending `BinaryAsset` — it rides the
 // save queue like every other edit; the base install is never written here.
 //

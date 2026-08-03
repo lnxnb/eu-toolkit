@@ -16,7 +16,7 @@
   overlay is open, Escape closes only the overlay and never reaches MapView. When
   the overlay is closed, the listener no-ops and MapView keeps Escape.
 
-  z-index: 100 (backdrop) / 101 (panel) — the modal layer per AGENTS.md, above the
+  z-index: 100 (backdrop) / 101 (panel) — the modal layer, above the
   toolbar (10) and popover (20) layers.
 -->
 <script lang="ts">

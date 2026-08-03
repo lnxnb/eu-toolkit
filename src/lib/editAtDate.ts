@@ -91,6 +91,14 @@ const CUMULATIVE_INVERSE: Record<string, string | null> = {
   add_permanent_province_modifier: "remove_province_modifier",
   remove_province_modifier: "add_permanent_province_modifier",
   discovered_by: null,
+  // Country-history cumulative keys (the country panel's writers).
+  add_accepted_culture: "remove_accepted_culture",
+  remove_accepted_culture: "add_accepted_culture",
+  set_estate_privilege: "remove_estate_privilege",
+  remove_estate_privilege: "set_estate_privilege",
+  add_government_reform: null,
+  historical_rival: null,
+  historical_friend: null,
 };
 
 /** The leading `key` of a `key = value` statement, or null when unparseable. */

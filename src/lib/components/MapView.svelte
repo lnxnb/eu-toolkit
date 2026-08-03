@@ -971,6 +971,17 @@
   let error = $state("");
   let zoomPct = $state(100);
 
+  // Re-render scrim (mode switch / date change / save-bake): only shown when
+  // the load is still in flight after 150ms, so cache-fast switches don't flash.
+  let loadScrimVisible = $state(false);
+  $effect(() => {
+    if (loading && bitmap) {
+      const t = setTimeout(() => (loadScrimVisible = true), 150);
+      return () => clearTimeout(t);
+    }
+    loadScrimVisible = false;
+  });
+
   // --- Date selector (Sprint 12.1/12.2) ---
   interface Bookmark {
     file: string;
@@ -8582,8 +8593,11 @@
     ></div>
   {/if}
 
-  {#if loading && bitmap}
-    <div class="chip">Rendering…</div>
+  {#if loadScrimVisible}
+    <div class="load-scrim" role="status" aria-live="polite">
+      <span class="spinner"></span>
+      <span>Rendering map…</span>
+    </div>
   {/if}
 
   {#if noticeMessage}
@@ -8592,6 +8606,7 @@
 
   {#if loading && !bitmap}
     <div class="overlay">
+      <span class="spinner"></span>
       <p>Rendering map…</p>
     </div>
   {:else if error}
@@ -9455,6 +9470,45 @@
     gap: 1rem;
     color: var(--text-1);
     background: rgba(20, 24, 29, 0.6);
+  }
+
+  /* Re-render scrim: dims the stale map while the next mode/date renders.
+     Purely visual (pointer-events: none) so the mode panel stays usable and a
+     second switch can supersede this one. Above overlay canvases (5), below
+     map-anchored chrome (9). */
+  .load-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    color: var(--text-1);
+    background: rgba(20, 24, 29, 0.45);
+    pointer-events: none;
+  }
+
+  .spinner {
+    width: 26px;
+    height: 26px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation: none;
+    }
   }
 
   .overlay .error {

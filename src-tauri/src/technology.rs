@@ -35,7 +35,7 @@
 //!   A unit "arrives" at the tech level whose block lists `enable = <key>` — the
 //!   cross-ref is built from the tech tables. (There is no per-unit `cost` key in
 //!   EU4 — unit cost is global/tech-driven — so "edit cost" reduces to editing
-//!   pips/ship stats; see AGENTS.md.)
+//!   pips/ship stats.)
 
 use std::collections::HashMap;
 
@@ -75,7 +75,7 @@ const LAND_TYPES: &[&str] = &["infantry", "cavalry", "artillery"];
 /// MORE than this. Derived from vanilla — the largest legitimate peer gap in
 /// vanilla is exactly 6 (a level-9 elite infantry at 13 pips vs the next at 7),
 /// so a tolerance of 6 keeps vanilla clean while still catching a mod unit that
-/// is wildly ahead of its era. Documented in AGENTS.md.
+/// is wildly ahead of its era.
 const PIP_BUDGET_TOLERANCE: i64 = 6;
 
 // ---------------------------------------------------------------------------

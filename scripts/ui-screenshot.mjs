@@ -5,7 +5,7 @@
 //
 // Uses Node 22's built-in fetch + WebSocket to speak the Chrome DevTools
 // Protocol directly - no playwright/puppeteer install needed. This is the
-// fallback for agents/scripts that don't have the eu-toolkit-ui MCP server
+// fallback for automation scripts that don't have the eu-toolkit-ui MCP server
 // available; unlike an MCP attach it holds no persistent connection, so it
 // can never take the app down with it.
 import { writeFileSync } from "fs";

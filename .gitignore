@@ -11,3 +11,10 @@ node_modules
 !.env.example
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# local docs & tool configs (kept out of the repo)
+*.md
+.agents/
+.claude/
+.codex/
+.mcp.json

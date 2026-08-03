@@ -237,7 +237,7 @@
 
   // Create a new group (pending edit) and move this religion into it. The group
   // block is inserted into this religion's file so the move stays same-file and
-  // composes on the evolving buffer (AGENTS.md list-creation ordering).
+  // composes on the evolving buffer (list-creation ordering rule).
   async function createGroupAndMove(res: NewGroupResult) {
     if (!details || !details.raw_block_text) return;
     try {

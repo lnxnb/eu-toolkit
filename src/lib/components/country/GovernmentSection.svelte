@@ -15,7 +15,16 @@
   import type { DropdownItem } from "$lib/components/ui";
   import type { EditQueue } from "$lib/edits.svelte";
   import FieldRow from "./FieldRow.svelte";
-  import { scalarEdit, removeEdit, listAdd, listRemove } from "./fields";
+  import {
+    scalarEdit,
+    removeEdit,
+    listAdd,
+    listRemove,
+    pushAtDate,
+    pendingHistField,
+    pendingHistList,
+    type CountryDateCtx,
+  } from "./fields";
   import type { CountryDetails, RegistryEntry, GroupedEntry, CountryBrief } from "./types";
 
   let {
@@ -25,6 +34,7 @@
     details,
     queue,
     date = null,
+    startDate = "1444.11.11",
     onopennaming,
     onopenmechanics,
   }: {
@@ -36,6 +46,8 @@
     /** Selected view/edit date (Sprint 12) — the naming-rules preview evaluates
      *  the country's state at this date. Null = effective start. */
     date?: string | null;
+    /** The mod's effective start date — the pushAtDate write routing needs it. */
+    startDate?: string;
     /** Open the Government-names editor (Sprint 19.3), optionally scrolled to a
      *  scheme. MapView owns the overlay. */
     onopennaming?: (schemeKey?: string) => void;
@@ -112,18 +124,30 @@
       .catch(() => {});
   });
 
+  // Date routing (Sprint 12.3 / timeline mods): writes go through `pushAtDate`,
+  // which lands them top-level only when the top level is authoritative for the
+  // written key at the selected date — else in a dated block.
+  const ctx = $derived<CountryDateCtx>({
+    file: hf,
+    selectedDate: date,
+    startDate,
+    blocks: details.dated_blocks,
+  });
+
   // --- Single scalar field helper: reads pending, writes set/insert/remove ---
   function fieldValue(key: string, base: string | null): string | null {
-    const p = queue.pendingField(hf, key);
+    const p = pendingHistField(queue, hf, key, date);
     return p !== undefined ? p.value : base;
   }
   function isEdited(key: string, base: string | null): boolean {
-    const p = queue.pendingField(hf, key);
+    const p = pendingHistField(queue, hf, key, date);
     return p !== undefined && p.value !== base;
   }
   function setField(key: string, base: string | null, value: string, label: string) {
     if (value === base) return;
-    queue.push({ label, edits: [scalarEdit(hf, key, value, base != null)] });
+    pushAtDate(queue, ctx, label, [scalarEdit(hf, key, value, base != null)], [
+      `${key} = ${value}`,
+    ]);
   }
 
   // Government type
@@ -151,12 +175,14 @@
   ];
   let focusValue = $derived(fieldValue("national_focus", details.national_focus) ?? "NONE");
   let focusEdited = $derived(
-    queue.pendingField(hf, "national_focus") !== undefined,
+    pendingHistField(queue, hf, "national_focus", date) !== undefined,
   );
   function setFocus(key: string) {
     const present = details.national_focus != null;
     if (key === "NONE") {
-      if (!present && queue.pendingField(hf, "national_focus")?.value == null) return;
+      if (!present && pendingHistField(queue, hf, "national_focus", date)?.value == null) return;
+      // A scalar clear has no dated-block form — it edits the baseline at any
+      // date (same rule as the province panel's `clear`).
       queue.push({ label: `Clear national focus of ${tag}`, edits: [removeEdit(hf, "national_focus")] });
       return;
     }
@@ -170,49 +196,67 @@
   function setMerc(raw: string) {
     const v = raw.trim();
     if (v === "" || v === mercBase) return;
-    queue.push({
-      label: `Set mercantilism of ${tag}`,
-      edits: [scalarEdit(hf, "mercantilism", v, details.mercantilism != null)],
-    });
+    pushAtDate(
+      queue,
+      ctx,
+      `Set mercantilism of ${tag}`,
+      [scalarEdit(hf, "mercantilism", v, details.mercantilism != null)],
+      [`mercantilism = ${v}`],
+    );
   }
 
   // Elector toggle (presence of `elector = yes`)
-  let electorField = $derived(queue.pendingField(hf, "elector"));
+  let electorField = $derived(pendingHistField(queue, hf, "elector", date));
   let electorOn = $derived(
     electorField !== undefined ? electorField.value === "yes" : details.elector,
   );
   let electorEdited = $derived(electorField !== undefined && (electorField.value === "yes") !== details.elector);
   function toggleElector() {
     const next = !electorOn;
-    if (next === details.elector) {
-      // Returning to the on-disk state: if there is a pending change, undo path
-      // handles it — here we push the inverse edit to reach disk state.
-    }
-    const edit = next
-      ? listAdd(hf, "elector", "yes")
-      : removeEdit(hf, "elector");
-    queue.push({ label: `${next ? "Set" : "Clear"} ${tag} as elector`, edits: [edit] });
+    // Top-level shape keeps the presence semantics (`elector = yes` / key
+    // absent); the dated shape assigns `elector = yes|no` so the fold at the
+    // selected date sees the change even when earlier blocks set it.
+    const startEdits = [next ? listAdd(hf, "elector", "yes") : removeEdit(hf, "elector")];
+    pushAtDate(queue, ctx, `${next ? "Set" : "Clear"} ${tag} as elector`, startEdits, [
+      `elector = ${next ? "yes" : "no"}`,
+    ]);
   }
 
   // --- Membership lists (reforms / accepted cultures / rivals / friends) ---
-  let reformList = $derived(queue.pendingList(hf, "add_government_reform", details.government_reforms));
-  let acceptedList = $derived(queue.pendingList(hf, "add_accepted_culture", details.accepted_cultures));
-  let rivalList = $derived(queue.pendingList(hf, "historical_rival", details.historical_rivals));
-  let friendList = $derived(queue.pendingList(hf, "historical_friend", details.historical_friends));
+  let reformList = $derived(pendingHistList(queue, hf, "add_government_reform", details.government_reforms, date));
+  let acceptedList = $derived(
+    pendingHistList(queue, hf, "add_accepted_culture", details.accepted_cultures, date, "remove_accepted_culture"),
+  );
+  let rivalList = $derived(pendingHistList(queue, hf, "historical_rival", details.historical_rivals, date));
+  let friendList = $derived(pendingHistList(queue, hf, "historical_friend", details.historical_friends, date));
 
   function labelFor(items: DropdownItem[], key: string): string {
     return items.find((i) => i.key === key)?.label ?? key;
   }
   function addTo(key: string, value: string, human: string) {
     if (!value) return;
-    queue.push({ label: `Add ${human} to ${tag}`, edits: [listAdd(hf, key, value)] });
+    pushAtDate(queue, ctx, `Add ${human} to ${tag}`, [listAdd(hf, key, value)], [
+      `${key} = ${value}`,
+    ]);
   }
   function removeFrom(key: string, value: string, human: string) {
+    if (key === "add_accepted_culture") {
+      // `remove_accepted_culture` is real history vocabulary (vanilla uses it),
+      // so a removal that can't surgically strike the top level (the culture
+      // came from a dated block, or the date is past the start) writes the
+      // dated inverse instead.
+      pushAtDate(queue, ctx, `Remove ${human} from ${tag}`, [listRemove(hf, key, value)], [
+        `remove_accepted_culture = ${value}`,
+      ]);
+      return;
+    }
+    // No dated inverse exists for the other lists — the removal edits the
+    // baseline statement in place at any date.
     queue.push({ label: `Remove ${human} from ${tag}`, edits: [listRemove(hf, key, value)] });
   }
 
   // Capital display (edited via the map's Set Capital tool)
-  let capitalField = $derived(queue.pendingField(hf, "capital"));
+  let capitalField = $derived(pendingHistField(queue, hf, "capital", date));
   let capitalId = $derived(
     capitalField?.value != null ? capitalField.value : (details.capital != null ? String(details.capital) : null),
   );

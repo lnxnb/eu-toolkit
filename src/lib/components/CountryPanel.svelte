@@ -24,7 +24,7 @@
   import { EstatesSection } from "./estates";
   import DiplomacyTab from "./country/DiplomacyTab.svelte";
   import FieldRow from "./country/FieldRow.svelte";
-  import { scalarEdit } from "./country/fields";
+  import { scalarEdit, pushAtDate, pendingHistField, pendingHistList } from "./country/fields";
   import type {
     CountryDetails,
     CountryCreateSeed,
@@ -148,7 +148,7 @@
     if (pendingMode) return seed?.capitalId ?? null;
     if (!details) return null;
     const hf = details.history_file ?? `history/countries/${tag} - ${details.name}.txt`;
-    const pending = queue.pendingField(hf, "capital")?.value;
+    const pending = pendingHistField(queue, hf, "capital", date)?.value;
     const raw = pending != null ? Number(pending) : details.capital;
     return raw != null && Number.isFinite(Number(raw)) ? Number(raw) : null;
   });
@@ -174,10 +174,10 @@
   // Rivals/friends folded with pending edits, for the Diplomacy tab's read view.
   const histFile = $derived(details?.history_file ?? "");
   const rivals = $derived(
-    details ? queue.pendingList(histFile, "historical_rival", details.historical_rivals) : [],
+    details ? pendingHistList(queue, histFile, "historical_rival", details.historical_rivals, date) : [],
   );
   const friends = $derived(
-    details ? queue.pendingList(histFile, "historical_friend", details.historical_friends) : [],
+    details ? pendingHistList(queue, histFile, "historical_friend", details.historical_friends, date) : [],
   );
 
   function css(c: [number, number, number] | null): string | undefined {
@@ -249,15 +249,20 @@
     return () => oncolor?.(t, null);
   });
 
-  // Apply a capital chosen by the map's Set Capital tool.
+  // Apply a capital chosen by the map's Set Capital tool. Routed through the
+  // date rule: on a timeline mod whose file re-assigns `capital` before the
+  // start (or at a later view date), the write lands in a dated block.
   $effect(() => {
     const id = capitalRequest;
     if (id == null || !details) return;
     const hf = details.history_file ?? `history/countries/${tag} - ${details.name}.txt`;
-    queue.push({
-      label: `Set capital of ${tag} to #${id}`,
-      edits: [scalarEdit(hf, "capital", String(id), details.capital != null)],
-    });
+    pushAtDate(
+      queue,
+      { file: hf, selectedDate: date, startDate, blocks: details.dated_blocks },
+      `Set capital of ${tag} to #${id}`,
+      [scalarEdit(hf, "capital", String(id), details.capital != null)],
+      [`capital = ${id}`],
+    );
     oncapitalapplied?.();
   });
 
@@ -414,7 +419,7 @@
       oncolor={(rgb) => oncolor?.(tag, rgb)}
     />
 
-    <GovernmentSection {installPath} {modPath} {tag} {details} {queue} {date} {onopennaming} {onopenmechanics} />
+    <GovernmentSection {installPath} {modPath} {tag} {details} {queue} {date} {startDate} {onopennaming} {onopenmechanics} />
   {:else if activeTab === "rulers"}
     <RulerSection {installPath} {modPath} {tag} {details} {queue} {date} {startDate} {cultures} {religions} {personalityItems} />
 
@@ -425,7 +430,7 @@
   {:else if activeTab === "ideas"}
     <IdeasSection {installPath} {modPath} {tag} {details} {queue} />
   {:else if activeTab === "estates"}
-    <EstatesSection {installPath} {modPath} {tag} {queue} {date} {startDate} {onopenestates} />
+    <EstatesSection {installPath} {modPath} {tag} {queue} {date} {startDate} datedBlocks={details.dated_blocks} {onopenestates} />
   {:else if activeTab === "names"}
     <NamePoolsSection {tag} {details} {queue} />
 

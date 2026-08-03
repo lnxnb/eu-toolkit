@@ -661,7 +661,7 @@ fn check_trade_nodes(vfs: &Vfs, loc: &LocStore) -> Vec<ValidationIssue> {
                 continue;
             }
             // Path connectivity (warning). Route-corridor seas legitimately
-            // belong to NO node (AGENTS.md gotcha), so path provinces are
+            // belong to NO node (known gotcha), so path provinces are
             // normally not members of either endpoint — the only reliable
             // "disconnected" signal is an empty path. Vanilla is clean.
             if r.path.is_empty() {

@@ -20,7 +20,7 @@
 //!
 //! The block is authored at column 0 with **no members**; the create/move flow
 //! then inserts the religion/culture into it as a second same-file edit that
-//! composes on the evolving buffer (AGENTS.md list-creation ordering). Pool text
+//! composes on the evolving buffer (list-creation ordering rule). Pool text
 //! is extracted as Latin-1 (each source byte → one `char`) so Windows-1252
 //! high bytes in accented names round-trip exactly when re-encoded on write.
 

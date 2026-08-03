@@ -13,7 +13,7 @@ use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::vfs::Vfs;
 
-/// English loc file suffix. Only english is needed (see AGENTS.md).
+/// English loc file suffix. Only english is needed.
 const ENGLISH_SUFFIX: &str = "_l_english.yml";
 
 /// The single toolkit-owned override file. Lives under `localisation/replace/`
