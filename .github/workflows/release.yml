@@ -9,6 +9,9 @@ jobs:
   build-windows:
     runs-on: windows-latest
     timeout-minutes: 40
+    # Needed to create the GitHub release from the workflow token.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -29,6 +32,16 @@ jobs:
 
       # Portable exe only (no MSI/NSIS bundles), same as build.bat.
       - run: npm run tauri -- build --no-bundle
+
+      - name: Stage versioned artifact
+        shell: bash
+        run: cp src-tauri/target/release/eu-toolkit.exe "eu-toolkit-${GITHUB_REF_NAME}.exe"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: eu-toolkit-*.exe
+          generate_release_notes: true
 
       # Upload via the S3 protocol with a storage-only access-key pair
       # (Storage -> Settings -> S3 access keys) — no service_role key in CI.
