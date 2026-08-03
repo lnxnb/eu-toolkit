@@ -14,9 +14,9 @@ if not exist node_modules (
 
 echo Starting EU Toolkit (UI debug mode: vite on 1430, CDP on 9222, hot reload ON)...
 rem WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS exposes the WebView2 (Chromium) DevTools
-rem protocol so UI tooling can attach to the running app: the Chrome DevTools MCP
-rem in .mcp.json connects here (--browser-url) to snapshot, click, and screenshot
-rem the real UI; scripts/ui-screenshot.mjs is the zero-dependency fallback.
+rem protocol so UI tooling can attach to the running app (port 9222) to snapshot,
+rem click, and screenshot the real UI; scripts/ui-screenshot.mjs is the
+rem zero-dependency fallback.
 rem
 rem EU_TOOLKIT_UI_PORT=1430 (+ the tauri.uidebug.conf.json devUrl override) puts
 rem this instance's dev server on its own port so it never collides with - or

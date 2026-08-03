@@ -1,0 +1,64 @@
+name: Release build
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      # Caches cargo registry + target dir keyed on Cargo.lock — the Rust
+      # compile dominates this job, so warm runs are minutes instead of ~20.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+
+      # Portable exe only (no MSI/NSIS bundles), same as build.bat.
+      - run: npm run tauri -- build --no-bundle
+
+      # Upload via the S3 protocol with a storage-only access-key pair
+      # (Storage -> Settings -> S3 access keys) — no service_role key in CI.
+      - name: Upload to Supabase Storage (S3)
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.SUPABASE_S3_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SUPABASE_S3_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.SUPABASE_S3_REGION || 'us-east-1' }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          BUCKET: ${{ vars.SUPABASE_BUCKET || 'releases' }}
+        run: |
+          set -euo pipefail
+          EXE="src-tauri/target/release/eu-toolkit.exe"
+          test -f "$EXE"
+          ENDPOINT="${SUPABASE_URL}/storage/v1/s3"
+          TAG="${GITHUB_REF_NAME}"
+          SHA256=$(sha256sum "$EXE" | cut -d' ' -f1)
+          SIZE=$(stat -c%s "$EXE")
+
+          # Versioned artifact + a stable "latest" pointer for download links.
+          aws s3 cp "$EXE" "s3://${BUCKET}/eu-toolkit-${TAG}.exe" \
+            --endpoint-url "$ENDPOINT" --content-type application/octet-stream
+          aws s3 cp "$EXE" "s3://${BUCKET}/eu-toolkit-latest.exe" \
+            --endpoint-url "$ENDPOINT" --content-type application/octet-stream
+
+          # Machine-readable manifest — the website reads this to learn the
+          # newest version instead of parsing object names.
+          printf '{"version":"%s","file":"eu-toolkit-%s.exe","sha256":"%s","size":%s,"publishedAt":"%s"}\n' \
+            "$TAG" "$TAG" "$SHA256" "$SIZE" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > latest.json
+          cat latest.json
+          aws s3 cp latest.json "s3://${BUCKET}/latest.json" \
+            --endpoint-url "$ENDPOINT" --content-type application/json --cache-control no-cache
