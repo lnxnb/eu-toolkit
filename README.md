@@ -10,17 +10,22 @@ Point it at your EU4 installation and (optionally) a mod folder, and you get an 
 
 A few things it cares about:
 
-- **Clean diffs.** Edits are byte-surgical — only the changed span of a file is rewritten, so comments, formatting, and encoding round-trip untouched and your mod's git history stays readable.
 - **Total conversions welcome.** All reads go through a virtual file system that layers the mod over the base game (including `replace_path`), so mods like Anbennar work out of the box. Unrecognized keys in game files are preserved, never dropped.
 - **View at any date.** The map and editors can derive the world state at any start date, not just 1444.
 - **Toolkit workflows.** Project-wide search, a mod-vs-base diff browser, a validation dashboard with jump-to-problem, undo/redo with a pending-edit queue, and one-click export & launch into the game.
 
 ## Requirements
 
-- Windows 10/11 (WebView2 is preinstalled on both)
+**To run the released exe:**
+
+- Windows 10 or 11 (64-bit)
+- A Europa Universalis IV installation
+- 8 GB RAM recommended — the world map is decoded and rendered in memory
+
+**To build from source, additionally:**
+
 - [Node.js](https://nodejs.org/) 20 or newer
 - [Rust](https://rustup.rs/) stable toolchain
-- A Europa Universalis IV installation
 
 ## Running
 
