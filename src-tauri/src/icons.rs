@@ -828,6 +828,57 @@ pub fn get_modifier_icon(
     )?))
 }
 
+// ---------------------------------------------------------------------------
+// Achievement icons (Sprint follow-up — achievements editor).
+// ---------------------------------------------------------------------------
+
+// Same filename convention as modifier icons: `gfx/interface/achievements/`
+// holds one `.dds` per achievement, named exactly after the block key (373/373
+// in vanilla; Anbennar's custom system follows suit for its `ach_*` art).
+// Uncompressed 32-bpp BGRA, so `decode_dds` handles them directly.
+
+const ACHIEVEMENT_ICON_DIR: &str = "gfx/interface/achievements";
+
+/// Game-relative path of an achievement key's icon, or `None` if the key is
+/// not a plain identifier (guards against `..`/separators reaching the Vfs).
+pub fn achievement_icon_rel(key: &str) -> Option<String> {
+    if key.is_empty()
+        || !key
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+    {
+        return None;
+    }
+    Some(format!("{ACHIEVEMENT_ICON_DIR}/{key}.dds"))
+}
+
+/// Decodes one achievement icon to PNG bytes. `Err` when the key has no icon
+/// file — expected for a freshly-created achievement whose art doesn't exist
+/// yet; the caller renders a placeholder rather than a wrong picture.
+pub fn achievement_icon(vfs: &Vfs, fallback: Option<&Vfs>, key: &str) -> Result<Vec<u8>, String> {
+    let rel = achievement_icon_rel(key).ok_or_else(|| format!("Not an achievement key: {key}"))?;
+    let img = read_strip(vfs, fallback, &rel)?;
+    encode_png_rgba(&img.rgba, img.width, img.height)
+}
+
+#[tauri::command(async)]
+pub fn get_achievement_icon(
+    install_path: String,
+    mod_path: Option<String>,
+    key: String,
+) -> Result<tauri::ipc::Response, String> {
+    let vfs = Vfs::new(&install_path, mod_path.as_deref())?;
+    let base = mod_path
+        .as_deref()
+        .map(|_| Vfs::new(&install_path, None))
+        .transpose()?;
+    Ok(tauri::ipc::Response::new(achievement_icon(
+        &vfs,
+        base.as_ref(),
+        &key,
+    )?))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1041,6 +1092,36 @@ mod tests {
         let atlas = icon_atlas(&vfs, Some(&base), "idea_modifiers").unwrap();
         assert_eq!(atlas.count, 18);
         assert!(atlas.png.len() > 100);
+    }
+
+    #[test]
+    fn achievement_icon_rel_validates_keys() {
+        assert_eq!(
+            achievement_icon_rel("achievement_for_the_glory").as_deref(),
+            Some("gfx/interface/achievements/achievement_for_the_glory.dds")
+        );
+        assert!(achievement_icon_rel("../escape").is_none());
+        assert!(achievement_icon_rel("").is_none());
+    }
+
+    #[test]
+    fn real_achievement_icon_decodes() {
+        let Some(vfs) = real_install() else { return };
+        let png = achievement_icon(&vfs, None, "achievement_for_the_glory").unwrap();
+        let img = image::load_from_memory_with_format(&png, image::ImageFormat::Png).unwrap();
+        assert_eq!((img.width(), img.height()), (64, 64));
+        // A key with no icon file errs (callers render a placeholder).
+        assert!(achievement_icon(&vfs, None, "no_such_achievement_xyz").is_err());
+    }
+
+    #[test]
+    fn anbennar_achievement_icon_smoke() {
+        if !Path::new(ANBENNAR).is_dir() || real_install().is_none() { return; }
+        let vfs = Vfs::new(INSTALL, Some(ANBENNAR)).unwrap();
+        let base = Vfs::new(INSTALL, None).unwrap();
+        // Anbennar's own custom-achievement art resolves through the mod layer.
+        let png = achievement_icon(&vfs, Some(&base), "ach_bulwar_garden").unwrap();
+        assert!(image::load_from_memory_with_format(&png, image::ImageFormat::Png).is_ok());
     }
 
     #[test]

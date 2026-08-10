@@ -17,14 +17,19 @@
 <script lang="ts" module>
   import { invoke } from "@tauri-apps/api/core";
 
-  // key: `${modPath ?? ""}|${modifierKey}` → object URL, or null for "no art".
+  // key: `${command}|${modPath ?? ""}|${iconKey}` → object URL, or null for "no art".
   const cache = new Map<string, Promise<string | null>>();
 
-  function load(installPath: string, modPath: string | null, key: string): Promise<string | null> {
-    const id = `${modPath ?? ""}|${key}`;
+  function load(
+    command: string,
+    installPath: string,
+    modPath: string | null,
+    key: string,
+  ): Promise<string | null> {
+    const id = `${command}|${modPath ?? ""}|${key}`;
     let hit = cache.get(id);
     if (!hit) {
-      hit = invoke<ArrayBuffer>("get_modifier_icon", { installPath, modPath, key })
+      hit = invoke<ArrayBuffer>(command, { installPath, modPath, key })
         .then((buf) => URL.createObjectURL(new Blob([buf], { type: "image/png" })))
         .catch(() => null);
       cache.set(id, hit);
@@ -39,12 +44,16 @@
     modPath = null,
     key,
     size = "1.15rem",
+    command = "get_modifier_icon",
   }: {
     installPath: string;
     modPath?: string | null;
     /** The modifier key, e.g. `land_morale`. */
     key: string;
     size?: string;
+    /** Backend icon command sharing the (installPath, modPath, key) → PNG shape
+     *  (e.g. `get_achievement_icon` for achievement art). */
+    command?: string;
   } = $props();
 
   let url = $state<string | null>(null);
@@ -54,7 +63,7 @@
     let live = true;
     // Cached URLs are shared and intentionally not revoked: they live as long as
     // the session, and revoking here would blank every other row using the key.
-    load(installPath, modPath, want).then((u) => {
+    load(command, installPath, modPath, want).then((u) => {
       if (live) url = u;
     });
     return () => {

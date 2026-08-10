@@ -30,6 +30,7 @@
   import type { View } from "$lib/views";
   import { requiredMapMode } from "$lib/entityCatalog";
   import { RebelsOverlay } from "./rebels";
+  import { AchievementsOverlay } from "./achievements";
   import { MechanicsOverlay } from "./mechanics";
   import { ColorPoolsOverlay } from "./colorpools";
   import { EmpiresOverlay } from "./empires";
@@ -366,6 +367,7 @@
           case "govnames": openView({kind:"government-names"}); break;
           case "estates": openView({ kind: "estates" }, "reuse"); break;
           case "rebels": openView({kind:"rebels"}); break;
+          case "achievements": openView({kind:"achievements"}); break;
           case "technology": openView({kind:"technology"}); break;
           case "mechanics": openView({kind:"mechanics", family: route.family}); break;
           case "empires": openView({kind:"empires"}); break;
@@ -7614,6 +7616,9 @@
           <button onclick={() => { openMenu = null; openView({kind:"rebels"}); }}>
             Rebels…
           </button>
+          <button onclick={() => { openMenu = null; openView({kind:"achievements"}); }}>
+            Achievements…
+          </button>
           <button onclick={() => { openMenu = null; openView({kind:"technology"}); }}>
             Technology…
           </button>
@@ -8714,6 +8719,8 @@
         <GovernmentNamesOverlay open {installPath} {modPath} {queue} focusKey={tab.view.focusKey ?? null} />
       {:else if tab.view.kind === "rebels"}
         <RebelsOverlay open {installPath} {modPath} date={selectedDate} {queue} onopenprovince={openProvince} />
+      {:else if tab.view.kind === "achievements"}
+        <AchievementsOverlay open {installPath} {modPath} {queue} focusKey={tab.view.focusKey ?? null} onopenmechanics={(family) => openView({kind:"mechanics", family})} />
       {:else if tab.view.kind === "mechanics"}
         <MechanicsOverlay open family={tab.view.family ?? null} focusKey={tab.view.focusKey ?? null} {installPath} {modPath} date={selectedDate} {queue} onopenevents={() => openView({kind:"events"})} onopennaming={() => openView({kind:"government-names"})} />
       {:else if tab.view.kind === "color-pools"}

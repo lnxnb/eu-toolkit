@@ -15,6 +15,7 @@ export type View =
   | { kind: "government-names"; focusKey?: string }
   | { kind: "estates"; focusKey?: string }
   | { kind: "rebels"; focusKey?: string }
+  | { kind: "achievements"; focusKey?: string }
   | { kind: "mechanics"; family?: string; focusKey?: string }
   | { kind: "color-pools" }
   | { kind: "empires"; focusKey?: string }
@@ -85,6 +86,7 @@ export const VIEW_REGISTRY: Record<ViewKind, ViewDefinition> = {
   "government-names": singleton("Government names"),
   estates: singleton("Estates", { w: 920, h: 680 }),
   rebels: singleton("Rebels"),
+  achievements: singleton("Achievements"),
   mechanics: singleton("Mechanics"),
   "color-pools": singleton("Color pools"),
   empires: singleton("Empires"),
@@ -110,7 +112,7 @@ export const VIEW_GROUPS: { label: string; kinds: ViewKind[]; extras?: { label: 
   { label: "Map entities", kinds: ["country", "province", "religion", "culture", "trade-node", "area", "region", "colonial", "adjacency", "climate"] },
   {
     label: "Game systems",
-    kinds: ["decisions", "events", "missions", "government-names", "estates", "rebels", "mechanics", "color-pools", "empires", "technology"],
+    kinds: ["decisions", "events", "missions", "government-names", "estates", "rebels", "achievements", "mechanics", "color-pools", "empires", "technology"],
     extras: [{ label: "Ideas", view: { kind: "mechanics", family: "idea_groups" } }],
   },
   { label: "Scripting", kinds: ["scripted", "on-actions", "localisation", "defines"] },

@@ -18,6 +18,7 @@
 //   common/estates/** · estate_privileges/**  → Estates overlay
 //     · estate_agendas/** · estate_crown_land → Estates overlay
 //   common/rebel_types/**                     → Rebels overlay
+//   common/achievements.txt                   → Achievements overlay
 //   common/technologies/** · common/units/**  → Technology overlay
 //   common/government_names/**                → Government names overlay
 //   common/scripted_triggers|effects/**       → Scripted overlay
@@ -49,6 +50,7 @@ export type OverlayId =
   | "govnames"
   | "estates"
   | "rebels"
+  | "achievements"
   | "technology"
   | "mechanics"
   | "empires"
@@ -145,6 +147,8 @@ export function routeForFile(
     if (dir === "defines") return { kind: "overlay", overlay: "defines" };
   }
   if (/(?:^|\/)common\/defines\.lua$/.test(f)) return { kind: "overlay", overlay: "defines" };
+  if (/(?:^|\/)common\/achievements\.txt$/.test(f))
+    return { kind: "overlay", overlay: "achievements" };
 
   // top-level content directories
   if (/(?:^|\/)decisions\//.test(f)) return { kind: "overlay", overlay: "decisions" };

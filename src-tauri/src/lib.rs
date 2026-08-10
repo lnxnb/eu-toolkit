@@ -1,3 +1,4 @@
+mod achievements;
 mod adjacencies;
 mod blank;
 mod bookmarks;
@@ -1185,7 +1186,10 @@ pub fn run() {
             gfx::get_sprite,
             icons::get_icon_atlas,
             icons::get_modifier_icon,
+            icons::get_achievement_icon,
             icons::import_icon,
+            achievements::get_achievements,
+            achievements::scaffold_achievement_cmd,
             validation::validate,
             validation::validate_all,
             dynasties::scan_dynasties,
