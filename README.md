@@ -35,3 +35,7 @@ For development with hot reload instead, use `npm run tauri dev`.
 ## License
 
 [MIT](LICENSE)
+
+## AI disclosure
+
+Generative AI tools were used in the creation of this project, including for writing code, tests, and documentation. All of it was directed, reviewed, and tested by a human before release. If you find a bug or something that looks wrong, please open an issue or a pull request.
