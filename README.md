@@ -4,15 +4,15 @@
 
 **[⬇ Download here](https://github.com/lnxnb/eu-toolkit/releases/latest/download/eu-toolkit.exe)** — portable exe, no install needed ([all releases](https://github.com/lnxnb/eu-toolkit/releases))
 
-An all-in-one desktop tool for viewing and editing Europa Universalis IV mods, built with [Tauri 2](https://tauri.app/) (Rust) and [SvelteKit](https://svelte.dev/) (Svelte 5, TypeScript).
+A desktop editor for Europa Universalis IV mods. Point it at your EU4 install, pick a mod folder if you have one, and you get the game's world map — political, religion, culture, trade goods, trade nodes, development, areas and regions, climate — with the data behind it editable: provinces, countries, rulers, diplomacy and wars, estates, rebels, technology and units, missions, events, decisions, government reforms, trade companies, the HRE, localisation, defines.
 
-Point it at your EU4 installation and (optionally) a mod folder, and you get an interactive world map with the game's map modes — political, religion, culture, trade goods, trade nodes, development, areas/regions, climate, and more — plus editors for just about everything: countries, provinces, rulers, diplomacy, wars, estates, rebels, technology and units, missions, events, decisions, government reforms, trade companies, the HRE, localisation, defines, and beyond.
+Click a province to edit it, or paint religion and culture straight onto the map. Changes collect in a pending queue you can review, undo, and redo before anything is written to disk.
 
-A few things it cares about:
+Total conversions work. Reads layer your mod over the base game the way EU4 does, `replace_path` included, so Anbennar and the like open without special handling — and keys the toolkit doesn't model are left alone rather than dropped.
 
-- **Total conversions welcome.** All reads go through a virtual file system that layers the mod over the base game (including `replace_path`), so mods like Anbennar work out of the box. Unrecognized keys in game files are preserved, never dropped.
-- **View at any date.** The map and editors can derive the world state at any start date, not just 1444.
-- **Toolkit workflows.** Project-wide search, a mod-vs-base diff browser, a validation dashboard with jump-to-problem, undo/redo with a pending-edit queue, and one-click export & launch into the game.
+You're not stuck at 1444, either. Pick any date and the map and editors re-derive the world as of that day.
+
+The rest is the unglamorous stuff you end up wanting anyway: project-wide search, a browser showing what your mod changes against vanilla, a validation dashboard that jumps straight to the problem, and a button that exports your mod and launches the game with it enabled.
 
 ## Requirements
 
@@ -36,6 +36,8 @@ For development with hot reload instead, use `npm run tauri dev`.
 ## Building
 
 **`build.bat`** produces a portable, optimized executable at `dist\eu-toolkit.exe`. No installer needed — settings live in `%APPDATA%\com.eutoolkit.app`.
+
+Built with [Tauri 2](https://tauri.app/) (Rust) and [SvelteKit](https://svelte.dev/) (Svelte 5, TypeScript).
 
 ## License
 
