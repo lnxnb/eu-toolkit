@@ -1,5 +1,7 @@
 # EU Toolkit
 
+![The political map mode in EU Toolkit](docs/screenshots/political-map.png)
+
 [![Latest release](https://img.shields.io/github/v/release/lnxnb/eu-toolkit)](https://github.com/lnxnb/eu-toolkit/releases/latest)
 
 **[⬇ Download here](https://github.com/lnxnb/eu-toolkit/releases/latest/download/eu-toolkit.exe)** — portable exe, no install needed ([all releases](https://github.com/lnxnb/eu-toolkit/releases))
