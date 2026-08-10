@@ -10,9 +10,9 @@ Click a province to edit it, or paint religion and culture straight onto the map
 
 Total conversions work. Reads layer your mod over the base game the way EU4 does, `replace_path` included, so Anbennar and the like open without special handling — and keys the toolkit doesn't model are left alone rather than dropped.
 
-You're not stuck at 1444, either. Pick any date and the map and editors re-derive the world as of that day.
+Any date works, not just 1444 — the map and editors re-derive the world at whatever date you pick.
 
-The rest is the unglamorous stuff you end up wanting anyway: project-wide search, a browser showing what your mod changes against vanilla, a validation dashboard that jumps straight to the problem, and a button that exports your mod and launches the game with it enabled.
+Also in there: project-wide search, a mod-vs-vanilla diff browser, a validation dashboard, and export & launch.
 
 ## Requirements
 
